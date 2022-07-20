@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import React, { useState } from "react";
 import Login from './screens/Login/Login';
+import SideBar from './components/SideBar/SideBar';
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,9 +20,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path='/' exact element={<Login/>}/>
-      </Routes>
-    </Router>
+          <Route path='/' exact element={<Login />} />
+          <Route path='/admin' exact element={<SideBar />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
