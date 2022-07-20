@@ -28,6 +28,7 @@ const Login = () => {
 
   // DEFINE STATE VAR FOR FORM VALUES
   const [formValues, setFormValues] = useState(defaultValues)
+  const [submitted, setSubmitted] = useState(false)
 
   const handleInputChange = (e) => {
     // HANDLE INPUT CHANGE
@@ -43,6 +44,7 @@ const Login = () => {
     const _form = await validateForm(formValues)
     console.log(_form)
     setFormValues(_form)
+    setSubmitted(true)
   };
 
   const validateForm = (_form) => {

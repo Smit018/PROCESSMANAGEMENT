@@ -1,19 +1,19 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { useState } from "react";
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import { Button, TextField } from '@mui/material';
 import Login from './screens/Login/Login';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { theme } from './components/Theme';
 
 
 function App() {
 
 
   return (
-    <Login/>
+    <ThemeProvider theme={theme}>
+      <Login/>
+    </ThemeProvider>
   );
 }
 
