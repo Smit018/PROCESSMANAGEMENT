@@ -4,9 +4,12 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import { Button, TextField } from '@mui/material';
+import { atom, RecoilRoot, useRecoilState } from 'recoil'
 
 import PropTypes from 'prop-types';
 import styles from './Login.module.css';
+import { userAuthState } from "../../services/recoil.service";
+import { post } from "../../services/https.service";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
 const PWD_REGEX = /.{6,}/g
@@ -29,6 +32,7 @@ const Login = () => {
   // DEFINE STATE VAR FOR FORM VALUES
   const [formValues, setFormValues] = useState(defaultValues)
   const [submitted, setSubmitted] = useState(false)
+  const [admin, setMyAdmin] = useRecoilState(userAuthState)
 
   const handleInputChange = (e) => {
     // HANDLE INPUT CHANGE
@@ -45,7 +49,32 @@ const Login = () => {
     console.log(_form)
     setFormValues(_form)
     setSubmitted(true)
+    login(_form.email.value, _form.password.value)
   };
+
+  const login = (email, password) => {
+    const body = { email, password }
+    post('admins/login', body).then(response => {
+      if(response.statusCode == 200) {
+        if(response.data.id) {
+          setMyAdmin({
+            token: response.data.id,
+            name: 'admin',
+            userId: response.data.userId
+          })
+          // LOGIN TO DASHBOARD
+        }
+        else {
+          // FAILED LOGIN ATTEMPT
+        }
+      }
+      else {
+          // FAILED LOGIN ATTEMPT
+      }
+    }).catch(err => {
+      console.log(err)
+    })
+  }
 
   const validateForm = (_form) => {
     // VALIDATES THE DATA IN FORM
@@ -55,8 +84,8 @@ const Login = () => {
         const _key = _formKeys[index];
         let pattern = _form[_key]['regex']
         _form[_key]['error'] = !(pattern.test(_form[_key]['value']))
-        console.log('Key -->' , _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
-        if(index === _formKeys.length - 1) resolve(_form)
+        console.log('Key -->', _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
+        if (index === _formKeys.length - 1) resolve(_form)
       }
     })
   }
