@@ -12,8 +12,8 @@ const Departments = () => {
   const [typeCode,setTypeCode] = useState('');
 
   const createDepartment = async ()=>{
-    // let department = {name:name.trim(),typeCode:typeCode.trim()};
-    let department = {name:"Marketing",typeCode:"MKG"}
+    let department = {name:name.trim(),typeCode:typeCode.trim()};
+    // let department = {name:"Marketing",typeCode:"MKG"}
     let saveDepartment = await addDepartments(department);
     if(saveDepartment.statusCode>=200 && saveDepartment.statusCode<300){
       console.log(" Department added")

@@ -41,6 +41,7 @@ function App() {
             <Route path="vendors" element={<Vendors/>}/>
             <Route path="whatsapp-groups" element={<WhatsappGroup/>}/>
             <Route path="documents" element={<Documents/>}/>
+            <Route path="department" element={<Departments/>}/>
             <Route path="process-matrix" element={<ProcessMatrix/>}/>
           </Route>
         </Routes>

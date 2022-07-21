@@ -38,6 +38,7 @@ const menu = [
   { title: 'Vendors', path: 'vendors', icon: BusinessIcon },
   { title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: WhatsAppIcon },
   { title: 'Documents', path: 'documents', icon: ArticleIcon },
+  { title: 'Departments', path: 'department', icon: ArticleIcon },
   { title: 'Process Matrix', path: 'process-matrix', icon: AccountTreeIcon },
 ]
 
