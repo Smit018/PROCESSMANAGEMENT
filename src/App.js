@@ -35,14 +35,15 @@ function App() {
         <Routes>
           <Route path='' exact element={<Login />} />
           <Route path='admin' exact element={<SideBar />}>
-            <Route path="" element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="processes" element={<Process />} />
-            <Route path="employees" element={<Employee />} />
-            <Route path="vendors" element={<Vendors />} />
-            <Route path="whatsapp-groups" element={<WhatsappGroup />} />
-            <Route path="documents" element={<Documents />} />
-            <Route path="process-matrix" element={<ProcessMatrix />} />
+            <Route path="" element={<Dashboard/>}/>
+            <Route path="dashboard" element={<Dashboard/>}/>
+            <Route path="processes" element={<Process/>}/>
+            <Route path="employees" element={<Employee/>}/>
+            <Route path="vendors" element={<Vendors/>}/>
+            <Route path="whatsapp-groups" element={<WhatsappGroup/>}/>
+            <Route path="documents" element={<Documents/>}/>
+            <Route path="department" element={<Departments/>}/>
+            <Route path="process-matrix" element={<ProcessMatrix/>}/>
           </Route>
         </Routes>
       </Router>
