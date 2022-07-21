@@ -20,6 +20,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
 // ICONS
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -28,13 +29,15 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import BusinessIcon from '@mui/icons-material/Business';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ArticleIcon from '@mui/icons-material/Article';
+import { userAuthState } from '../../services/recoil.service';
+import { updateLocalStorage } from '../../services/https.service';
 const drawerWidth = 300;
 
 
 const menu = [
   { title: 'Dashboard', path: 'dashboard', icon: DashboardIcon },
   { title: 'Processes', path: 'processes', icon: AccountTreeIcon },
-  { title: 'Employees', path: 'dashboard', icon: GroupsIcon },
+  { title: 'Employees', path: 'employees', icon: GroupsIcon },
   { title: 'Vendors', path: 'vendors', icon: BusinessIcon },
   { title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: WhatsAppIcon },
   { title: 'Documents', path: 'documents', icon: ArticleIcon },
@@ -88,11 +91,12 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 
+  
 
 const SideBar = () => {
-
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const _storage = useRecoilValue(userAuthState);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -101,6 +105,10 @@ const SideBar = () => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  React.useEffect(() => {
+    updateLocalStorage(_storage)
+  }, [])
 
   return (
     <Box sx={{ display: 'flex' }}>
