@@ -92,11 +92,11 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 
-  
+
 
 const SideBar = () => {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const _storage = useRecoilValue(userAuthState);
 
   const handleDrawerOpen = () => {
@@ -164,18 +164,6 @@ const SideBar = () => {
           ))}
         </List>
         <Divider />
-        {/* <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
