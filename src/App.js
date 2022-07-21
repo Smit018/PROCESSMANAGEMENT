@@ -12,6 +12,18 @@ import {
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { theme } from './components/Theme';
 
+// SCREENS
+import Dashboard from './screens/Dashboard/Dashboard';
+import Process from './screens/Process/Process';
+import Departments from './screens/Departments/Departments';
+import Documents from './screens/Documents/Documents';
+import Employee from './screens/Employee/Employee';
+import Members from './screens/Members/Members';
+import ProcessMatrix from './screens/ProcessMatrix/ProcessMatrix';
+import Types from './screens/Types/Types';
+import Vendors from './screens/Vendors/Vendors';
+import WhatsappGroup from './screens/WhatsappGroup/WhatsappGroup';
+
 
 function App() {
 
@@ -20,8 +32,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path='/' exact element={<Login />} />
-          <Route path='/admin' exact element={<SideBar />} />
+          <Route path='' exact element={<Login />} />
+          <Route path='admin' exact element={<SideBar />}>
+            <Route path="" element={<Dashboard/>}/>
+            <Route path="dashboard" element={<Dashboard/>}/>
+            <Route path="processes" element={<Process/>}/>
+            <Route path="employees" element={<Employee/>}/>
+            <Route path="vendors" element={<Vendors/>}/>
+            <Route path="whatsapp-groups" element={<WhatsappGroup/>}/>
+            <Route path="documents" element={<Documents/>}/>
+            <Route path="process-matrix" element={<ProcessMatrix/>}/>
+          </Route>
         </Routes>
       </Router>
     </ThemeProvider>
