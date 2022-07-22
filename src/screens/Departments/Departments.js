@@ -4,7 +4,7 @@ import styles from './Departments.module.css';
 import { post } from '../../services/https.service';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import { Button } from 'evergreen-ui'
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -90,7 +90,7 @@ const Departments = () => {
       </div>
 
       <div className='flex justify-end' style={{ margin: "20px 0" }}>
-        <Button variant="contained" onClick={() => setOpen(true)}>
+        <Button appearance="primary" onClick={() => setOpen(true)}>
           Add Department
         </Button>
       </div>
@@ -129,8 +129,8 @@ const Departments = () => {
           </form>
         </DialogContent>
         <DialogActions>
-          <Button variant='outlined' onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" type='button' disabled={formValidation()} onClick={createDepartment}>
+          <Button type='button' onClick={handleClose}>Cancel</Button>
+          <Button appearance="primary" type='button' disabled={formValidation()} onClick={createDepartment}>
             Save Department
           </Button>
         </DialogActions>

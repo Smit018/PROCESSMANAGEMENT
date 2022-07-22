@@ -26,6 +26,7 @@ const Documents = () =>{
   const [name,setName] = useState('');
   const [link,setLink] = useState('');
   const [documentData, setDocumentData] = useState([]);
+  const [addMembers, setAddMembers] = useState([]);
   const [open,setOpen] = useState(false);
 
   useEffect(()=>{
@@ -34,18 +35,30 @@ const Documents = () =>{
     for(let i=0;i<10;i++){
       arr.push(obj)
     }
-    setDepartmentData(arr);
+    setDocumentData(arr);
   },[0]);
 
   const createDocument = async ()=>{
-    let Type = {name:name.trim(),link:typeCode.trim()};
-    let saveType = await post('types',Type);
-    if(saveType.statusCode>=200 && saveType.statusCode<300){
-      console.log(" Type added")
+    let newDoc = {name:name.trim(),link:link.trim()};
+    let saveDoc = await post('documents',newDoc);
+    if(saveDoc.statusCode>=200 && saveDoc.statusCode<300){
+      addMembers.forEach((e)=>{
+        e={...e,documentId:saveDoc._id}
+      })
+      let addMember_Document = await post("documentMembers",addMembers);
+      if(addMember_Document.statusCode>=200 && addMember_Document.statusCode<300){
+        console.log('members in a document added')
+      }else{
+        console.log(addMember_Document.message)
+      }
     }else{
       console.log(saveType.message)
     }
 
+  }
+
+  const memberAdd = (memId,admin)=>{
+    setAddMembers(...addMembers,{memberId:memId,admin:admin})
   }
 
   const handleClose =()=>{
@@ -103,7 +116,7 @@ const Documents = () =>{
               </TableRow>
             </TableHead>
             <TableBody>
-              {departmentData.map((item,index)=>{
+              {documentData.map((item,index)=>{
                 return(
                   <TableRow>
                       <TableCell className="tableB-Color">{index+1}</TableCell>
