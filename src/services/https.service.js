@@ -28,7 +28,7 @@ export const post = async (url, data) => {
         return { statusCode: res.status, data: res.data };
     }
     catch (e) {
-        console.error(e)
+        console.log(e)
         return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
     }
 }

@@ -5,6 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import { Button, TextField } from '@mui/material';
 import { atom, RecoilRoot, useRecoilState } from 'recoil'
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import PropTypes from 'prop-types';
 import styles from './Login.module.css';
@@ -33,6 +34,7 @@ const Login = () => {
   const [formValues, setFormValues] = useState(defaultValues)
   const [submitted, setSubmitted] = useState(false)
   const [admin, setMyAdmin] = useRecoilState(userAuthState)
+  const [loading, setLoading] = React.useState(false);
 
   const handleInputChange = (e) => {
     // HANDLE INPUT CHANGE
@@ -44,6 +46,7 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     // FORM SUBMIT FUNCTION
+    setLoading(true)
     event.preventDefault();
     const _form = await validateForm(formValues)
     console.log(_form)
@@ -52,28 +55,35 @@ const Login = () => {
     login(_form.email.value, _form.password.value)
   };
 
-  const login = (email, password) => {
+  const login = async (email, password) => {
     const body = { email, password }
-    post('admins/login', body).then(response => {
-      if(response.statusCode == 200) {
-        if(response.data.id) {
+    try {
+      const response = await post('admins/login', body)
+      if (response.statusCode == 200) {
+        if (response.data.id) {
           setMyAdmin({
             token: response.data.id,
             name: 'admin',
             userId: response.data.userId
           })
+          setLoading(false)
           // LOGIN TO DASHBOARD
         }
         else {
           // FAILED LOGIN ATTEMPT
+          setLoading(false)
         }
       }
       else {
-          // FAILED LOGIN ATTEMPT
+        // FAILED LOGIN ATTEMPT
+        setLoading(false)
       }
-    }).catch(err => {
-      console.log(err)
-    })
+      setSubmitted(true)
+    }
+    catch (err) {
+      setSubmitted(true)
+      setLoading(false)
+    }
   }
 
   const validateForm = (_form) => {
@@ -125,7 +135,14 @@ const Login = () => {
             />
           </CardContent>
           <CardActions className='flex justify-center items-center'>
-            <Button sx={{ minWidth: 200 }} variant="contained" type="submit" size="medium">Login</Button>
+            <LoadingButton
+              sx={{ minWidth: 200 }}
+              loading={loading}
+              variant="contained"
+              type="submit"
+              size="medium">
+              Login
+            </LoadingButton>
           </CardActions>
         </Card>
       </form>
