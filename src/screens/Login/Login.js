@@ -1,16 +1,11 @@
 import React, { useState } from "react";
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import { Button, TextField } from '@mui/material';
-import { atom, RecoilRoot, useRecoilState } from 'recoil'
-import LoadingButton from '@mui/lab/LoadingButton';
 
-import PropTypes from 'prop-types';
+import { atom, RecoilRoot, useRecoilState } from 'recoil'
+
 import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
 import { post } from "../../services/https.service";
+import { TextInput, TextInputField, Button } from "evergreen-ui";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
 const PWD_REGEX = /.{6,}/g
@@ -35,6 +30,7 @@ const Login = () => {
   const [submitted, setSubmitted] = useState(false)
   const [admin, setMyAdmin] = useRecoilState(userAuthState)
   const [loading, setLoading] = React.useState(false);
+  const [dummy, setDummy] = React.useState('');
 
   const handleInputChange = (e) => {
     // HANDLE INPUT CHANGE
@@ -42,6 +38,7 @@ const Login = () => {
     const _formValues = { ...formValues }
     _formValues[name]['value'] = value
     setFormValues(_formValues);
+    console.log(value)
   };
 
   const handleSubmit = async (event) => {
@@ -100,51 +97,90 @@ const Login = () => {
     })
   }
 
+
+  const CardContent = () => {
+    return (
+      <div>
+        <div style={{ marginBottom: 20 }}>
+          <TextInputField
+            required
+            error={formValues.email.error.toString()}
+            id="email"
+            name="email"
+            label="Email"
+            type="email"
+            placeholder="Enter your email..."
+            value={dummy}
+            onChange={(e) => { setDummy(e.target.value) }}
+            hint={formValues.email.error ? "Email is invalid!" : ""}
+          />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <TextInputField
+            type="password"
+            label="Password"
+            placeholder="Enter your password..."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const cardActions = () => {
+    return (
+      <div></div>
+    );
+  }
+
   return (
     <h1 className="h-full bg-slate-200 flex justify-center items-center">
       <form onSubmit={handleSubmit}>
-        <Card sx={{ maxWidth: 400 }}>
-          <CardHeader
-            title="Enter email & password"
-          />
-          <CardContent>
-            <TextField
-              fullWidth
-              required
-              error={formValues.email.error}
-              id="email"
-              name="email"
-              label="Email"
-              type="email"
-              value={formValues.email.value}
-              onChange={handleInputChange}
-              helperText={formValues.email.error ? "Email is invalid!" : ""}
-            />
-            &nbsp;
-            <TextField
-              fullWidth
-              required
-              error={formValues.password.error}
-              id="password"
-              name="password"
-              label="Password"
-              type="password"
-              value={formValues.password.value}
-              onChange={handleInputChange}
-              helperText={formValues.password.error ? "Password is invalid!" : ""}
-            />
-          </CardContent>
-          <CardActions className='flex justify-center items-center'>
-            <LoadingButton
-              sx={{ minWidth: 200 }}
-              loading={loading}
-              variant="contained"
-              type="submit"
-              size="medium">
-              Login
-            </LoadingButton>
-          </CardActions>
-        </Card>
+        <div className='shadow w-96'>
+          <div className='flex justify-between'>
+            <div>
+              <p>Enter email & password</p>
+            </div>
+          </div>
+          <br></br>
+          <div>
+            <div style={{ marginBottom: 10 }}>
+              <TextInputField
+                required
+                error={formValues.email.error.toString()}
+                id="email"
+                name="email"
+                label="Email"
+                type="email"
+                placeholder="Enter your email..."
+                value={formValues.email.value}
+                onChange={handleInputChange}
+                isInvalid={formValues.email.error}
+                validationMessage={formValues.email.error ? "Email is invalid!" : null}
+              />
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <TextInputField
+                required
+                error={formValues.password.error.toString()}
+                id="password"
+                name="password"
+                label="Password"
+                type="password"
+                placeholder="Enter your password..."
+                value={formValues.password.value}
+                onChange={handleInputChange}
+                isInvalid={formValues.password.error}
+                validationMessage={formValues.password.error ? "Password is invalid!" : null}
+              />
+            </div>
+          </div>
+          <br></br>
+          <div className='w-full flex justify-center items-center'>
+          <Button className="w-36" isLoading={loading} appearance="primary">
+            Login
+          </Button>
+          </div>
+        </div>
       </form>
     </h1>
   );
