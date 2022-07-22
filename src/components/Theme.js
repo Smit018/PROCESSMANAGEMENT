@@ -9,6 +9,9 @@ export let theme = createTheme({
             main: '#262626',
         },
     },
+    typography:{
+        fontFamily:['Poppins', 'sans-serif'].join(",")
+    }
 });
 
 theme = createTheme(theme, {
