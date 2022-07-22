@@ -2,7 +2,7 @@ import axios from "axios";
 import { userAuthState } from '../services/recoil.service'
 
 
-let _localStorage = {}
+export let _localStorage = {}
 
 export const updateLocalStorage = (data) => {
     // UPDATE LOCAL STORAGE
@@ -45,6 +45,7 @@ export const get = async (url) => {
     }
 }
 
+
 export const addDepartments = async (data) => {
     try {
         const res = await axios.post(baseUrl + `departments`, data)
@@ -79,4 +80,14 @@ export const addMember = async (data) => {
         console.log(e);
         return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
     }
+}
+
+
+
+export const REGEX =  {
+    EMAIL: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+    PWD: /.{6,}/g,
+    NAME: /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/g,
+    TITLE: /^[a-zA-Z0-9 ]*$/gm,
+    ALL: /.*/gm
 }

@@ -5,7 +5,7 @@ import TopBar from '../../components/TopBar/TopBar';
 
 const Dashboard = () => (
   <div className={styles.Dashboard}>
-    <TopBar/>
+    <TopBar breadscrubs="true"/>
   </div>
 );
 
