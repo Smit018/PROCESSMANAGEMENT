@@ -126,12 +126,6 @@ const Login = () => {
     );
   }
 
-  const cardActions = () => {
-    return (
-      <div></div>
-    );
-  }
-
   return (
     <h1 className="h-full bg-slate-200 flex justify-center items-center">
       <form onSubmit={handleSubmit}>
@@ -176,9 +170,9 @@ const Login = () => {
           </div>
           <br></br>
           <div className='w-full flex justify-center items-center'>
-          <Button className="w-36" isLoading={loading} appearance="primary">
-            Login
-          </Button>
+            <Button className="w-36" isLoading={loading} appearance="primary">
+              Login
+            </Button>
           </div>
         </div>
       </form>
