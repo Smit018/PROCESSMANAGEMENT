@@ -42,6 +42,7 @@ const menu = [
   { title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: WhatsAppIcon },
   { title: 'Documents', path: 'documents', icon: ArticleIcon },
   { title: 'Departments', path: 'department', icon: ArticleIcon },
+  { title: 'Types', path: 'type', icon: ArticleIcon },
   { title: 'Process Matrix', path: 'process-matrix', icon: AccountTreeIcon },
 ]
 
