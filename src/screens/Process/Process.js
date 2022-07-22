@@ -16,7 +16,7 @@ const Process = () => {
   }
 
   return (
-    <div className={styles.Process}>
+    <div className="w-full h-full">
       <TopBar title="Processes" add={true} addEv={() => _setShowForm(true)} />
       <br></br>
       <TextField

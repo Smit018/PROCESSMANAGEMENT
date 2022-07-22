@@ -97,35 +97,6 @@ const Login = () => {
     })
   }
 
-
-  const CardContent = () => {
-    return (
-      <div>
-        <div style={{ marginBottom: 20 }}>
-          <TextInputField
-            required
-            error={formValues.email.error.toString()}
-            id="email"
-            name="email"
-            label="Email"
-            type="email"
-            placeholder="Enter your email..."
-            value={dummy}
-            onChange={(e) => { setDummy(e.target.value) }}
-            hint={formValues.email.error ? "Email is invalid!" : ""}
-          />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <TextInputField
-            type="password"
-            label="Password"
-            placeholder="Enter your password..."
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <h1 className="h-full bg-slate-200 flex justify-center items-center">
       <form onSubmit={handleSubmit}>

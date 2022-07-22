@@ -1,187 +1,76 @@
 import './SideBar.css';
-import PropTypes from 'prop-types';
 import * as React from 'react';
-import { styled, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiAppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 // ICONS
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import GroupsIcon from '@mui/icons-material/Groups';
-import BusinessIcon from '@mui/icons-material/Business';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import ArticleIcon from '@mui/icons-material/Article';
 import { userAuthState } from '../../services/recoil.service';
 import { updateLocalStorage } from '../../services/https.service';
+
+
+import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon } from "evergreen-ui";
+
+
 const drawerWidth = 300;
 
 
 const menu = [
-  { title: 'Dashboard', path: 'dashboard', icon: DashboardIcon },
-  { title: 'Processes', path: 'processes', icon: AccountTreeIcon },
-  { title: 'Employees', path: 'employees', icon: GroupsIcon },
-  { title: 'Vendors', path: 'vendors', icon: BusinessIcon },
-  { title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: WhatsAppIcon },
-  { title: 'Documents', path: 'documents', icon: ArticleIcon },
-  { title: 'Departments', path: 'department', icon: ArticleIcon },
-  { title: 'Types', path: 'type', icon: ArticleIcon },
-  { title: 'Process Matrix', path: 'process-matrix', icon: AccountTreeIcon },
+	{ title: 'Dashboard', path: 'dashboard', icon: HomeIcon },
+	{ title: 'Processes', path: 'processes', icon: RandomIcon },
+	{ title: 'Employees', path: 'employees', icon: PeopleIcon },
+	{ title: 'Vendors', path: 'vendors', icon: MugshotIcon },
+	{ title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: ChatIcon },
+	{ title: 'Documents', path: 'documents', icon: DocumentIcon },
+	{ title: 'Departments', path: 'department', icon: DocumentIcon },
+	{ title: 'Types', path: 'type', icon: DocumentIcon },
+	{ title: 'Process Matrix', path: 'process-matrix', icon: RandomIcon },
 ]
 
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  }),
-);
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: 'flex-end'
-}));
-
-
-const test = () => {
-  return (
-    <div className='w-full h-full flex'>
-      <div className='sidenav'></div>
-      <div className='side-main'></div>
-    </div>
-  )
-}
-
-
-
 const SideBar = () => {
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
-  const _storage = useRecoilValue(userAuthState);
+	const _storage = useRecoilValue(userAuthState);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
 
-  React.useEffect(() => {
-    updateLocalStorage(_storage)
-  }, [])
+	React.useEffect(() => {
+		updateLocalStorage(_storage)
+	}, [])
 
-  return (
-    test()
-    // <Box sx={{ display: 'flex' }}>
-    //   <CssBaseline />
-    //   <AppBar position="fixed" open={open}>
-    //     <Toolbar>
-    //       <IconButton
-    //         color="inherit"
-    //         aria-label="open drawer"
-    //         onClick={handleDrawerOpen}
-    //         edge="start"
-    //         sx={{ mr: 2, ...(open && { display: 'none' }) }}
-    //       >
-    //         <MenuIcon />
-    //       </IconButton>
-    //       <Typography variant="h6" noWrap component="div">
-    //         Persistent drawer
-    //       </Typography>
-    //     </Toolbar>
-    //   </AppBar>
-    //   <Drawer
-    //     sx={{
-    //       width: drawerWidth,
-    //       flexShrink: 0,
-    //       '& .MuiDrawer-paper': {
-    //         width: drawerWidth,
-    //         boxSizing: 'border-box',
-    //       },
-    //     }}
-    //     variant="persistent"
-    //     anchor="left"
-    //     open={open}
-    //   >
-    //     <DrawerHeader>
-    //       <IconButton onClick={handleDrawerClose}>
-    //         {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-    //       </IconButton>
-    //     </DrawerHeader>
-    //     <Divider />
-    //     <List>
-    //       {menu.map((_menu, index) => (
-    //         <Link key={_menu.title} to={_menu.path}>
-    //           <ListItem key={_menu.title} disablePadding>
-    //             <ListItemButton>
-    //               <ListItemIcon>
-    //                 {<_menu.icon />}
-    //               </ListItemIcon>
-    //               <ListItemText primary={_menu.title} />
-    //             </ListItemButton>
-    //           </ListItem>
-    //         </Link>
-    //       ))}
-    //     </List>
-    //     <Divider />
-    //   </Drawer>
-    //   <Main open={open}>
-    //     <DrawerHeader />
-    //     <Outlet />
-    //   </Main>
-    // </Box>
-  );
+	return (
+		<div className='w-full h-full flex'>
+			<div className='sidenav'>
+				{/* DEFINE ROUTES  AND ADMIN INFO */}
+				<div style={{ height: 200 }}>
+
+				</div>
+				<hr></hr>
+				<Menu>
+					<Menu.Group>
+						{menu.map((_menu, index) => {
+							return (
+								<Link key={index.toString()} to={_menu.path}>
+									<Menu.Item icon={_menu.icon}>{_menu.title}</Menu.Item>
+								</Link>
+							)
+						})
+						}
+					</Menu.Group>
+					<Menu.Divider />
+					<Menu.Group>
+						<Menu.Item intent="danger">
+							Logout
+						</Menu.Item>
+					</Menu.Group>
+				</Menu>
+			</div>
+			<div className='side-main'>
+				<div className='app-bar'></div>
+				<div className='routes'>
+					<Outlet />
+				</div>
+			</div>
+		</div>
+	);
 }
 
 SideBar.propTypes = {};
