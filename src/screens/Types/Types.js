@@ -134,11 +134,6 @@ const Types = () => {
           </Button>
           </DialogActions>
       </Dialog>
-
-        <form>
-        
-          
-        </form>
   </div>
   )
 };
