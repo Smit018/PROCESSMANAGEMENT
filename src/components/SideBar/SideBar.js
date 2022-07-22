@@ -1,4 +1,4 @@
-import styles from './SideBar.module.css';
+import './SideBar.css';
 import PropTypes from 'prop-types';
 import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
@@ -93,6 +93,15 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 
+const test = () => {
+  return (
+    <div className='w-full h-full flex'>
+      <div className='sidenav'></div>
+      <div className='side-main'></div>
+    </div>
+  )
+}
+
 
 
 const SideBar = () => {
@@ -113,64 +122,65 @@ const SideBar = () => {
   }, [])
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Persistent drawer
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {menu.map((_menu, index) => (
-            <Link key={_menu.title} to={_menu.path}>
-              <ListItem key={_menu.title} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {<_menu.icon />}
-                  </ListItemIcon>
-                  <ListItemText primary={_menu.title} />
-                </ListItemButton>
-              </ListItem>
-            </Link>
-          ))}
-        </List>
-        <Divider />
-      </Drawer>
-      <Main open={open}>
-        <DrawerHeader />
-        <Outlet />
-      </Main>
-    </Box>
+    test()
+    // <Box sx={{ display: 'flex' }}>
+    //   <CssBaseline />
+    //   <AppBar position="fixed" open={open}>
+    //     <Toolbar>
+    //       <IconButton
+    //         color="inherit"
+    //         aria-label="open drawer"
+    //         onClick={handleDrawerOpen}
+    //         edge="start"
+    //         sx={{ mr: 2, ...(open && { display: 'none' }) }}
+    //       >
+    //         <MenuIcon />
+    //       </IconButton>
+    //       <Typography variant="h6" noWrap component="div">
+    //         Persistent drawer
+    //       </Typography>
+    //     </Toolbar>
+    //   </AppBar>
+    //   <Drawer
+    //     sx={{
+    //       width: drawerWidth,
+    //       flexShrink: 0,
+    //       '& .MuiDrawer-paper': {
+    //         width: drawerWidth,
+    //         boxSizing: 'border-box',
+    //       },
+    //     }}
+    //     variant="persistent"
+    //     anchor="left"
+    //     open={open}
+    //   >
+    //     <DrawerHeader>
+    //       <IconButton onClick={handleDrawerClose}>
+    //         {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+    //       </IconButton>
+    //     </DrawerHeader>
+    //     <Divider />
+    //     <List>
+    //       {menu.map((_menu, index) => (
+    //         <Link key={_menu.title} to={_menu.path}>
+    //           <ListItem key={_menu.title} disablePadding>
+    //             <ListItemButton>
+    //               <ListItemIcon>
+    //                 {<_menu.icon />}
+    //               </ListItemIcon>
+    //               <ListItemText primary={_menu.title} />
+    //             </ListItemButton>
+    //           </ListItem>
+    //         </Link>
+    //       ))}
+    //     </List>
+    //     <Divider />
+    //   </Drawer>
+    //   <Main open={open}>
+    //     <DrawerHeader />
+    //     <Outlet />
+    //   </Main>
+    // </Box>
   );
 }
 
