@@ -14,6 +14,55 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+
+const _formDefault = {
+  "title": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "typeId": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "departmentId": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "processOwner": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "inputProcess": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "frequency": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "duration": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "inputSourceSelf": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+  "reportingHead": {
+    value: '',
+    error: false,
+    regex: EMAIL_REGEX
+  },
+}
 
 const AddProcess = (props) => {
   const [age, setAge] = useState(20)
@@ -46,7 +95,33 @@ const AddProcess = (props) => {
               </FormControl>
               <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
               <FormControl fullWidth>
-              <p className='m-label'>Department</p>
+                <p className='m-label'>Department</p>
+                <Select
+                  value={age}
+                  label="Department"
+                  onChange={handleChange}
+                >
+                  <MenuItem value={10}>Ten</MenuItem>
+                  <MenuItem value={20}>Twenty</MenuItem>
+                  <MenuItem value={30}>Thirty</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+            <div className='flex justify-between'>
+              <FormControl fullWidth>
+                <p className='m-label'>Type</p>
+                <Select
+                  value={age}
+                  onChange={handleChange}
+                >
+                  <MenuItem value={10}>Ten</MenuItem>
+                  <MenuItem value={20}>Twenty</MenuItem>
+                  <MenuItem value={30}>Thirty</MenuItem>
+                </Select>
+              </FormControl>
+              <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <FormControl fullWidth>
+                <p className='m-label'>Department</p>
                 <Select
                   value={age}
                   label="Department"
