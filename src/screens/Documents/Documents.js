@@ -21,20 +21,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-<<<<<<< HEAD
-const Documents = () =>{ 
-  
-  const [name,setName] = useState('');
-  const [link,setLink] = useState('');
-  const [documentData, setDocumentData] = useState([]);
-  const [addMembers, setAddMembers] = useState([]);
-  const [open,setOpen] = useState(false);
-=======
 const Documents = () => {
->>>>>>> b3fe4d895f7647e94463af36a917051dfd920e79
 
   const [name, setName] = useState('');
-  const [typeCode, setTypeCode] = useState('');
   const [link, setLink] = useState('');
   const [documentData, setDocumentData] = useState([]);
   const [open, setOpen] = useState(false);
@@ -46,7 +35,6 @@ const Documents = () => {
       arr.push(obj)
     }
     setDocumentData(arr);
-<<<<<<< HEAD
   },[0]);
 
   const createDocument = async ()=>{
@@ -63,30 +51,16 @@ const Documents = () => {
         console.log(addMember_Document.message)
       }
     }else{
-=======
-  }, [0]);
-
-  const createDocument = async () => {
-    let Type = { name: name.trim(), link: typeCode.trim() };
-    let saveType = await post('types', Type);
-    if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
-      console.log(" Type added")
-    } else {
->>>>>>> b3fe4d895f7647e94463af36a917051dfd920e79
       console.log(saveType.message)
     }
 
   }
 
-<<<<<<< HEAD
   const memberAdd = (memId,admin)=>{
     setAddMembers(...addMembers,{memberId:memId,admin:admin})
   }
 
   const handleClose =()=>{
-=======
-  const handleClose = () => {
->>>>>>> b3fe4d895f7647e94463af36a917051dfd920e79
     setOpen(false);
   }
 
@@ -131,7 +105,6 @@ const Documents = () => {
         </Button>
       </div>
 
-<<<<<<< HEAD
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
@@ -154,30 +127,6 @@ const Documents = () => {
             </TableBody>
           </Table>
         </TableContainer>  
-=======
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell className="tableH-Color">SL No.</TableCell>
-              <TableCell className="tableH-Color">Name</TableCell>
-              <TableCell className="tableH-Color">Code</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {documentData.map((item, index) => {
-              return (
-                <TableRow>
-                  <TableCell className="tableB-Color">{index + 1}</TableCell>
-                  <TableCell className="tableB-Color">{item.name}</TableCell>
-                  <TableCell className="tableB-Color">{item.code}</TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
->>>>>>> b3fe4d895f7647e94463af36a917051dfd920e79
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add Document</DialogTitle>
