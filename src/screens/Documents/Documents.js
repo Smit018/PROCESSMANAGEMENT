@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styles from './Documents.module.css';
 
 import { post } from '../../services/https.service';
+import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -27,6 +28,7 @@ const Documents = () => {
   const [link, setLink] = useState('');
   const [documentData, setDocumentData] = useState([]);
   const [open, setOpen] = useState(false);
+  const [addMembers, setAddMembers] = useState([])
 
   useEffect(() => {
     let obj = { name: "HR Group", link: "http://localhost:3000/admin/documents" };
@@ -51,7 +53,7 @@ const Documents = () => {
         console.log(addMember_Document.message)
       }
     }else{
-      console.log(saveType.message)
+      console.log(saveDoc.message)
     }
 
   }
@@ -65,7 +67,7 @@ const Documents = () => {
   }
 
   const formValidation = () => {
-    if (name.trim().length > 3 && typeCode.trim().length == 3) {
+    if (name.trim().length > 3 && link.trim().length>1) {
       return false;
     }
     else {
@@ -111,7 +113,7 @@ const Documents = () => {
               <TableRow>
                 <TableCell className="tableH-Color">SL No.</TableCell>
                 <TableCell className="tableH-Color">Name</TableCell>
-                <TableCell className="tableH-Color">Code</TableCell>
+                <TableCell className="tableH-Color">Link</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -120,7 +122,7 @@ const Documents = () => {
                   <TableRow>
                       <TableCell className="tableB-Color">{index+1}</TableCell>
                       <TableCell className="tableB-Color">{item.name}</TableCell>
-                      <TableCell className="tableB-Color">{item.code}</TableCell>
+                      <TableCell className="tableB-Color"><Link to={item.link}>{'See File'}</Link></TableCell>
                   </TableRow>
                 )
               })}
@@ -134,7 +136,7 @@ const Documents = () => {
           <form>
             <Box component="form" sx={{ '& > :not(style)': { m: 1, width: '25ch' }, }} noValidate autoComplete="off">
               <TextField id="outlined-basic" label="Name" variant="outlined" value={name} onChange={(e) => setName(e.target.value)} />
-              <TextField id="outlined-basic" inputProps={{ maxLength: 2 }} label="Code" variant="outlined" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
+              <TextField id="outlined-basic" label="Code" variant="outlined" value={link} onChange={(e) => setLink(e.target.value)} />
             </Box>
           </form>
         </DialogContent>
