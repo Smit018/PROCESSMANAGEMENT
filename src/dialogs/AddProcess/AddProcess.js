@@ -65,21 +65,11 @@ const _formDefault = {
 		error: false,
 		regex: REGEX.ALL
 	},
-	"inputSourceSelf": {
-		value: '',
-		error: false,
-		regex: REGEX.ALL
-	},
-	"reportingHead": {
-		value: '',
-		error: false,
-		regex: REGEX.ALL
-	},
 	"status": {
 		value: '',
 		error: false,
 		regex: REGEX.ALL
-	},
+	}
 }
 
 const AddProcess = (props) => {
@@ -110,6 +100,27 @@ const AddProcess = (props) => {
 		);
 	}
 
+	const submit = async () => {
+		setLoading(true)
+		const _form = await validateForm(formValues)
+		props.onSubmit(_form)
+	}
+
+
+	const validateForm = (_form) => {
+		// VALIDATES THE DATA IN FORM
+		return new Promise(resolve => {
+			const _formKeys = Object.keys(_form)
+			for (let index = 0; index < _formKeys.length; index++) {
+				const _key = _formKeys[index];
+				let pattern = _form[_key]['regex']
+				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
+				console.log('Key -->', _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
+				if (index === _formKeys.length - 1) resolve(_form)
+			}
+		})
+	}
+
 	return (
 		<Pane>
 			<Dialog
@@ -118,6 +129,7 @@ const AddProcess = (props) => {
 				shouldCloseOnOverlayClick={false}
 				width={'60%'}
 				onCloseComplete={() => props.onClose()}
+				onConfirm={submit}
 				hasHeader={false}>
 				<br></br>
 				<form>
@@ -137,7 +149,7 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Department">
+						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues.departmentId.error ? "Process department is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
 								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
@@ -157,7 +169,6 @@ const AddProcess = (props) => {
 											name="departmentId"
 											isInvalid={formValues.departmentId.error}
 											value={formValues.departmentId.value}
-											validationMessage={formValues.departmentId.error ? "Process department is required!" : null}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -193,7 +204,7 @@ const AddProcess = (props) => {
 					</div>
 					<br></br>
 					<div className="flex">
-						<FormField className='w-full' isRequired label="Input Process">
+						<FormField className='w-full' isRequired label="Input Process" validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
 								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
@@ -213,7 +224,6 @@ const AddProcess = (props) => {
 											name="inputProcess"
 											isInvalid={formValues.inputProcess.error}
 											value={formValues.inputProcess.value}
-											validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -223,7 +233,7 @@ const AddProcess = (props) => {
 							</Autocomplete>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Owner">
+						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
 								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
@@ -243,7 +253,6 @@ const AddProcess = (props) => {
 											name="processOwner"
 											isInvalid={formValues.processOwner.error}
 											value={formValues.processOwner.value}
-											validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -270,16 +279,26 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Duration">
-							<TextInput
-								style={{ marginTop: 8, width: '100%' }}
-								name="duration"
-								type="time"
-								isInvalid={formValues.duration.error}
-								value={formValues.duration.value}
-								validationMessage={formValues.duration.error ? "Duration is required!" : null}
-								onChange={(e) => handleInputChange(e)}
-							/>
+						<FormField className='w-full' isRequired label="Duration" validationMessage={formValues.duration.error ? "Duration is required!" : null}>
+							<div className='flex justify-center items-center'>
+								<TextInput
+									style={{ marginTop: 8, width: '100%' }}
+									name="duration"
+									type="number"
+									isInvalid={formValues.duration.error}
+									value={formValues.duration.value}
+									onChange={(e) => handleInputChange(e)}
+								/>
+								<span>&nbsp;:&nbsp;</span>
+								<TextInput
+									style={{ marginTop: 8, width: '100%' }}
+									name="duration"
+									type="number"
+									isInvalid={formValues.duration.error}
+									value={formValues.duration.value}
+									onChange={(e) => handleInputChange(e)}
+								/>
+							</div>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Status">
@@ -296,6 +315,9 @@ const AddProcess = (props) => {
 								<option value="bar">Bar</option>
 							</SelectField>
 						</FormField>
+					</div>
+					<div id="time-span">
+						<input type="number" min="0" step="1" />:<input type="number" min="0" max="59" step="1" />
 					</div>
 				</form>
 			</Dialog>

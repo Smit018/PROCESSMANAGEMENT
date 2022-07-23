@@ -16,7 +16,7 @@ const drawerWidth = 300;
 
 
 const menu = [
-	{ title: 'Dashboard', path: 'dashboard', icon: HomeIcon },
+	{ title: 'Dashboard', path: '', icon: HomeIcon },
 	{ title: 'Processes', path: 'processes', icon: RandomIcon },
 	{ title: 'Employees', path: 'employees', icon: PeopleIcon },
 	{ title: 'Vendors', path: 'vendors', icon: MugshotIcon },

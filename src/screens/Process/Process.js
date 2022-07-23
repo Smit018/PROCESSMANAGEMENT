@@ -36,7 +36,7 @@ const Process = () => {
         }}
       />
       <div>
-        <AddProcess open={showForm} onClose={(ev) => _setShowForm(ev)}/>
+        <AddProcess open={showForm} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => {console.log(form)}}/>
       </div>
     </div>
   );
