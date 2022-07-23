@@ -65,7 +65,7 @@ const SideBar = () => {
 			</div>
 			<div className='side-main'>
 				<div className='app-bar'></div>
-				<div className='routes'>
+				<div className='routes px-5 py-4'>
 					<Outlet />
 				</div>
 			</div>

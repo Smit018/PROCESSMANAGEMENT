@@ -108,7 +108,7 @@ const Process = () => {
 
   const ProcessPage = () => {
     return (
-      <div className="w-full h-full px-5 py-4">
+      <div className="w-full h-full">
         <TopBar title="Processes" breadscrubs={paths} add={true} addEv={() => _setShowForm(true)} />
         <div className='mb-4'>
           <SearchInput onChange={(e) => setSearch(e.target.value)} value={search} />

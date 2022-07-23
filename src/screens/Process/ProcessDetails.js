@@ -20,7 +20,7 @@ const ProcessDetails = () => {
     }, [])
 
     return (
-        <div className="w-full h-full px-5 py-4">
+        <div className="w-full h-full">
             <TopBar title="Processes" breadscrubs={paths} />
         </div>
     );
