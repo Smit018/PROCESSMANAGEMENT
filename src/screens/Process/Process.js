@@ -77,6 +77,19 @@ const Process = () => {
     { path: '/admin/processes/', title: 'Processes' }
   ]
 
+  const nestedTableHead = (columns) => {
+    return (
+      <div className='flex flex-col items-center w-60'>
+        <span className='mb-1'>{columns._value}</span>
+        <div className='flex justify-between'>
+          {columns.value.map((column, index) => {
+            return (<Table.TextHeaderCell key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-full px-5 py-4">
       <TopBar title="Processes" breadscrubs={paths} add={true} addEv={() => _setShowForm(true)} />
@@ -86,7 +99,9 @@ const Process = () => {
       <Table>
         <Table.Head>
           {columns.map((column, index) => {
-            return (<Table.TextHeaderCell key={column.key}>{column.value}</Table.TextHeaderCell>)
+            return (<Table.TextHeaderCell key={column.key}>
+              {column.key == 'inputSource' || column.key == 'outputSource' ? nestedTableHead(column) : column.value}
+            </Table.TextHeaderCell>)
           })}
         </Table.Head>
         <Table.Body height={240}>
@@ -146,7 +161,18 @@ const columns = [
   { key: 'department', value: 'Department' },
   { key: 'processOwner', value: 'Owner' },
   { key: 'members', value: 'Members' },
-  
+  {
+    key: 'inputSource', _value: 'Input Source', value: [
+      { key: 'whatsapp', value: 'Whatsapp' },
+      { key: 'documents', value: 'Documents' }
+    ]
+  },
+  {
+    key: 'outputSource', _value: 'Output Source', value: [
+      { key: 'whatsapp', value: 'Whatsapp' },
+      { key: 'documents', value: 'Documents' }
+    ]
+  },
 
   { key: 'status', value: 'Status' },
   { key: 'createdAt', value: 'Created At' }
