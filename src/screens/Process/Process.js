@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { SearchOutlined } from '@mui/icons-material';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
+import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs';
 
 const Process = () => {
   const [showForm, setShowForm] = useState(false)
@@ -15,9 +16,13 @@ const Process = () => {
     setShowForm(data)
   }
 
+  const paths = [
+    { path: '/admin/processes/', title: 'Processes' }
+  ]
+
   return (
-    <div className="w-full h-full">
-      <TopBar title="Processes" add={true} addEv={() => _setShowForm(true)} />
+    <div className="w-full h-full px-5 py-4">
+      <TopBar title="Processes" breadscrubs={paths} add={true} addEv={() => _setShowForm(true)} />
       <br></br>
       <TextField
         hiddenLabel
