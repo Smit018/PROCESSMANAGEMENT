@@ -146,18 +146,7 @@ const columns = [
   { key: 'department', value: 'Department' },
   { key: 'processOwner', value: 'Owner' },
   { key: 'members', value: 'Members' },
-  {
-    key: 'inputSource', value: [
-      { key: 'whatsapp', value: 'Whatsapp' },      
-      { key: 'documents', value: 'Documents' }
-    ]
-  },
-  {
-    key: 'outputSource', value: [
-      { key: 'whatsapp', value: 'Whatsapp' },      
-      { key: 'documents', value: 'Documents' }
-    ]
-  },
+  
 
   { key: 'status', value: 'Status' },
   { key: 'createdAt', value: 'Created At' }
