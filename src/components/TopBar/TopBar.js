@@ -27,7 +27,7 @@ const TopBar = (props) => {
   }
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center pb-4">
       <div role="presentation" onClick={handleClick}>
         {props.breadscrubs && props.breadscrubs.length > 0 ?
           <Breadcrumbs paths={props.breadscrubs} /> : null

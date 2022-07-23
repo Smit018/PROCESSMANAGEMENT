@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './AddProcess.css';
 // import Dialog from '@mui/material/Dialog';
@@ -60,7 +60,12 @@ const _formDefault = {
 		error: false,
 		regex: REGEX.ALL
 	},
-	"duration": {
+	"hours": {
+		value: '',
+		error: false,
+		regex: REGEX.ALL
+	},
+	"minutes": {
 		value: '',
 		error: false,
 		regex: REGEX.ALL
@@ -75,9 +80,15 @@ const _formDefault = {
 const AddProcess = (props) => {
 	const [formValues, setFormValues] = useState(_formDefault)
 	const [submitted, setSubmitted] = useState(false)
+	const [hours, setHours] = useState('')
+	const [minutes, setMinutes] = useState('')
 	const [loading, setLoading] = React.useState(false);
 
-	const [age, setAge] = useState(20);
+
+	useEffect(() => {
+		console.log(props.data)
+		return (() => { return formValues })
+	})
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
@@ -106,6 +117,9 @@ const AddProcess = (props) => {
 		props.onSubmit(_form)
 	}
 
+	const setDuration = () => {
+
+	}
 
 	const validateForm = (_form) => {
 		// VALIDATES THE DATA IN FORM
@@ -130,6 +144,7 @@ const AddProcess = (props) => {
 				width={'60%'}
 				onCloseComplete={() => props.onClose()}
 				onConfirm={submit}
+				confirmLabel="Add Process"
 				hasHeader={false}>
 				<br></br>
 				<form>
@@ -142,17 +157,22 @@ const AddProcess = (props) => {
 								value={formValues.typeId.value}
 								validationMessage={formValues.typeId.error ? "Type is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option value="foo">
-									Foo
-								</option>
-								<option value="bar">Bar</option>
+								<option disabled>Select Process Type</option>
+								{props.data.types.map(_type => {
+									return (
+										<option key={_type.id} value={_type.id}>
+											{_type.name}
+										</option>
+									)
+								})}
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues.departmentId.error ? "Process department is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
-								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
+								items={props.data.departments}
+								itemToString={(item) => { return item ? item.name : '' }}
 							>
 								{({
 									key,
@@ -186,7 +206,7 @@ const AddProcess = (props) => {
 								label=""
 								isInvalid={formValues.processNumber.error}
 								value={formValues.processNumber.value}
-								validationMessage={formValues.processNumber.error ? "Process Type is required!" : null}
+								validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}
 								onChange={e => handleInputChange(e)}
 							/>
 						</FormField>
@@ -207,7 +227,8 @@ const AddProcess = (props) => {
 						<FormField className='w-full' isRequired label="Input Process" validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
-								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
+								items={props.data.process}
+								itemToString={(item) => { return item ? item.processNumber : '' }}
 							>
 								{({
 									key,
@@ -236,7 +257,8 @@ const AddProcess = (props) => {
 						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
-								items={['Apple', 'Apricot', 'Banana', 'Cherry', 'Cucumber']}
+								items={props.data.members}
+								itemToString={(item) => { return item ? item.name : '' }}
 							>
 								{({
 									key,
@@ -272,30 +294,37 @@ const AddProcess = (props) => {
 								value={formValues.frequency.value}
 								validationMessage={formValues.frequency.error ? "Frequency is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option value="foo">
-									Foo
-								</option>
-								<option value="bar">Bar</option>
+								<option disabled>Select Frequency</option>
+								<option value="Daily">Daily</option>
+								<option value="Weekly">Weekly</option>
+								<option value="Monthly">Monthly</option>
+								<option value="Yearly">Yearly</option>
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Duration" validationMessage={formValues.duration.error ? "Duration is required!" : null}>
+						<FormField className='w-full' isRequired label="Duration" validationMessage={formValues.hours.error || formValues.minutes.error ? "Duration is required!" : null}>
 							<div className='flex justify-center items-center'>
 								<TextInput
 									style={{ marginTop: 8, width: '100%' }}
-									name="duration"
+									name="hours"
+									placeholder='Hrs'
 									type="number"
-									isInvalid={formValues.duration.error}
-									value={formValues.duration.value}
+									max={72}
+									min={0}
+									isInvalid={formValues.hours.error}
+									value={formValues.hours.value}
 									onChange={(e) => handleInputChange(e)}
 								/>
-								<span>&nbsp;:&nbsp;</span>
+								<span>&nbsp;&nbsp;</span>
 								<TextInput
 									style={{ marginTop: 8, width: '100%' }}
-									name="duration"
+									name="minutes"
+									placeholder='Min'
 									type="number"
-									isInvalid={formValues.duration.error}
-									value={formValues.duration.value}
+									max={60}
+									min={0}
+									isInvalid={formValues.minutes.error}
+									value={formValues.minutes.value}
 									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
@@ -309,15 +338,12 @@ const AddProcess = (props) => {
 								value={formValues.status.value}
 								validationMessage={formValues.status.error ? "Status is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option value="foo">
-									Foo
-								</option>
-								<option value="bar">Bar</option>
+								<option disabled>Select Status</option>
+								<option value="Not Implemented">Not Implemented</option>
+								<option value="Partially Implemented">Partially Implemented</option>
+								<option value="Implemented">Implemented</option>
 							</SelectField>
 						</FormField>
-					</div>
-					<div id="time-span">
-						<input type="number" min="0" step="1" />:<input type="number" min="0" max="59" step="1" />
 					</div>
 				</form>
 			</Dialog>
