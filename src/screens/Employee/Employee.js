@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Employee.module.css';
+import "./Employee.module.css";
 import { post } from '../../services/https.service';
 import { Table } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui'
@@ -22,7 +23,7 @@ const Employee = () => {
   }
 
   useEffect(()=>{
-    let obj ={name:"Human Resource",typeCode:"HR"};
+    let obj ={name:"Jay Kumar",designation:"Assistant", employeeCode:"JKR",doj:"27 Jan 2016",doe:"16 Mar 2021",contactNo:"6546546646",bankDetails:"AXIS BANK"};
     let arr=[]
     for(let i=0;i<10;i++){
       arr.push(obj)
@@ -45,7 +46,8 @@ const Employee = () => {
   }
 
   return(
-  <div className={styles.Employee}>
+  // <div className={styles.Employee}>
+  <div>
     <div className='flex justify-between items-center'>
         <div>
           <span>Master</span>
@@ -72,7 +74,7 @@ const Employee = () => {
 
       <div className='flex justify-end' style={{margin:"20px 0"}}>
         <Button appearance="primary" onClick={()=>setOpen(true)}>
-          Add Type
+          Add Employee
         </Button>
       </div>
 
@@ -95,12 +97,12 @@ const Employee = () => {
                   <Table.Row>
                       <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
                       <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.doj}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.doe}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
                   </Table.Row>
                 )
               })}
@@ -109,12 +111,19 @@ const Employee = () => {
       </Table>
 
       <Dialog isShown={open} onCloseComplete={handleClose}
-        title="Add Type"
-        confirmLabel="Save Type"
+        title="Add Employee"
+        confirmLabel="Save Employee"
         isConfirmDisabled={formValidation()}
         onConfirm={createEmployee}
       >
           <form>
+            <div className='flex flex-col justify-center items-center'>
+              <div className="pol">
+                <p>ADD Image</p>
+              </div>
+              <TextInputField hidden required  type="file" value={employee.photo} onChange={(e) => setEmployee({...employee,photo:e.target.value})} />
+            </div>
+            
             <TextInputField  required label="Name" value={employee.name} onChange={(e) => setEmployee({...employee,name:e.target.value})} />
             <TextInputField  required label="Designation" value={employee.designation} onChange={(e) => setEmployee({...employee,designation:e.target.value})} />
             <TextInputField  required label="Employee Code" value={employee.employeeCode} onChange={(e) => setEmployee({...employee,employeeCode:e.target.value})} />
@@ -122,7 +131,7 @@ const Employee = () => {
             <TextInputField  required label="Date Of Exit" value={employee.doe} onChange={(e) => setEmployee({...employee,doe:e.target.value})} />
             <TextInputField  required label="Contact Number" value={employee.contactNo} onChange={(e) => setEmployee({...employee,contactNo:e.target.value})} />
             <TextInputField  required label="Bank Details" value={employee.bankDetails} onChange={(e) => setEmployee({...employee,bankDetails:e.target.value})} />
-            <TextInputField  required label="Photo" value={employee.photo} onChange={(e) => setEmployee({...employee,photo:e.target.value})} />
+            
           </form>
         
       </Dialog>
