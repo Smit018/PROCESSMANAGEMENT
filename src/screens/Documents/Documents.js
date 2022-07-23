@@ -4,23 +4,14 @@ import styles from './Documents.module.css';
 
 import { post } from '../../services/https.service';
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
+
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import { Table } from 'evergreen-ui'
+import { TextInputField } from 'evergreen-ui'
+import { Pane, Dialog, Button } from 'evergreen-ui'
 
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 
 const Documents = () => {
 
@@ -31,7 +22,7 @@ const Documents = () => {
   const [addMembers, setAddMembers] = useState([])
 
   useEffect(() => {
-    let obj = { name: "HR Group", link: "http://localhost:3000/admin/documents" };
+    let obj = { name: "HR Group", link: "/" };
     let arr = []
     for (let i = 0; i < 10; i++) {
       arr.push(obj)
@@ -102,50 +93,43 @@ const Documents = () => {
       </div>
 
       <div className='flex justify-end' style={{ margin: "20px 0" }}>
-        <Button variant="contained" onClick={() => setOpen(true)}>
+        <Button appearance="primary" onClick={() => setOpen(true)}>
           Add Type
         </Button>
       </div>
 
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell className="tableH-Color">SL No.</TableCell>
-                <TableCell className="tableH-Color">Name</TableCell>
-                <TableCell className="tableH-Color">Link</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+          <Table aria-label="simple table">
+            <Table.Head>
+              
+                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Link</Table.TextHeaderCell>
+          
+            </Table.Head>
+            <Table.Body>
               {documentData.map((item,index)=>{
                 return(
-                  <TableRow>
-                      <TableCell className="tableB-Color">{index+1}</TableCell>
-                      <TableCell className="tableB-Color">{item.name}</TableCell>
-                      <TableCell className="tableB-Color"><Link to={item.link}>{'See File'}</Link></TableCell>
-                  </TableRow>
+                  <Table.Row>
+                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color"><Link to={item.link}>{'See File'}</Link></Table.TextCell>
+                  </Table.Row>
                 )
               })}
-            </TableBody>
+            </Table.Body>
           </Table>
-        </TableContainer>  
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Document</DialogTitle>
-        <DialogContent>
+      <Dialog isShown={open} onCloseComplete={handleClose}
+        title="Add Document"
+        confirmLabel="Save Document"
+        isConfirmDisabled={formValidation()}
+        onConfirm={createDocument}
+      >
           <form>
-            <Box component="form" sx={{ '& > :not(style)': { m: 1, width: '25ch' }, }} noValidate autoComplete="off">
-              <TextField id="outlined-basic" label="Name" variant="outlined" value={name} onChange={(e) => setName(e.target.value)} />
-              <TextField id="outlined-basic" label="Code" variant="outlined" value={link} onChange={(e) => setLink(e.target.value)} />
-            </Box>
+            <TextInputField  required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextInputField  required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
           </form>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='outlined' onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" type='button' disabled={formValidation()} onClick={createDocument}>
-            Save Type
-          </Button>
-        </DialogActions>
+        
       </Dialog>
     </div>
   )

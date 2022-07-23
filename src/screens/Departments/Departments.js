@@ -3,22 +3,24 @@ import PropTypes from 'prop-types';
 import styles from './Departments.module.css';
 import { post } from '../../services/https.service';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import { Button } from 'evergreen-ui'
+// import TextField from '@mui/material/TextField';
+import { Table } from 'evergreen-ui'
+import { TextInputField } from 'evergreen-ui'
+import { Pane, Dialog, Button } from 'evergreen-ui'
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+// import Table from '@mui/material/Table';
+// import TableBody from '@mui/material/TableBody';
+// import TableCell from '@mui/material/TableCell';
+// import TableContainer from '@mui/material/TableContainer';
+// import TableHead from '@mui/material/TableHead';
+// import TableRow from '@mui/material/TableRow';
+// import Paper from '@mui/material/Paper';
 
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+// import Dialog from '@mui/material/Dialog';
+// import DialogActions from '@mui/material/DialogActions';
+// import DialogContent from '@mui/material/DialogContent';
+// import DialogContentText from '@mui/material/DialogContentText';
+// import DialogTitle from '@mui/material/DialogTitle';
 
 const Departments = () => {
 
@@ -95,51 +97,42 @@ const Departments = () => {
         </Button>
       </div>
 
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell className="tableH-Color">SL No.</TableCell>
-              <TableCell className="tableH-Color">Name</TableCell>
-              <TableCell className="tableH-Color">Code</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {departmentData.map((item, index) => {
-              return (
-                <TableRow>
-                  <TableCell className="tableB-Color">{index + 1}</TableCell>
-                  <TableCell className="tableB-Color">{item.name}</TableCell>
-                  <TableCell className="tableB-Color">{item.code}</TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Table aria-label="simple table">
+            <Table.Head>
+              
+                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Code</Table.TextHeaderCell>
+          
+            </Table.Head>
+            <Table.Body>
+              {departmentData.map((item,index)=>{
+                return(
+                  <Table.Row>
+                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
+                  </Table.Row>
+                )
+              })}
+            </Table.Body>
+          
+      </Table>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Department</DialogTitle>
-        <DialogContent>
+      <Dialog isShown={open} onCloseComplete={handleClose}
+        title="Add Type"
+        confirmLabel="Save Type"
+        isConfirmDisabled={formValidation()}
+        onConfirm={createDepartment}
+      >
           <form>
-            <Box component="form" sx={{ '& > :not(style)': { m: 1, width: '25ch' }, }} noValidate autoComplete="off">
-              <TextField id="outlined-basic" label="Name" variant="outlined" value={name} onChange={(e) => setName(e.target.value)} />
-              <TextField id="outlined-basic" inputProps={{ maxLength: 3 }} label="Code" variant="outlined" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
-            </Box>
+            <TextInputField  required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextInputField  required label="Code" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
           </form>
-        </DialogContent>
-        <DialogActions>
-          <Button type='button' onClick={handleClose}>Cancel</Button>
-          <Button appearance="primary" type='button' disabled={formValidation()} onClick={createDepartment}>
-            Save Department
-          </Button>
-        </DialogActions>
+        
       </Dialog>
 
-      <form>
-
-
-      </form>
+      
     </div>
   )
 };
@@ -149,3 +142,46 @@ Departments.propTypes = {};
 Departments.defaultProps = {};
 
 export default Departments;
+
+
+      // <TableContainer component={Paper}>
+      //   <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      //     <TableHead>
+      //       <TableRow>
+      //         <TableCell className="tableH-Color">SL No.</TableCell>
+      //         <TableCell className="tableH-Color">Name</TableCell>
+      //         <TableCell className="tableH-Color">Code</TableCell>
+      //       </TableRow>
+      //     </TableHead>
+      //     <TableBody>
+      //       {departmentData.map((item, index) => {
+      //         return (
+      //           <TableRow>
+      //             <TableCell className="tableB-Color">{index + 1}</TableCell>
+      //             <TableCell className="tableB-Color">{item.name}</TableCell>
+      //             <TableCell className="tableB-Color">{item.code}</TableCell>
+      //           </TableRow>
+      //         )
+      //       })}
+      //     </TableBody>
+      //   </Table>
+      // </TableContainer>
+
+      // <Dialog open={open} onClose={handleClose}>
+      //   <DialogTitle>Add Department</DialogTitle>
+      //   <DialogContent>
+      //     <form>
+      //       <Box component="form" sx={{ '& > :not(style)': { m: 1, width: '25ch' }, }} noValidate autoComplete="off">
+      //         <TextField id="outlined-basic" label="Name" variant="outlined" value={name} onChange={(e) => setName(e.target.value)} />
+      //         <TextField id="outlined-basic" inputProps={{ maxLength: 3 }} label="Code" variant="outlined" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
+      //       </Box>
+      //     </form>
+      //   </DialogContent>
+      //   <DialogActions>
+      //     <Button type='button' onClick={handleClose}>Cancel</Button>
+      //     <Button appearance="primary" type='button' disabled={formValidation()} onClick={createDepartment}>
+      //       Save Department
+      //     </Button>
+      //   </DialogActions>
+      // </Dialog>
+

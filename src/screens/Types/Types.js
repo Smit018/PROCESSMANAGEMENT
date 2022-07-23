@@ -4,28 +4,15 @@ import styles from './Types.module.css';
 
 import { post } from '../../services/https.service';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import { Table } from 'evergreen-ui'
+import { TextInputField } from 'evergreen-ui'
+import { Pane, Dialog, Button } from 'evergreen-ui'
 
 const Types = () => {
 
   const [name,setName] = useState('');
   const [typeCode,setTypeCode] = useState('');
-  const [departmentData, setDepartmentData] = useState([]);
+  const [typeData, setTypeData] = useState([]);
   const [open,setOpen] = useState(false);
 
   const createType = async ()=>{
@@ -41,12 +28,12 @@ const Types = () => {
   }
 
   useEffect(()=>{
-    let obj ={name:"Human Resource",code:"HR"};
+    let obj ={name:"Human Resource",typeCode:"HR"};
     let arr=[]
     for(let i=0;i<10;i++){
       arr.push(obj)
     }
-    setDepartmentData(arr);
+    setTypeData(arr);
   },[0]);
 
   const handleClose =()=>{
@@ -89,50 +76,44 @@ const Types = () => {
       </div>
 
       <div className='flex justify-end' style={{margin:"20px 0"}}>
-        <Button variant="contained" onClick={()=>setOpen(true)}>
+        <Button appearance="primary" onClick={()=>setOpen(true)}>
           Add Type
         </Button>
       </div>
 
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell className="tableH-Color">SL No.</TableCell>
-                <TableCell className="tableH-Color">Name</TableCell>
-                <TableCell className="tableH-Color">Code</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {departmentData.map((item,index)=>{
+      <Table aria-label="simple table">
+            <Table.Head>
+              
+                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Code</Table.TextHeaderCell>
+          
+            </Table.Head>
+            <Table.Body>
+              {typeData.map((item,index)=>{
                 return(
-                  <TableRow>
-                      <TableCell className="tableB-Color">{index+1}</TableCell>
-                      <TableCell className="tableB-Color">{item.name}</TableCell>
-                      <TableCell className="tableB-Color">{item.code}</TableCell>
-                  </TableRow>
+                  <Table.Row>
+                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
+                  </Table.Row>
                 )
               })}
-            </TableBody>
-          </Table>
-        </TableContainer>  
+            </Table.Body>
+          
+      </Table>
 
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Add Type</DialogTitle>
-          <DialogContent>
-            <form>
-              <Box  component="form"  sx={{'& > :not(style)': { m: 1, width: '25ch' },  }}  noValidate  autoComplete="off">
-                <TextField id="outlined-basic" label="Name" variant="outlined" value={name} onChange={(e)=>setName(e.target.value)} />
-                <TextField id="outlined-basic" inputProps={{ maxLength: 2 }} label="Code" variant="outlined" value={typeCode} onChange={(e  )=>setTypeCode(e.target.value)} />
-              </Box>
-            </form>
-          </DialogContent>
-          <DialogActions>
-            <Button variant='outlined' onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" type='button' disabled={formValidation()} onClick={createType}>
-            Save Type
-          </Button>
-          </DialogActions>
+      <Dialog isShown={open} onCloseComplete={handleClose}
+        title="Add Type"
+        confirmLabel="Save Type"
+        isConfirmDisabled={formValidation()}
+        onConfirm={createType}
+      >
+          <form>
+            <TextInputField  required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextInputField  required label="Code" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
+          </form>
+        
       </Dialog>
   </div>
   )
