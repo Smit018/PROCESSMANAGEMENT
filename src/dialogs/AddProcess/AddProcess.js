@@ -21,9 +21,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField } from "evergreen-ui";
 
-
-
-
 const _formDefault = {
 	"title": {
 		value: '',
@@ -348,100 +345,6 @@ const AddProcess = (props) => {
 				</form>
 			</Dialog>
 		</Pane>
-		// <div>
-		//   <Dialog fullWidth open={props.open} onClose={handleClose}>
-		//     <DialogTitle>Add Process</DialogTitle>
-		//     <Divider />
-		//     <DialogContent>
-		//       <form>
-		//         <div className='flex justify-between'>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Type</p>
-		//             <Select
-		//               value={age}
-		//               onChange={handleChange}
-		//             >
-		//               <MenuItem value={10}>Ten</MenuItem>
-		//               <MenuItem value={20}>Twenty</MenuItem>
-		//               <MenuItem value={30}>Thirty</MenuItem>
-		//             </Select>
-		//           </FormControl>
-		//           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Department</p>
-		//             <Autocomplete
-		//               disablePortal
-		//               id="department"
-		//               options={_options}
-		//               renderInput={(params) => <TextField {...params} />} />
-		//           </FormControl>
-		//         </div>
-		//         <br></br>
-		//         <div className='flex justify-between'>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Process No</p>
-		//             <TextField
-		//               required
-		//               error={formValues.processNumber.error}
-		//               id="processNumber"
-		//               name="processNumber"
-		//               type="text"
-		//               value={formValues.processNumber.value}
-		//               onChange={handleInputChange}
-		//               helperText={formValues.processNumber.error ? "Process number is invalid!" : ""}
-		//               InputProps={{
-		//                 startAdornment: (
-		//                   <div style={{ padding: 16, background: '#f5f5f5', marginLeft: -14 }}>
-		//                     A
-		//                   </div>
-		//                 ),
-		//               }}
-		//               variant="outlined"
-		//             />
-		//           </FormControl>
-		//           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Process Title</p>
-		//             <TextField
-		//               required
-		//               error={formValues.title.error}
-		//               id="title"
-		//               name="title"
-		//               type="text"
-		//               value={formValues.title.value}
-		//               onChange={handleInputChange}
-		//               helperText={formValues.title.error ? "Process title is invalid!" : ""}
-		//             />
-		//           </FormControl>
-		//         </div>
-		//         <br></br>
-		//         <div className='flex justify-between'>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Input Process</p>
-		//             <Autocomplete
-		//               disablePortal
-		//               id="inputProcess"
-		//               options={_options}
-		//               renderInput={(params) => <TextField {...params} />} />
-		//           </FormControl>
-		//           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-		//           <FormControl fullWidth>
-		//             <p className='m-label'>Process Owner</p>
-		//             <Autocomplete
-		//               disablePortal
-		//               id="processOwner"
-		//               options={_options}
-		//               renderInput={(params) => <TextField {...params} />} />
-		//           </FormControl>
-		//         </div>
-		//       </form>
-		//     </DialogContent>
-		//     <DialogActions>
-		//       <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-		//       <Button variant="contained" onClick={handleClose}>Add Process</Button>
-		//     </DialogActions>
-		//   </Dialog>
-		// </div>
 	)
 }
 
