@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import styles from './Employee.module.css';
-import "./Employee.module.css";
+// import styles from './Employee.module.css';
+import "./Employee.css";
 import { post } from '../../services/https.service';
 import { Table } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui'
-import { Pane, Dialog, Button } from 'evergreen-ui'
+import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon } from 'evergreen-ui'
 
 const Employee = () => {
   const [employee,setEmployee] = useState({});
+  const [imgPresent,setImgPresent] = useState(false);
+  const [image,setImage] = useState();
   const [employeeData, setEmployeeData] = useState([]);
   const [open,setOpen] = useState(false);
+  let imageHandler = useRef(null);
 
   const createEmployee = async ()=>{
     let saveType = await post('types',employee);
@@ -43,6 +46,26 @@ const Employee = () => {
         return false;
       }
     })
+  }
+
+  const removeImage =(e)=>{
+    e.stopPropagation();
+    setImgPresent(false);
+    setImage(null)
+  }
+
+  const handleImage =async (e)=>{
+    UploadImage(e.target.files[0]);
+    setImage(URL.createObjectURL(e.target.files[0]))
+    setImgPresent(true);
+    
+  }
+
+  const UploadImage = async(file)=>{
+    let formData = new FormData();
+    formData.append('file', file)
+    const image = await post("photos/employee/upload",formData)
+    console.log(image)
   }
 
   return(
@@ -116,12 +139,19 @@ const Employee = () => {
         isConfirmDisabled={formValidation()}
         onConfirm={createEmployee}
       >
-          <form>
+          <form className='employee'>
             <div className='flex flex-col justify-center items-center'>
-              <div className="pol">
-                <p>ADD Image</p>
+              <div className="flex-col flex justify-center items-center pol" style={{position:"relative",cursor:"pointer"}} onClick={()=>{console.log(imageHandler);imageHandler.current.click()}}>
+                  {!imgPresent?<>
+                  <SmallPlusIcon size={21} style={{position:"absolute",top:0,right:0,color:"white",backgroundColor:"black",borderRadius:"30px"}}/>
+                  <UserIcon size={90}/>
+                  </>:
+                  <>
+                    <SmallCrossIcon style={{position:"absolute",top:0,right:0,color:"white",backgroundColor:"black",borderRadius:"30px"}} onClick={removeImage}/>
+                    <img src={image} className="pol" onClick={(e)=>e.stopPropagation()}/>
+                  </>}
               </div>
-              <TextInputField hidden required  type="file" value={employee.photo} onChange={(e) => setEmployee({...employee,photo:e.target.value})} />
+              <TextInputField accept='image/*' ref={imageHandler} type="file" onChange={(e) => handleImage(e)} />
             </div>
             
             <TextInputField  required label="Name" value={employee.name} onChange={(e) => setEmployee({...employee,name:e.target.value})} />
