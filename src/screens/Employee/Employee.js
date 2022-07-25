@@ -2,23 +2,34 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 // import styles from './Employee.module.css';
 import "./Employee.css";
-import { post } from '../../services/https.service';
+import { baseUrl, get, post } from '../../services/https.service';
+import { DateFormat } from '../../services/dateFormat';
 import { Table } from 'evergreen-ui'
-import { TextInputField } from 'evergreen-ui'
+import { TextInputField } from 'evergreen-ui';
+import USERIMG from "../../assets/images/userImgs.png";
 import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon } from 'evergreen-ui'
 
 const Employee = () => {
   const [employee,setEmployee] = useState({});
   const [imgPresent,setImgPresent] = useState(false);
   const [image,setImage] = useState();
+  const [saveImage, setSaveImage] = useState();
   const [employeeData, setEmployeeData] = useState([]);
   const [open,setOpen] = useState(false);
   let imageHandler = useRef(null);
 
   const createEmployee = async ()=>{
-    let saveType = await post('types',employee);
+    let imgToServer,saveEmp;
+    if(image){
+      imgToServer = await UploadImage(saveImage);
+      if(imgToServer){
+        saveEmp={...employee,profile:imgToServer}
+      }
+    }
+    saveEmp = {...saveEmp,memberType:"EMPLOYEE",userName:saveEmp.email}
+    let saveType = await post('members',saveEmp);
     if(saveType.statusCode>=200 && saveType.statusCode<300){
-      console.log(" Type added")
+      console.log("Employee added")
     }else{
       console.log(saveType.message)
     }
@@ -26,26 +37,23 @@ const Employee = () => {
   }
 
   useEffect(()=>{
-    let obj ={name:"Jay Kumar",designation:"Assistant", employeeCode:"JKR",doj:"27 Jan 2016",doe:"16 Mar 2021",contactNo:"6546546646",bankDetails:"AXIS BANK"};
-    let arr=[]
-    for(let i=0;i<10;i++){
-      arr.push(obj)
-    }
-    setEmployeeData(arr);
+    getAllEmpoloyees()
+    // setEmployeeData();
   },[0]);
+
+  const getAllEmpoloyees = async()=>{
+    const employ = await get('members?filter={"where":{"memberType":"EMPLOYEE"}}');
+    console.log(employ)
+    if(employ.statusCode>=200 && employ.statusCode<300){
+      setEmployeeData(employ.data);
+    }
+  }
 
   const handleClose =()=>{
     setOpen(false);
   }
 
   const formValidation = ()=>{
-    Object.keys(employee).forEach(e=>{
-      if(employee[e].trim().length>1){
-        return true
-      }else{
-        return false;
-      }
-    })
   }
 
   const removeImage =(e)=>{
@@ -55,39 +63,60 @@ const Employee = () => {
   }
 
   const handleImage =async (e)=>{
-    UploadImage(e.target.files[0]);
+    // UploadImage(e.target.files[0]);
+    setSaveImage(e.target.files[0]);
     setImage(URL.createObjectURL(e.target.files[0]))
     setImgPresent(true);
     
   }
 
   const UploadImage = async(file)=>{
+    
     let formData = new FormData();
     formData.append('file', file)
     const image = await post("photos/employee/upload",formData)
     console.log(image)
+    if(image.data){
+      return image.data.result.files.file[0].name
+    }else{
+      return null;
+    }
+  
   }
+
+const getImage = async(img)=>{
+  if(img=="" || !img){
+    return true
+  }
+  const getImg = await get(`photos/employee/files/${img}`);
+  if(getImg.statusCode>200 && getImg.statusCode<300)
+  {
+    return false 
+  }
+  else 
+  { 
+    return true
+  }
+}
 
   return(
   // <div className={styles.Employee}>
   <div>
     <div className='flex justify-between items-center'>
         <div>
-          <span>Master</span>
-          <span> {'>'} </span>
-          <span> Types </span>
+          <span className='m-label'> Employees </span>
         </div>
         <div className='flex justify-between items-center'>
           
             <span>
-              <span>Filter By</span>
+              <span className='m-label'>Filter By</span>
               {/* <span>?</span> */}
             </span>
       
           <span style={{margin:'0 20px'}}></span>
           
           <span>
-              <span>Download CSV</span>
+              <span className='m-label'>Download CSV</span>
               {/* <span>?</span> */}
           </span>
           
@@ -96,36 +125,35 @@ const Employee = () => {
       </div>
 
       <div className='flex justify-end' style={{margin:"20px 0"}}>
-        <Button appearance="primary" onClick={()=>setOpen(true)}>
+        <Button appearance="primary"  onClick={()=>setOpen(true)}>
           Add Employee
         </Button>
       </div>
 
       <Table aria-label="simple table">
             <Table.Head>
-              
-                <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Designation</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Employee Code</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Date Joining</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Date Exit</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Contact Number</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="th-c">Bank Details</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Vendor Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Employee Code</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Date Joining</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Date Exit</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
           
             </Table.Head>
             <Table.Body>
               {employeeData.map((item,index)=>{
                 return(
                   <Table.Row>
-                      <Table.TextCell className="tb-c">{index+1}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.designation}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.employeeCode}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.doj}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.doe}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.contactNo}</Table.TextCell>
-                      <Table.TextCell className="tb-c">{item.bankDetails}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{getImage(item?.profile)?<img src={USERIMG} className="img-20"/>:<img className="img-20" src={`${baseUrl}photos/employee/download/${item.profile}}`}/>}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{DateFormat(item.doj)}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.doe || "-"}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
+                      <Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
                   </Table.Row>
                 )
               })}
@@ -153,15 +181,30 @@ const Employee = () => {
               </div>
               <TextInputField accept='image/*' ref={imageHandler} type="file" onChange={(e) => handleImage(e)} />
             </div>
-            
             <TextInputField  required label="Name" value={employee.name} onChange={(e) => setEmployee({...employee,name:e.target.value})} />
-            <TextInputField  required label="Designation" value={employee.designation} onChange={(e) => setEmployee({...employee,designation:e.target.value})} />
-            <TextInputField  required label="Employee Code" value={employee.employeeCode} onChange={(e) => setEmployee({...employee,employeeCode:e.target.value})} />
-            <TextInputField  required label="Date Of Joining" value={employee.doj} onChange={(e) => setEmployee({...employee,doj:e.target.value})} />
-            <TextInputField  required label="Date Of Exit" value={employee.doe} onChange={(e) => setEmployee({...employee,doe:e.target.value})} />
-            <TextInputField  required label="Contact Number" value={employee.contactNo} onChange={(e) => setEmployee({...employee,contactNo:e.target.value})} />
-            <TextInputField  required label="Bank Details" value={employee.bankDetails} onChange={(e) => setEmployee({...employee,bankDetails:e.target.value})} />
+            <div className='flex justify-center items-center'>
+              <TextInputField size={100} required label="Email" value={employee.email} onChange={(e) => setEmployee({...employee,email:e.target.value})} />
+              <div style={{margin:"0 10px"}}></div>
+              <TextInputField size={100} required label="Password" type="password" value={employee.password} onChange={(e) => setEmployee({...employee,password:e.target.value})} />
+            </div>
+
+            <div className='flex justify-center items-center'>
+              <TextInputField size={100}  required label="Designation" value={employee.designation} onChange={(e) => setEmployee({...employee,designation:e.target.value})} />
+              <div style={{margin:"0 10px"}}></div>
+              <TextInputField size={100} required label="Employee Code" value={employee.employeeCode} onChange={(e) => setEmployee({...employee,employeeCode:e.target.value})} />
+            </div>
             
+            <div className='flex justify-center items-center doe-doj' >
+              <TextInputField size={100} type="date"  required label="Date Of Joining" value={employee.doj} onChange={(e) => setEmployee({...employee,doj:e.target.value})} />
+              <div style={{margin:"0 10px"}}></div>
+              <TextInputField size={100} type="date" label="Date Of Exit" value={employee.doe} onChange={(e) => setEmployee({...employee,doe:e.target.value})} />
+            </div>
+            
+            <div className='flex justify-center items-center'>
+              <TextInputField size={100} required label="Contact Number" value={employee.contactNo} onChange={(e) => setEmployee({...employee,contactNo:e.target.value})} />
+              <div style={{margin:"0 10px"}}></div>
+              <TextInputField size={100} required label="Bank Details" value={employee.bankDetails} onChange={(e) => setEmployee({...employee,bankDetails:e.target.value})} />
+            </div>
           </form>
         
       </Dialog>
