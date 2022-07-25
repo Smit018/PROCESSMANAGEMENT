@@ -104,28 +104,28 @@ const Employee = () => {
       <Table aria-label="simple table">
             <Table.Head>
               
-                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Designation</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Employee Code</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Date Joining</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Date Exit</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Designation</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Employee Code</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Date Joining</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Date Exit</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Contact Number</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Bank Details</Table.TextHeaderCell>
           
             </Table.Head>
             <Table.Body>
               {employeeData.map((item,index)=>{
                 return(
                   <Table.Row>
-                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.doj}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.doe}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.designation}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.employeeCode}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.doj}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.doe}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.contactNo}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.bankDetails}</Table.TextCell>
                   </Table.Row>
                 )
               })}

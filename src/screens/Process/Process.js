@@ -78,10 +78,10 @@ const Process = () => {
 	const nestedTableHead = (columns) => {
 		return (
 			<div className='flex flex-col items-center w-60'>
-				<span className='mb-4'>{columns._value}</span>
+				<span className='my-1 className="th-c"'>{columns._value}</span>
 				<div className='flex justify-between'>
 					{columns.value.map((column, index) => {
-						return (<Table.TextHeaderCell key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
+						return (<Table.TextHeaderCell className="th-c" key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
 					})}
 				</div>
 			</div>
@@ -98,7 +98,7 @@ const Process = () => {
 				<Table>
 					<Table.Head>
 						{columns.map((column, index) => {
-							return (<Table.TextHeaderCell key={column.key}>
+							return (<Table.TextHeaderCell key={column.key} className="th-c">
 								{column.key == 'inputSource' || column.key == 'outputSource' ? nestedTableHead(column) : column.value}
 							</Table.TextHeaderCell>)
 						})}
@@ -106,9 +106,9 @@ const Process = () => {
 					<Table.Body height={240}>
 						{profiles.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
-								<Table.TextCell>{profile.name}</Table.TextCell>
-								<Table.TextCell>{profile.lastActivity}</Table.TextCell>
-								<Table.TextCell isNumber>{profile.ltv}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile.name}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile.lastActivity}</Table.TextCell>
+								<Table.TextCell isNumber className="tb-c">{profile.ltv}</Table.TextCell>
 							</Table.Row>
 						))}
 					</Table.Body>

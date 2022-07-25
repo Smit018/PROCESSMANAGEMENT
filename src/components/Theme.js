@@ -1,5 +1,5 @@
 
-import { mergeTheme, defaultTheme } from 'evergreen-ui'
+import { mergeTheme, defaultTheme, classicTheme } from 'evergreen-ui'
 
 import { createTheme } from '@mui/material/styles';
 
@@ -27,9 +27,28 @@ import { createTheme } from '@mui/material/styles';
 
 export let theme = mergeTheme(defaultTheme, {
     components: {
-        
+        Button: {
+            baseStyle: {
+                color: 'white',
+                paddingX: 12,
+                paddingY: 8,
+                borderRadius: 5,
+                backgroundColor: 'indianred',
+                _hover: {
+                    backgroundColor: 'firebrick',
+                },
+                _active: {
+                    backgroundColor: 'darkred',
+                },
+                _focus: {
+                    boxShadow: '0 0 0 2px lightcoral',
+                },
+            },
+        },
     },
-    colors: {
-        
-    }
+    fontFamilies: {
+        display: 'Poppins, sans-serif',
+        ui: 'Poppins, sans-serif'
+    },
+    fontWeights: 500
 })

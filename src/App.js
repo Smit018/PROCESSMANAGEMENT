@@ -36,28 +36,28 @@ function App() {
 
 
 	return (
-		<RecoilRoot value={state}>
+		<ThemeProvider value={theme}>
 			<Router>
-				<Routes>
-					<Route path='' exact element={<Login />} />
-					<Route path='admin' exact element={<SideBar />}>
-						<Route path="" element={<Dashboard />} />
-						<Route path="dashboard" element={<Dashboard />} />
-						<Route path="processes" exact element={<Process />} />
-						<Route path="processes/:id" element={<ProcessDetails />} />
-						<Route path="employees" element={<Employee />} />
-						<Route path="vendors" element={<Vendors />} />
-						<Route path="whatsapp-groups" element={<WhatsappGroup />} />
-						<Route path="documents" element={<Documents />} />
-						<Route path="department" element={<Departments />} />
-						<Route path="type" element={<Types />} />
-						<Route path="process-matrix" element={<ProcessMatrix />} />
-					</Route>
-				</Routes>
+				<RecoilRoot value={state}>
+					<Routes>
+						<Route path='' exact element={<Login />} />
+						<Route path='admin' exact element={<SideBar />}>
+							<Route path="" element={<Dashboard />} />
+							<Route path="dashboard" element={<Dashboard />} />
+							<Route path="processes" exact element={<Process />} />
+							<Route path="processes/:id" element={<ProcessDetails />} />
+							<Route path="employees" element={<Employee />} />
+							<Route path="vendors" element={<Vendors />} />
+							<Route path="whatsapp-groups" element={<WhatsappGroup />} />
+							<Route path="documents" element={<Documents />} />
+							<Route path="department" element={<Departments />} />
+							<Route path="type" element={<Types />} />
+							<Route path="process-matrix" element={<ProcessMatrix />} />
+						</Route>
+					</Routes>
+				</RecoilRoot>
 			</Router>
-			{/* <ThemeProvider theme={defaultTheme}>
-      </ThemeProvider> */}
-		</RecoilRoot>
+		</ThemeProvider>
 	);
 }
 

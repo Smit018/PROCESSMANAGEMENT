@@ -92,18 +92,18 @@ const WhatsappGroup = () => {
       <Table aria-label="simple table">
         <Table.Head>
 
-          <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
-          <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-          <Table.TextHeaderCell className="tableH-Color">Link</Table.TextHeaderCell>
+          <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
+          <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
+          <Table.TextHeaderCell className="th-c">Link</Table.TextHeaderCell>
 
         </Table.Head>
         <Table.Body>
           {documentData.map((item, index) => {
             return (
               <Table.Row>
-                <Table.TextCell className="tableB-Color">{index + 1}</Table.TextCell>
-                <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-                <Table.TextCell className="tableB-Color"><Link to={item.link}>{'See File'}</Link></Table.TextCell>
+                <Table.TextCell className="tb-c">{index + 1}</Table.TextCell>
+                <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+                <Table.TextCell className="tb-c"><Link to={item.link}>{'See File'}</Link></Table.TextCell>
               </Table.Row>
             )
           })}

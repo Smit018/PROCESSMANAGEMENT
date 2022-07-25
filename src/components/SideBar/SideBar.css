@@ -3,7 +3,7 @@
     flex-direction: column;
     margin: 0;
     width: calc(100% - 270px);
-    background-color: #f5f5f5;
+    background-color: #fafafa;
 }
 
 .sidenav {
@@ -20,7 +20,7 @@
 
 .routes {
     flex: 1;
-    background-color: #f5f5f5;
+    background-color: #fafafa;
     overflow: auto !important;
     margin: 1px;
 }

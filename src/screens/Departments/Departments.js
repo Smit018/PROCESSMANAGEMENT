@@ -100,18 +100,18 @@ const Departments = () => {
       <Table aria-label="simple table">
             <Table.Head>
               
-                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Code</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
           
             </Table.Head>
             <Table.Body>
               {departmentData.map((item,index)=>{
                 return(
                   <Table.Row>
-                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
                   </Table.Row>
                 )
               })}
@@ -148,18 +148,18 @@ export default Departments;
       //   <Table sx={{ minWidth: 650 }} aria-label="simple table">
       //     <TableHead>
       //       <TableRow>
-      //         <TableCell className="tableH-Color">SL No.</TableCell>
-      //         <TableCell className="tableH-Color">Name</TableCell>
-      //         <TableCell className="tableH-Color">Code</TableCell>
+      //         <TableCell className="th-c">SL No.</TableCell>
+      //         <TableCell className="th-c">Name</TableCell>
+      //         <TableCell className="th-c">Code</TableCell>
       //       </TableRow>
       //     </TableHead>
       //     <TableBody>
       //       {departmentData.map((item, index) => {
       //         return (
       //           <TableRow>
-      //             <TableCell className="tableB-Color">{index + 1}</TableCell>
-      //             <TableCell className="tableB-Color">{item.name}</TableCell>
-      //             <TableCell className="tableB-Color">{item.code}</TableCell>
+      //             <TableCell className="tb-c">{index + 1}</TableCell>
+      //             <TableCell className="tb-c">{item.name}</TableCell>
+      //             <TableCell className="tb-c">{item.code}</TableCell>
       //           </TableRow>
       //         )
       //       })}

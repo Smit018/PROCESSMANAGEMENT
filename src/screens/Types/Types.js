@@ -84,18 +84,18 @@ const Types = () => {
       <Table aria-label="simple table">
             <Table.Head>
               
-                <Table.TextHeaderCell className="tableH-Color">SL No.</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-                <Table.TextHeaderCell className="tableH-Color">Code</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
+                <Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
           
             </Table.Head>
             <Table.Body>
               {typeData.map((item,index)=>{
                 return(
                   <Table.Row>
-                      <Table.TextCell className="tableB-Color">{index+1}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-                      <Table.TextCell className="tableB-Color">{item.typeCode}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{index+1}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+                      <Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
                   </Table.Row>
                 )
               })}
