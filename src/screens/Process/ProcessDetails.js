@@ -57,6 +57,15 @@ const ProcessDetails = () => {
         )
     }
 
+
+    const Steps = (allSteps) => {
+        return (
+            <div className='flex justify-between'>
+                
+            </div>
+        );
+    }
+
     return (
         <div className="w-full h-full">
             <TopBar title="Processes" breadscrubs={paths} />
@@ -80,7 +89,7 @@ const ProcessDetails = () => {
                 <div className='flex justify-between items-center px-4 py-5'>
                     <div className='flex items-center'>
                         <Avatar
-                            src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                            src="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                             name="Alan Turing"
                             size={50}
                             marginRight={10}
@@ -111,7 +120,7 @@ const ProcessDetails = () => {
                 <div className='mr-4'>
                     <Heading size={600} marginBottom={10}>MEMBERS</Heading>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -138,7 +147,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -156,13 +165,13 @@ const ProcessDetails = () => {
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
                     />
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -180,7 +189,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Documents</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -204,7 +213,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -222,7 +231,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -240,7 +249,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Documents</Text>
                     <br></br>
                     <AvatarList
-                        avatar="https://upload.wikimedia.org/wikipedia/commons/a/a1/Alan_Turing_Aged_16.jpg"
+                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -268,3 +277,36 @@ export default ProcessDetails;
 
 
 const datasource = [{ name: "hello" }, { name: "world" }, { name: "drek" }, { name: "john" }, { name: "oswald" }, { name: "honey" }]
+
+const steps = [
+    { desription: 'Uploading youtube videos', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]},
+    { desription: 'Add cases via MIS panel', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]},
+    { desription: 'Send Payment Links', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]},
+    { desription: 'Aprrove discount requests', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]},
+    { desription: 'Uploading youtube videos', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+    ]},
+    { desription: 'Uploading youtube videos', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]},
+    { desription: 'Uploading youtube videos', member: [
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+    ]}
+]
