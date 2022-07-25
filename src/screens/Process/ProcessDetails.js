@@ -6,7 +6,9 @@ import AddProcess from '../../dialogs/AddProcess/AddProcess';
 import { get } from '../../services/https.service';
 import { useParams } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete } from 'evergreen-ui';
-import AvatarList from '../../components/AvatarList/AvatarList';
+import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
+
+const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 const ProcessDetails = () => {
     const params = useParams();
@@ -24,13 +26,37 @@ const ProcessDetails = () => {
     }, [])
 
 
+    const autoItem = (item) => {
+        return (
+            <span key={item.children.name} onClick={(item) => console.log(item)}>
+                <AvatarList
+                    avatar={ImageURL}
+                    name={item.children.name}
+                    description="Product Manager"
+                    action={false}
+                    _item={item}
+                />
+            </span>
+        )
+    }
+
+    const filterAutoComplete = (items, text) => {
+        return items.filter(item => {
+            return item.name.toLowerCase().includes(text)
+        })
+    }
+
+
     const AutoTextInput = (myProps) => {
-        console.log(myProps)
         return (
             <Autocomplete
                 onChange={changedItem => console.log(changedItem)}
                 items={myProps.datasource}
-                itemToString={(item) => { return item ? item.name : '' }}
+                itemToString={(item) => { return item ? item : '' }}
+                renderItem={(item, index) => autoItem(item)}
+                itemSize={75}
+                itemsFilter={(item, text) => filterAutoComplete(item, text)}
+                onInputValueChange={changedItem => console.log(changedItem)}
             >
                 {({
                     key,
@@ -41,7 +67,7 @@ const ProcessDetails = () => {
                     openMenu,
                     toggleMenu
                 }) => (
-                    <Pane style={{ marginTop: 16 }} key={key} ref={getRef} display="flex">
+                    <Pane key={key} ref={getRef} display="flex">
                         <TextInput
                             flex="1"
                             value={myProps.value}
@@ -58,11 +84,27 @@ const ProcessDetails = () => {
     }
 
 
-    const Steps = (allSteps) => {
+    const Steps = (myProps) => {
         return (
-            <div className='flex justify-between'>
-                
-            </div>
+            myProps.datasource.map((data, index) => {
+                return (<div key={index} className="flex flex-col mb-6">
+                    <Heading size={500}>{index + 1}. {data.description}</Heading>
+                    <div className='flex flex-wrap my-3'>
+                        {data.member.map((member, _index) => {
+                            return (
+                                <div key={_index} className='mx-2 my-2'>
+                                    <AvatarCard
+                                        avatar={ImageURL}
+                                        name={member.name}
+                                        description={`${member.code}, ${member.position}`}
+                                        type={member.type}
+                                    />
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>)
+            })
         );
     }
 
@@ -70,7 +112,7 @@ const ProcessDetails = () => {
         <div className="w-full h-full">
             <TopBar title="Processes" breadscrubs={paths} />
             <Pane className="w-full l-blue" elevation={1}>
-                <div className='flex justify-between items-center px-4 py-5'>
+                <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                     <div>
                         <Heading size={600}>
                             OPLAW101
@@ -86,10 +128,10 @@ const ProcessDetails = () => {
                     </div>
                 </div>
                 <hr></hr>
-                <div className='flex justify-between items-center px-4 py-5'>
+                <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                     <div className='flex items-center'>
                         <Avatar
-                            src="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                            src={ImageURL}
                             name="Alan Turing"
                             size={50}
                             marginRight={10}
@@ -116,11 +158,11 @@ const ProcessDetails = () => {
                 </div>
             </Pane>
             <br></br>
-            <div className='flex'>
+            <div className='flex flex-wrap'>
                 <div className='mr-4'>
-                    <Heading size={600} marginBottom={10}>MEMBERS</Heading>
+                    <Heading size={800} marginBottom={10}>MEMBERS</Heading>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -135,19 +177,36 @@ const ProcessDetails = () => {
                     </div>
                 </div>
                 <div>
-                    <Heading size={600} marginBottom={10}>STEPS</Heading>
+                    <Heading size={800} marginBottom={10}>STEPS</Heading>
+                    <Steps
+                        datasource={steps}
+                    />
+                    <div className='flex'>
+                        <div className='w-1/2'>
+                            <TextInput className="w-full" height={50} placeholder="Enter step description here" />
+                        </div>
+                        &nbsp;&nbsp;&nbsp;
+                        <div className='w-1/2'>
+                            <AutoTextInput
+                                datasource={datasource}
+                                placeholder="Add Member"
+                                value={newMember}
+                                inputChange={(e) => setNewMember(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
             <br></br>
             <br></br>
             <br></br>
-            <Heading size={600} marginBottom={10}>INPUT SOURCES</Heading>
-            <div className='flex justify-between'>
+            <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
+            <div className='flex flex-wrap justify-between'>
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -165,13 +224,13 @@ const ProcessDetails = () => {
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
                     />
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -189,7 +248,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Documents</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -207,13 +266,13 @@ const ProcessDetails = () => {
             <br></br>
             <br></br>
             <br></br>
-            <Heading size={600} marginBottom={10}>OUTPUT SOURCES</Heading>
-            <div className='flex justify-between'>
+            <Heading size={800} marginBottom={10}>OUTPUT SOURCES</Heading>
+            <div className='flex flex-wrap justify-between'>
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -231,7 +290,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -249,7 +308,7 @@ const ProcessDetails = () => {
                     <Text size={400}>Documents</Text>
                     <br></br>
                     <AvatarList
-                        avatar="http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png?access_token=5MpraYvnSfe8QCGiK78yxziOdKF5zOwG3He1EFpU9aBQrqMvFoWJiWzZFO1XeLq8"
+                        avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
@@ -279,34 +338,54 @@ export default ProcessDetails;
 const datasource = [{ name: "hello" }, { name: "world" }, { name: "drek" }, { name: "john" }, { name: "oswald" }, { name: "honey" }]
 
 const steps = [
-    { desription: 'Uploading youtube videos', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]},
-    { desription: 'Add cases via MIS panel', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]},
-    { desription: 'Send Payment Links', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]},
-    { desription: 'Aprrove discount requests', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]},
-    { desription: 'Uploading youtube videos', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-    ]},
-    { desription: 'Uploading youtube videos', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]},
-    { desription: 'Uploading youtube videos', member: [
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-        { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-    ]}
+    {
+        description: 'Uploading youtube videos', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Add cases via MIS panel', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Send Payment Links', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Aprrove discount requests', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Uploading youtube videos', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Add cases via MIS panel', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Send Payment Links', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    },
+    {
+        description: 'Aprrove discount requests', member: [
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
+            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
+        ]
+    }
 ]
