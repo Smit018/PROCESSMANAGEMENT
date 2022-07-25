@@ -10,7 +10,7 @@ export const updateLocalStorage = (data) => {
 }
 
 
-const baseUrl = `http://142.93.212.14:3200/api/`;
+export const baseUrl = `http://142.93.212.14:3200/api/`;
 // const baseUrl =`http://localhost:3200/api/`;
 
 
