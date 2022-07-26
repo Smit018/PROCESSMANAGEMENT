@@ -20,13 +20,12 @@ const Process = () => {
 	const [process, setProcess] = useState([])
 
 	useEffect(() => {
-		console.log('window.innerHeight ---> ', window.innerHeight)
+		setScreenHeight(window.innerHeight)
 		fetchDepartments()
 		fetchMembers()
 		fetchProcesses()
 		fetchTypes()
 	}, [])
-
 
 	window.addEventListener('resize', (event) => {
 		setScreenHeight(event.target.innerHeight)
@@ -35,7 +34,6 @@ const Process = () => {
 	const fetchTypes = async () => {
 		const response = await get('types')
 		if (response) {
-			console.log(response)
 			if (response.statusCode == 200) {
 				setTypes(response.data)
 			}
@@ -45,7 +43,6 @@ const Process = () => {
 	const fetchDepartments = async () => {
 		const response = await get('departments')
 		if (response) {
-			console.log(response)
 			if (response.statusCode == 200) {
 				setDept(response.data)
 			}
@@ -55,7 +52,6 @@ const Process = () => {
 	const fetchMembers = async () => {
 		const response = await get('members?filter={"where": {"memberType": "employee"}}')
 		if (response) {
-			console.log(response)
 			if (response.statusCode == 200) {
 				setMembers(response.data)
 			}
@@ -98,10 +94,18 @@ const Process = () => {
 	const ProcessPage = () => {
 		return (
 			<div className="w-full h-full">
-				<TopBar title="Processes" breadscrubs={paths} add={true} addTitle="Add Process" addEv={() => _setShowForm(true)} />
-				<div className='h-10 flex items-center'>
-					<SearchInput onChange={(e) => setSearch(e.target.value)} value={search} />
-				</div>
+				<TopBar
+					filter="true"
+					csv="true"
+					title="Processes"
+					breadscrubs={paths}
+					add={true}
+					addTitle="Add Process"
+					addEv={() => _setShowForm(true)}
+					search={search}
+					onSearch={(e) => setSearch(e.target.value)}
+				/>
+				<br></br>
 				<Table>
 					<Table.Head>
 						{columns.map((column, index) => {
@@ -110,7 +114,7 @@ const Process = () => {
 							</Table.TextHeaderCell>)
 						})}
 					</Table.Head>
-					<Table.Body height={screenHeight - 350}>
+					<Table.Body height={screenHeight - 300}>
 						{profiles.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
 								<Table.TextCell className="tb-c">{profile.name}</Table.TextCell>

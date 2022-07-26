@@ -49,7 +49,7 @@ code {
 
 
 .l-blue {
-  background-color: rgba(51, 102, 255, 0.05);
+  background-color: rgba(51, 102, 255, 0.05) !important;
 }
 
 

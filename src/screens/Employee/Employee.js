@@ -7,7 +7,7 @@ import { DateFormat } from '../../services/dateFormat';
 import { Table } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui';
 import USERIMG from "../../assets/images/userImgs.png";
-import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon } from 'evergreen-ui'
+import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
 
 const Employee = () => {
@@ -17,6 +17,8 @@ const Employee = () => {
 	const [saveImage, setSaveImage] = useState();
 	const [employeeData, setEmployeeData] = useState([]);
 	const [open, setOpen] = useState(false);
+	const [search, setSearch] = useState('');
+	const [height, setHeight] = useState(0);
 	let imageHandler = useRef(null);
 
 	const createEmployee = async () => {
@@ -41,6 +43,7 @@ const Employee = () => {
 	}
 
 	useEffect(() => {
+		setHeight(window.innerHeight)
 		getAllEmpoloyees()
 		// setEmployeeData();
 	}, [0]);
@@ -124,7 +127,18 @@ const Employee = () => {
 
 	return (
 		<div className="w-full h-full">
-			<TopBar title="Employee" breadscrubs={paths} add={true} addTitle="Add Employee" addEv={() => setOpen(true)} />
+			<TopBar
+				title="Employee"
+				breadscrubs={paths}
+				add={true}
+				addTitle="Add Employee"
+				addEv={() => setOpen(true)}
+				csv="true"
+				filter="true"
+				search={search}
+				onSearch={(e) => setSearch(e.target.value)}
+			/>
+			<br></br>
 			<Table aria-label="simple table">
 				<Table.Head>
 					<Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
@@ -137,7 +151,7 @@ const Employee = () => {
 					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
 
 				</Table.Head>
-				<Table.Body>
+				<Table.Body height={height - 300}>
 					{employeeData.map((item, index) => {
 						return (
 							<Table.Row key={index}>
@@ -153,6 +167,9 @@ const Employee = () => {
 						)
 					})}
 				</Table.Body>
+				<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
+					<Pagination page={1} totalPages={5}></Pagination>
+				</div>
 			</Table>
 			<Dialog isShown={open} onCloseComplete={handleClose}
 				title="Add Employee"
