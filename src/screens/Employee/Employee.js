@@ -9,15 +9,17 @@ import { TextInputField } from 'evergreen-ui';
 import USERIMG from "../../assets/images/userImgs.png";
 import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
+import AddMember from '../../dialogs/AddMember/AddMember';
 
 const Employee = () => {
+	const [showForm, setShowForm] = useState(false)
 	const [employee, setEmployee] = useState({});
 	const [imgPresent, setImgPresent] = useState(false);
 	const [image, setImage] = useState();
-	const [saveImage, setSaveImage] = useState();
 	const [employeeData, setEmployeeData] = useState([]);
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
+	const [saveImage, setSaveImage] = useState();
 	const [height, setHeight] = useState(0);
 	let imageHandler = useRef(null);
 
@@ -125,6 +127,11 @@ const Employee = () => {
 		{ path: '/admin/employees/', title: 'Employees' }
 	]
 
+	const validateForm = (_form) => {
+		console.log(_form)
+		setShowForm(false)
+	}
+
 	return (
 		<div className="w-full h-full">
 			<TopBar
@@ -132,7 +139,7 @@ const Employee = () => {
 				breadscrubs={paths}
 				add={true}
 				addTitle="Add Employee"
-				addEv={() => setOpen(true)}
+				addEv={() => setShowForm(true)}
 				csv="true"
 				filter="true"
 				search={search}
@@ -171,7 +178,13 @@ const Employee = () => {
 					<Pagination page={1} totalPages={5}></Pagination>
 				</div>
 			</Table>
-			<Dialog isShown={open} onCloseComplete={handleClose}
+			<AddMember
+				open={showForm}
+				title="Add Employee"
+				onSubmit={(formData) => { validateForm(formData) }}
+				onClose={() => setShowForm(false)}
+			/>
+			{/* <Dialog isShown={open} onCloseComplete={handleClose}
 				title="Add Employee"
 				confirmLabel="Save Employee"
 				isConfirmDisabled={formValidation()}
@@ -221,7 +234,7 @@ const Employee = () => {
 					</div>
 				</form>
 
-			</Dialog>
+			</Dialog> */}
 		</div>
 
 		// <div className={styles.Employee}>
