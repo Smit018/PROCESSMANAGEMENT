@@ -119,7 +119,7 @@ const Employee = () => {
 
 
 	const paths = [
-		{ path: '/admin/employess/', title: 'Employees' }
+		{ path: '/admin/employees/', title: 'Employees' }
 	]
 
 	return (
