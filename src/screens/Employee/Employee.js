@@ -29,7 +29,10 @@ const Employee = () => {
     saveEmp = { ...saveEmp, memberType: "EMPLOYEE", userName: saveEmp.email }
     let saveType = await post('members', saveEmp);
     if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
-      console.log("Employee added")
+      handleClose()
+      console.log("Employee added");
+      getAllEmpoloyees();
+
     } else {
       console.log(saveType.message)
     }

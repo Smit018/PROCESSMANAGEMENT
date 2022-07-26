@@ -1,4 +1,4 @@
-export const DateFormat = (myDate)=>{
+export const DateFormat = (myDate,type="date")=>{
     myDate = new Date(myDate)
     var month=new Array();
   month[0]="Jan";
@@ -15,11 +15,17 @@ export const DateFormat = (myDate)=>{
   month[11]="Dec";
   var hours = myDate.getHours();
   var minutes = myDate.getMinutes();
-  var ampm = hours >= 12 ? 'pm' : 'am';
+  var ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? '0'+minutes : minutes;
   var strTime = hours + ':' + minutes + ampm;
   // e.g. "13 Nov 2016 11:00pm";
+  if(type=="date"){
     return myDate.getDate()+" "+month[myDate.getMonth()]+" "+myDate.getFullYear();
+  }else if(type=="date-time"){
+    return myDate.getDate()+" "+month[myDate.getMonth()]+" "+myDate.getFullYear()+" "+strTime;
+  }else{
+    return strTime
+  }
 }

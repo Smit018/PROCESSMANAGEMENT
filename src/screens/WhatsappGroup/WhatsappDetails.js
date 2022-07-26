@@ -2,23 +2,43 @@ import React, { useState, useEffect }from 'react';
 import PropTypes from 'prop-types';
 import './WhatsappGroup.css';
 import { post, get } from '../../services/https.service';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox } from "evergreen-ui";
 import { Pane, Text } from 'evergreen-ui'
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
 import USERIMG from "../../assets/images/userImgs.png";
 
 const WhatsappDetails = () =>{
-
+    const pathArray = window.location.pathname.split('/');
+    const id = pathArray[3]
     const [members,setMembers] = useState([]);
+    const [whatsappDetail, setWhatsappDetail] = useState({});
 
     useEffect(()=>{
-        let obj={text:"Hello"},arr=[];
-        for(let i=0;i<20;i++){
-            arr.push(obj)
-        }
-        setMembers(arr);
+        getWhatsappMembers(id);
+        getWhatsappDetail()
+        
     },[0])
+
+    const getWhatsappDetail = async()=>{
+        const whatsap = await get(`whatsappGroups/${id}`);
+        if(whatsap.statusCode>=200 && whatsap.statusCode<300){
+            setWhatsappDetail(whatsap.data);
+        }else{
+            console.log('Fetch Whatsapp member')
+        }
+    }
+
+    const getWhatsappMembers = async(id)=>{
+        const whatsap = await get(`whatsappGroups/${id}/whatsappMember`);
+        if(whatsap.statusCode>=200 && whatsap.statusCode<300){
+            setMembers(whatsap.data);
+        }else{
+            console.log('Fetch Whatsapp member')
+        }
+    }
+
+    // const addMembersToWhatsapp = async(memberId)
 
 
     return(
@@ -95,7 +115,7 @@ const WhatsappDetails = () =>{
                             <div className='flex'>
                                 <img src={USERIMG} className="img-20 mr-4" />
                                 <div className='flex flex-col'>
-                                    <div className='pb-3 text-xl font-medium'>
+                                    <div className='pb-1 text-xl font-medium'>
                                         John Doe
                                     </div>
                                     <div className='text-pri-col text-xs'>
