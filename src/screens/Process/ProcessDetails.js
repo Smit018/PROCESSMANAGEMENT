@@ -92,8 +92,8 @@ const ProcessDetails = () => {
                     <div className='flex justify-between items-center'>
                         <Heading size={500}>{index + 1}. {data.description}</Heading>
                         <div className='flex items-center'>
-                        <IconButton icon={EditIcon} marginRight={2} />
-                        <IconButton icon={CrossIcon} marginRight={2} />
+                            <IconButton icon={EditIcon} marginRight={2} />
+                            <IconButton icon={CrossIcon} marginRight={2} />
                         </div>
                     </div>
                     <div className='flex flex-wrap my-3'>
@@ -166,7 +166,7 @@ const ProcessDetails = () => {
             </Pane>
             <br></br>
             <div className='flex'>
-            {/* MEMBERS */}
+                {/* MEMBERS */}
                 <div className='mr-4'>
                     <Heading size={800} marginBottom={10}>MEMBERS</Heading>
                     <AvatarList
@@ -203,6 +203,11 @@ const ProcessDetails = () => {
                                 inputChange={(e) => setNewMember(e.target.value)}
                             />
                         </div>
+                    </div>
+                    <div className='flex justify-end py-2'>
+                        <Button className="primary">
+                            Add Step
+                        </Button>
                     </div>
                 </div>
             </div>

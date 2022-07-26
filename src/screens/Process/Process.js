@@ -13,17 +13,24 @@ const Process = () => {
 	const navigate = useNavigate()
 	const [showForm, setShowForm] = useState(false)
 	const [search, setSearch] = useState('')
+	const [screenHeight, setScreenHeight] = useState('')
 	const [types, setTypes] = useState([])
 	const [departments, setDept] = useState([])
 	const [members, setMembers] = useState([])
 	const [process, setProcess] = useState([])
 
 	useEffect(() => {
+		console.log('window.innerHeight ---> ', window.innerHeight)
 		fetchDepartments()
 		fetchMembers()
 		fetchProcesses()
 		fetchTypes()
 	}, [])
+
+
+	window.addEventListener('resize', (event) => {
+		setScreenHeight(event.target.innerHeight)
+	})
 
 	const fetchTypes = async () => {
 		const response = await get('types')
@@ -91,8 +98,8 @@ const Process = () => {
 	const ProcessPage = () => {
 		return (
 			<div className="w-full h-full">
-				<TopBar title="Processes" breadscrubs={paths} add={true} addEv={() => _setShowForm(true)} />
-				<div className='mb-4'>
+				<TopBar title="Processes" breadscrubs={paths} add={true} addTitle="Add Process" addEv={() => _setShowForm(true)} />
+				<div className='h-10 flex items-center'>
 					<SearchInput onChange={(e) => setSearch(e.target.value)} value={search} />
 				</div>
 				<Table>
@@ -103,7 +110,7 @@ const Process = () => {
 							</Table.TextHeaderCell>)
 						})}
 					</Table.Head>
-					<Table.Body height={240}>
+					<Table.Body height={screenHeight - 350}>
 						{profiles.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
 								<Table.TextCell className="tb-c">{profile.name}</Table.TextCell>
@@ -112,7 +119,7 @@ const Process = () => {
 							</Table.Row>
 						))}
 					</Table.Body>
-					<div className='py-2 flex justify-end bg-white border-t'>
+					<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
 						<Pagination page={1} totalPages={5}></Pagination>
 					</div>
 				</Table>

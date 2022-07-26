@@ -27,7 +27,7 @@ const TopBar = (props) => {
   }
 
   return (
-    <div className="flex justify-between items-center pb-4">
+    <div className="flex justify-between items-center h-16">
       <div role="presentation" onClick={handleClick}>
         {props.breadscrubs && props.breadscrubs.length > 0 ?
           <Breadcrumbs paths={props.breadscrubs} /> : null
@@ -50,7 +50,7 @@ const TopBar = (props) => {
               <DownloadIcon />
             </span>
           </button>
-        </div> : props.add ? <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => add()}>Add Process</Button> : null
+        </div> : props.add ? <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => add()}>{props.addTitle}</Button> : null
       }
     </div>
 
