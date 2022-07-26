@@ -29,6 +29,7 @@ import Types from './screens/Types/Types';
 import Vendors from './screens/Vendors/Vendors';
 import WhatsappGroup from './screens/WhatsappGroup/WhatsappGroup';
 import ProcessDetails from './screens/Process/ProcessDetails';
+import WhatsappDetails from './screens/WhatsappGroup/WhatsappDetails';
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
 							<Route path="employees" element={<Employee />} />
 							<Route path="vendors" element={<Vendors />} />
 							<Route path="whatsapp-groups" element={<WhatsappGroup />} />
+							<Route path="whatsapp-groups/:id" element={<WhatsappDetails />} />
 							<Route path="documents" element={<Documents />} />
 							<Route path="department" element={<Departments />} />
 							<Route path="type" element={<Types />} />
