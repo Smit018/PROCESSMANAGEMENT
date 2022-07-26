@@ -84,8 +84,7 @@ const AddProcess = (props) => {
 
 	useEffect(() => {
 		console.log(props.data)
-		return (() => { return formValues })
-	})
+	}, [])
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
