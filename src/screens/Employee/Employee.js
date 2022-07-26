@@ -30,7 +30,10 @@ const Employee = () => {
 		saveEmp = { ...saveEmp, memberType: "EMPLOYEE", userName: saveEmp.email }
 		let saveType = await post('members', saveEmp);
 		if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
-			console.log("Employee added")
+			handleClose()
+			console.log("Employee added");
+			getAllEmpoloyees();
+
 		} else {
 			console.log(saveType.message)
 		}
@@ -121,7 +124,7 @@ const Employee = () => {
 
 	return (
 		<div className="w-full h-full">
-			<TopBar title="Employee" breadscrubs={paths} add={true} addTitle="Add Employee" addEv={() => setOpen(true)}/>
+			<TopBar title="Employee" breadscrubs={paths} add={true} addTitle="Add Employee" addEv={() => setOpen(true)} />
 			<Table aria-label="simple table">
 				<Table.Head>
 					<Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
@@ -234,9 +237,9 @@ const Employee = () => {
 		// 		</Button>
 		// 	</div>
 
-			
 
-			
+
+
 		// </div >
 	)
 };

@@ -2,49 +2,44 @@ import React, { useState, useEffect }from 'react';
 import PropTypes from 'prop-types';
 import './WhatsappGroup.css';
 import { post, get } from '../../services/https.service';
+import { DateFormat } from '../../services/dateFormat';
 import { Link } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField } from "evergreen-ui";
 import { Pane, Text } from 'evergreen-ui'
 import USERIMG from "../../assets/images/userImgs.png";
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
+import { ErrorTwoTone } from '@mui/icons-material';
 
 const WhatsappGroup = () => {
   const [name, setName] = useState('');
   const [link, setLink] = useState('');
-  const [documentData, setDocumentData] = useState([]);
+  const [whatsappData, setWhatsappData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [addMembers, setAddMembers] = useState([])
 
   useEffect(() => {
-    let obj = { name: "HR Group", link: "/" };
-    let arr = []
-    for (let i = 0; i < 10; i++) {
-      arr.push(obj)
-    }
-    setDocumentData(arr);
+    getAllWhatsappGroup();
   }, [0]);
 
-  const createDocument = async () => {
+  async function getAllWhatsappGroup(){
+    const whatsap = await get("whatsappGroups");
+    if(whatsap.statusCode>=200 && whatsap.statusCode<300){
+      let dataFromServer = whatsap.data;
+      setWhatsappData(dataFromServer);
+    }else{
+      alert('Error whatsapp Group')
+    }
+  }
+
+  const createWhatsapp = async () => {
     let newDoc = { name: name.trim(), link: link.trim() };
-    let saveDoc = await post('documents', newDoc);
+    let saveDoc = await post('whatsappGroups', newDoc);
     if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
-      addMembers.forEach((e) => {
-        e = { ...e, documentId: saveDoc._id }
-      })
-      let addMember_Document = await post("documentMembers", addMembers);
-      if (addMember_Document.statusCode >= 200 && addMember_Document.statusCode < 300) {
-        console.log('members in a document added')
-      } else {
-        console.log(addMember_Document.message)
-      }
+      console.log('Whtsapp group added');
+      getAllWhatsappGroup()
     } else {
       console.log(saveDoc.message)
     }
-
-  }
-
-  const memberAdd = (memId, admin) => {
-    setAddMembers(...addMembers, { memberId: memId, admin: admin })
+    handleClose()
   }
 
   const handleClose = () => {
@@ -111,7 +106,7 @@ const WhatsappGroup = () => {
         </Table.Body>
       </Table> */}
       
-      {documentData.map((item,index)=>{
+      {whatsappData.map((item,index)=>{
         return(
         <Link to={`${item.id}`}>  
         <Pane elevation={1} display="flex" justifyContent="space-between" alignItems="center" height={"90px"} width={"100%"}>
@@ -120,12 +115,13 @@ const WhatsappGroup = () => {
               <img src={TWOPEOPLE} className="img-201"/>
             </div>
             <div style={{ margin: "0 10px" }}></div>
-            <div className='flex flex-col items-center justify-center'>
+            <div className='flex flex-col '>
               <div className='m-label'>
                 {item.name}
               </div>
               <div className='text-m-label-30'>
-                20 July 2020, 10:30 AM
+                {/* 20 July 2020, 10:30 AM */}
+                {DateFormat(item.createdAt,"date-time")}
               </div>
             </div>
           </div>
@@ -143,7 +139,7 @@ const WhatsappGroup = () => {
         width={'50%'}
         confirmLabel="Save Whatsapp"
         isConfirmDisabled={formValidation()}
-        onConfirm={createDocument}
+        onConfirm={createWhatsapp}
       >
         <form>
           <div className='flex justify-center items-center'>
