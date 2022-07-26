@@ -5,7 +5,7 @@ import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
 import { get } from '../../services/https.service';
 import { useParams } from 'react-router-dom';
-import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete } from 'evergreen-ui';
+import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
@@ -16,6 +16,7 @@ const ProcessDetails = () => {
     const [newMember, setNewMember] = useState('')
     const [newWaGroup, setNewWaGroup] = useState('')
     const [newDocument, setNewDocument] = useState('')
+    const [processOwner, setProcessOwner] = useState('')
     const paths = [
         { path: '/admin/processes', title: 'Processes' },
         { path: '/admin/processes/' + params.id, title: 'Processes Details' }
@@ -28,7 +29,7 @@ const ProcessDetails = () => {
 
     const autoItem = (item) => {
         return (
-            <span key={item.children.name} onClick={(item) => console.log(item)}>
+            <span key={item.children.name} onClick={() => console.log('items', item.children)}>
                 <AvatarList
                     avatar={ImageURL}
                     name={item.children.name}
@@ -88,7 +89,13 @@ const ProcessDetails = () => {
         return (
             myProps.datasource.map((data, index) => {
                 return (<div key={index} className="flex flex-col mb-6">
-                    <Heading size={500}>{index + 1}. {data.description}</Heading>
+                    <div className='flex justify-between items-center'>
+                        <Heading size={500}>{index + 1}. {data.description}</Heading>
+                        <div className='flex items-center'>
+                        <IconButton icon={EditIcon} marginRight={2} />
+                        <IconButton icon={CrossIcon} marginRight={2} />
+                        </div>
+                    </div>
                     <div className='flex flex-wrap my-3'>
                         {data.member.map((member, _index) => {
                             return (
@@ -158,7 +165,8 @@ const ProcessDetails = () => {
                 </div>
             </Pane>
             <br></br>
-            <div className='flex flex-wrap'>
+            <div className='flex'>
+            {/* MEMBERS */}
                 <div className='mr-4'>
                     <Heading size={800} marginBottom={10}>MEMBERS</Heading>
                     <AvatarList
@@ -176,6 +184,7 @@ const ProcessDetails = () => {
                         />
                     </div>
                 </div>
+                {/* STEPS */}
                 <div>
                     <Heading size={800} marginBottom={10}>STEPS</Heading>
                     <Steps
@@ -200,7 +209,14 @@ const ProcessDetails = () => {
             <br></br>
             <br></br>
             <br></br>
-            <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
+            {/* INPUT SOURCES */}
+            <div className='flex flex-wrap justify-between items-center'>
+                <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
+                <div className='flex items-center'>
+                    <Text size={400}>Process Owner &nbsp; &nbsp;</Text>
+                    <Switch checked={processOwner} onChange={(e) => setProcessOwner(e.target.checked)} />
+                </div>
+            </div>
             <div className='flex flex-wrap justify-between'>
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
@@ -353,37 +369,6 @@ const steps = [
         description: 'Send Payment Links', member: [
             { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
             { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Aprrove discount requests', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Uploading youtube videos', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Add cases via MIS panel', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Send Payment Links', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Aprrove discount requests', member: [
             { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
             { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
         ]

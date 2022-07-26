@@ -46,9 +46,9 @@ export let theme = mergeTheme(defaultTheme, {
             },
         },
     },
-    // fontFamilies: {
-    //     display: 'Poppins, sans-serif',
-    //     ui: 'Poppins, sans-serif'
-    // },
-    // fontWeights: 500
+    fontFamilies: {
+        display: 'Poppins, sans-serif',
+        ui: 'Poppins, sans-serif'
+    },
+    fontWeights: 500
 })
