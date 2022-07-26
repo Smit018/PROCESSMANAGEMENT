@@ -35,6 +35,10 @@ code {
   font-size: 20px;
 }
 
+.text-pri-col{
+  color: #66788A;
+}
+
 .breadcrumb * {
   margin-right: 10px;
 }
@@ -70,4 +74,11 @@ progress::-moz-progress-bar {
 
 .primary {
   color: #3366FF !important;
+}
+
+.search input[type="text"]{
+  height: 50px;
+}
+.search .ub-mb_24px{
+  margin-bottom: 0px !important;
 }

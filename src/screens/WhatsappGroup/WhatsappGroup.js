@@ -1,9 +1,12 @@
 import React, { useState, useEffect }from 'react';
 import PropTypes from 'prop-types';
-import styles from './WhatsappGroup.module.css';
+import './WhatsappGroup.css';
 import { post, get } from '../../services/https.service';
 import { Link } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField } from "evergreen-ui";
+import { Pane, Text } from 'evergreen-ui'
+import USERIMG from "../../assets/images/userImgs.png";
+import TWOPEOPLE from "../../assets/images/twoPeople.png"
 
 const WhatsappGroup = () => {
   const [name, setName] = useState('');
@@ -58,11 +61,9 @@ const WhatsappGroup = () => {
   }
 
   return (
-    <div className={styles.Documents}>
-      <div className='flex justify-between items-center'>
+    <div>
+      <div className='flex justify-between items-center m-label'>
         <div>
-          <span>Master</span>
-          <span> {'>'} </span>
           <span> Types </span>
         </div>
         <div className='flex justify-between items-center'>
@@ -85,11 +86,11 @@ const WhatsappGroup = () => {
 
       <div className='flex justify-end' style={{ margin: "20px 0" }}>
         <Button appearance="primary" onClick={() => setOpen(true)}>
-          Add Type
+          Add Whatsapp
         </Button>
       </div>
 
-      <Table aria-label="simple table">
+      {/* <Table aria-label="simple table">
         <Table.Head>
 
           <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
@@ -108,17 +109,49 @@ const WhatsappGroup = () => {
             )
           })}
         </Table.Body>
-      </Table>
+      </Table> */}
+      
+      {documentData.map((item,index)=>{
+        return(
+        <Link to={`${item.id}`}>  
+        <Pane elevation={1} display="flex" justifyContent="space-between" alignItems="center" height={"90px"} width={"100%"}>
+          <div className='flex items-center justify-center margin_wh'>
+            <div className='circleC1 flex items-center justify-center'>
+              <img src={TWOPEOPLE} className="img-201"/>
+            </div>
+            <div style={{ margin: "0 10px" }}></div>
+            <div className='flex flex-col items-center justify-center'>
+              <div className='m-label'>
+                {item.name}
+              </div>
+              <div className='text-m-label-30'>
+                20 July 2020, 10:30 AM
+              </div>
+            </div>
+          </div>
+          <div className='margin_wh1' style={{color:"#66788A"}}>
+            42 Members
+          </div>
+        </Pane>
+        </Link>
+        )
+      }
+      )}
 
       <Dialog isShown={open} onCloseComplete={handleClose}
-        title="Add Document"
-        confirmLabel="Save Document"
+        title="ADD WHATSAPP GROUP"
+        width={'50%'}
+        confirmLabel="Save Whatsapp"
         isConfirmDisabled={formValidation()}
         onConfirm={createDocument}
       >
         <form>
-          <TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextInputField required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+          <div className='flex justify-center items-center'>
+            <TextInputField size={100} required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <div style={{ margin: "0 10px" }}></div>
+            <TextInputField size={100} required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+          </div>
+        
         </form>
 
       </Dialog>
