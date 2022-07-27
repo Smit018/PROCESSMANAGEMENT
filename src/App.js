@@ -51,9 +51,9 @@ function App() {
 							<Route path="employees" element={<Employee />} />
 							<Route path="vendors" element={<Vendors />} />
 							<Route path="whatsapp-groups" element={<WhatsappGroup />} />
-							<Route path="whatsapp-groups/:id" element={<WhatsappDetails />} />
+							<Route path="whatsapp-groups/:id/:name" element={<WhatsappDetails />} />
 							<Route path="documents" element={<Documents />} />
-							<Route path="documents/:id" element={<DocumentDetails />} />
+							<Route path="documents/:id/:name" element={<DocumentDetails />} />
 							<Route path="department" element={<Departments />} />
 							<Route path="type" element={<Types />} />
 							<Route path="process-matrix" element={<ProcessMatrix />} />

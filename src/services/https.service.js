@@ -83,6 +83,10 @@ export const addMember = async (data) => {
 }
 
 
+export const ImageURL = (container, filename) => {
+    return `${baseUrl}photos/${container}/download/${filename}`
+}
+
 
 export const REGEX =  {
     EMAIL: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
