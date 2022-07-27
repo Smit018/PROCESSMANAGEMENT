@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Types.module.css';
 
-import { post } from '../../services/https.service';
+import { get, post } from '../../services/https.service';
 import Box from '@mui/material/Box';
-import { Table } from 'evergreen-ui'
+import { Table, toaster } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui'
 import { Pane, Dialog, Button, Pagination } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
+import Paginator from '../../components/Paginator/Paginator';
 
+const page = { limit: 2, page: 0 }
 
 const Types = () => {
 
@@ -20,42 +22,105 @@ const Types = () => {
 	const [search, setSearch] = useState('');
 	const [innerHeight, setInnerHeight] = useState();
 
+	const [page, setPage] = useState(1);
+	const [pageLimit, setPageLimit] = useState(2);
+	const [totalData, setTotalData] = useState(0);
+
+
+
 	const paths = [
 		{ path: '/admin/types', title: 'Types' }
 	]
 
-	const createType = async () => {
-		let Type = { name: name.trim(), typeCode: typeCode.trim() };
-		// let department = {name:"Marketing",typeCode:"MKG"}
-		let saveType = await post('types', Type);
-		if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
-			console.log(" Type added")
-		} else {
-			console.log(saveType.message)
-		}
+	useEffect(() => {
+		fetchTypes()
+	}, []);
 
+
+	const fetchCount = () => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const count = await get('types/count')
+				if (count.statusCode >= 200 && count.statusCode < 300) {
+					console.log(count)
+					resolve(count.data)
+				}
+			}
+			catch (err) {
+				resolve(err)
+			}
+		})
 	}
 
-	useEffect(() => {
-		setInnerHeight(window.innerHeight)
-		let obj = { name: "Human Resource", typeCode: "HR" };
-		let arr = []
-		for (let i = 0; i < 300; i++) {
-			arr.push(obj)
+	const fetchTypes = async (filter) => {
+		// FETCH ALL TYPES FROM THE SERVER
+		try {
+			const url = filter ? `types?filter=${filter}` : 'types?filter={"limit": 2, "skip": 2}'
+			const allTypes = await get(url)
+			const count  = await fetchCount()
+			setTotalData(count)
+			if (allTypes.statusCode >= 200 && allTypes.statusCode < 300) {
+				setTypeData(allTypes.data)
+				allTypes.data.length <= 5 ? setInnerHeight(600) : allTypes.data.length <= 10 ? setInnerHeight(800) : setInnerHeight(window.innerHeight)
+				setInnerHeight(window.innerHeight)
+			}
+			else toaster.danger('Failed to fetch Types')
 		}
-		setTypeData(arr);
-	}, [0]);
+		catch (err) {
+			console.log(err)
+			toaster.danger('Failed to fetch Types')
+		}
+	}
+
+	const createType = async () => {
+		// SAVE TYPE TO DB
+		try {
+			let body = { name: name.trim(), typeCode: typeCode.trim() };
+			let saveType = await post('types', body);
+			if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
+				// TYPE SAVED SUCCESSFULLY
+				// CLEAR THE FORM -- SHOW TOAST
+				toaster.success('Type added succuessfully')
+				setName('');
+				setTypeCode('')
+				setOpen(false)
+				fetchTypes()
+			}
+			else {
+				console.log(saveType.message)
+				toaster.danger('Failed to add type')
+			}
+		}
+		catch (err) {
+			console.log(err)
+			toaster.danger('Failed to add type')
+		}
+	}
 
 	const handleClose = () => {
 		setOpen(false);
 	}
 
-	const formValidation = () => {
-		if (name.trim().length > 3 && typeCode.trim().length == 3) {
-			return false;
+	const _validateForm = () => {
+		if (name.trim().length > 3 && typeCode.trim().length == 2) return false;
+		else return true;
+	}
+
+	const changePage = (type) => {
+		if (type === 'next') {
+			setPage(page + 1)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}}`
+			console.log(filter)
+		}
+		else if (type === 'prev') {
+			setPage(page + 1)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}}`
+			console.log(filter)
 		}
 		else {
-			return true;
+			setPage(type)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}}`
+			console.log(filter)
 		}
 	}
 
@@ -91,14 +156,19 @@ const Types = () => {
 						)
 					})}
 				</Table.Body>
-				<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
-					<Pagination page={1} totalPages={5}></Pagination>
-				</div>
+				<Paginator
+					page={page}
+					total={totalData}
+					limit={pageLimit}
+					prev={(e) => changePage('prev')}
+					next={(e) => changePage('next')}
+					pageChange={(e) => changePage(e)}
+				/>
 			</Table>
 			<Dialog isShown={open} onCloseComplete={handleClose}
 				title="Add Type"
 				confirmLabel="Save Type"
-				isConfirmDisabled={formValidation()}
+				isConfirmDisabled={_validateForm()}
 				onConfirm={createType}
 			>
 				<form>
