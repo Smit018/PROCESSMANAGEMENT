@@ -6,6 +6,7 @@ import { baseUrl, get, post } from '../../services/https.service';
 import { DateFormat } from '../../services/dateFormat';
 import { Table } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui';
+import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import USERIMG from "../../assets/images/userImgs.png";
 import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
@@ -161,16 +162,21 @@ const Employee = () => {
 				<Table.Body height={height - 300}>
 					{employeeData.map((item, index) => {
 						return (
+							<Link to={item.id}>
 							<Table.Row key={index}>
+								
 								<Table.TextCell className="tableB-Color">{showMemberImage(item.profile)}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{DateFormat(item.doj)}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.doe || "-"}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{(item.doe)?DateFormat(item.doe) : "-"}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
+								
 							</Table.Row>
+							</Link>
+							
 						)
 					})}
 				</Table.Body>

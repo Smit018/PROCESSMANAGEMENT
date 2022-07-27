@@ -31,6 +31,8 @@ import Vendors from './screens/Vendors/Vendors';
 import WhatsappGroup from './screens/WhatsappGroup/WhatsappGroup';
 import ProcessDetails from './screens/Process/ProcessDetails';
 import WhatsappDetails from './screens/WhatsappGroup/WhatsappDetails';
+import EmployeeDetails from './screens/Employee/EmployeeDetails';
+import VendorDetails from './screens/Vendors/VendorDetails';
 
 
 function App() {
@@ -49,7 +51,9 @@ function App() {
 							<Route path="processes" exact element={<Process />} />
 							<Route path="processes/:id" element={<ProcessDetails />} />
 							<Route path="employees" element={<Employee />} />
+							<Route path="employees/:id" element={<EmployeeDetails />} />
 							<Route path="vendors" element={<Vendors />} />
+							<Route path="vendors/:id" element={<VendorDetails />} />
 							<Route path="whatsapp-groups" element={<WhatsappGroup />} />
 							<Route path="whatsapp-groups/:id" element={<WhatsappDetails />} />
 							<Route path="documents" element={<Documents />} />
