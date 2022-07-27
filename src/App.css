@@ -21,6 +21,13 @@ img.img-20{
   border-radius: 50px;
 }
 
+img.circleC1{
+  /* background-color: #c9c9c9; */
+  width: 60px;
+  height: 60px;
+  border-radius: 50px;
+}
+
 img.img-201{
   width:25px
 }
@@ -59,4 +66,8 @@ img.img-201{
 
 .backCol-WH{
   background-color: rgba(51, 102, 255, 0.05);
+}
+
+.pointer-Mouse{
+  cursor: pointer;
 }

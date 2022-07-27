@@ -10,6 +10,7 @@ import { TextInputField } from 'evergreen-ui';
 import USERIMG from "../../assets/images/userImgs.png";
 import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
 import AddMember from '../../dialogs/AddMember/AddMember';
+import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import TopBar from '../../components/TopBar/TopBar';
 
 const Vendors = () => {
@@ -144,6 +145,7 @@ const Vendors = () => {
 				<Table.Body height={innerHeight - 300}>
 					{employeeData.map((item, index) => {
 						return (
+							<Link to={item.id}>
 							<Table.Row key={index.toString()}>
 								<Table.TextCell className="tableB-Color">{getImage(item?.profile) ? <img src={USERIMG} className="img-20" /> : <img className="img-20" src={`${baseUrl}photos/vendor/download/${item.profile}}`} />}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
@@ -154,8 +156,10 @@ const Vendors = () => {
 								<Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
 								<Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
 							</Table.Row>
+							</Link>
 						)
 					})}
+				
 				</Table.Body>
 				<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
 					<Pagination page={1} totalPages={5}></Pagination>
