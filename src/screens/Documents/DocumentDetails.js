@@ -1,77 +1,75 @@
 import React, { useState, useEffect, useRef }from 'react';
 import PropTypes from 'prop-types';
-import './WhatsappGroup.css';
 import { post, get } from '../../services/https.service';
 import { Link, useLocation } from 'react-router-dom';
-import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon } from "evergreen-ui";
+import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon,CrossIcon, ChevronRightIcon } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
 import USERIMG from "../../assets/images/userImgs.png";
 import { baseUrl } from '../../services/https.service';
 
-const WhatsappDetails = () =>{
+const DocumentDetails = () =>{
     const pathArray = window.location.pathname.split('/');
     let saveObj = useRef();
     const id = pathArray[3]
     const [members,setMembers] = useState([]);
     const [newMembers,setNewMembers] = useState([])
-    const [whatsappDetail, setWhatsappDetail] = useState({});
+    const [documentDetail, setDocumentDetail] = useState({});
     const [search, setSearch] = useState('');
     const [suggestmember, setSuggestMember] = useState([]);
-    const [whatsappInputSources, setWhatsappInputSources] = useState([]);
-    const [whatsappOutputSources, setWhatsappOutputSources] = useState([]);
+    const [documentInputSources, setDocumentInputSources] = useState([]);
+    const [documentOutputSources, setDocumentOutputSources] = useState([]);
 
     useEffect(()=>{
-        getWhatsappMembers(id);
-        getWhatsappDetail()
+        getDocumentMembers(id);
+        getDocumentDetail()
 
         getInputSources()
         
-    },[0]);
+    },[0])
 
     const getInputSources = ()=>{
-        let obj={name:"OPVNXKA",description:"Uploading youtube video for APT Study Students"};
-        let arr=[]
-    for(let i=0;i<4;i++){
-        arr.push(obj)
-    };
-    setWhatsappInputSources(arr);
-    setWhatsappOutputSources(arr);
-}
+            let obj={name:"OPVNXKA",description:"Uploading youtube video for APT Study Students"};
+            let arr=[]
+        for(let i=0;i<4;i++){
+            arr.push(obj)
+        };
+        setDocumentInputSources(arr);
+        setDocumentOutputSources(arr);
+    }
 
-    const getWhatsappDetail = async()=>{
-        const whatsap = await get(`whatsappGroups/${id}`);
-        if(whatsap.statusCode>=200 && whatsap.statusCode<300){
-            console.log(whatsap.data)
-            setWhatsappDetail(whatsap.data);
+    const getDocumentDetail = async()=>{
+        const saveDoc = await get(`documents/${id}`);
+        if(saveDoc.statusCode>=200 && saveDoc.statusCode<300){
+            console.log(saveDoc.data)
+            setDocumentDetail(saveDoc.data);
         }else{
-            console.log('Fetch Whatsapp member')
+            console.log('Fetch Document member')
         }
     }
 
-    const getWhatsappMembers = async()=>{
-        // const whatsap = await get(`whatsappGroups/${id}/whatsappMember`);
-        const whatsap = await get(`whatsappMembers?filter={"where":{"whatsappGroupId":"${id}"},"include":"member"}`)
-        if(whatsap.statusCode>=200 && whatsap.statusCode<300){
-            let memberData = whatsap.data;
+    const getDocumentMembers = async()=>{
+        // const saveDoc = await get(`documents/${id}/documentMember`);
+        const saveDoc = await get(`documentMembers?filter={"where":{"documentId":"${id}"},"include":"member"}`)
+        if(saveDoc.statusCode>=200 && saveDoc.statusCode<300){
+            let memberData = saveDoc.data;
             memberData = memberData.map(e=>{return{...e.member,admin:e.admin}})
-            console.log(whatsap.data)
             setMembers(memberData);
         }else{
-            console.log('Fetch Whatsapp member')
+            console.log('Fetch Document member')
         }
     }
 
-    const addMembersToWhatsapp = async()=>{
+    const addMembersToDocument = async()=>{
         if(newMembers.length>0){
-            let addMember = newMembers.map(e=>{return{...e,whatsappGroupId:id}});
-            const whatsap = await post(`whatsappMembers`,addMember);
-                if(whatsap.statusCode>=200 && whatsap.statusCode<300){
-                    console.log("Members added to Whatsapp group");
-                    getWhatsappMembers();
+            let addMember = newMembers.map(e=>{return{...e,documentId:id}});
+            const saveDoc = await post(`documentMembers`,addMember);
+                if(saveDoc.statusCode>=200 && saveDoc.statusCode<300){
+                    console.log("Members added to Document group");
+                    getDocumentMembers();
                 }else{
-                    console.log('Fetch Whatsapp member')
+                    console.log('Fetch Document member')
                 }
         }
         setSuggestMember([]);
@@ -82,18 +80,17 @@ const WhatsappDetails = () =>{
     const getSearchQueryMember = async(text)=>{
         let alreadyMember = members.map(e=>e.id);
         let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
-        const whatsap = await get(filter);
-        if(whatsap.statusCode>=200 && whatsap.statusCode<300){
-            console.log("Fetch suggested Members",whatsap.data);
-            let dataMember = [...whatsap.data];
+        const saveDoc = await get(filter);
+        if(saveDoc.statusCode>=200 && saveDoc.statusCode<300){
+            console.log("Fetch suggested Members",saveDoc.data);
+            let dataMember = [...saveDoc.data];
             dataMember = dataMember.filter((e)=>!alreadyMember.includes(e.id))
             dataMember.forEach(element => {
                 element={...element,selected:false,admin:false}
             });
-            console.log(dataMember)
             setSuggestMember(dataMember);
         }else{
-            console.log('Fetch Whatsapp member')
+            console.log('Fetch Document member')
         }
     }
 
@@ -156,26 +153,26 @@ const WhatsappDetails = () =>{
     }
 
     const handleBlur =(event)=>{
-        addMembersToWhatsapp()
+        addMembersToDocument()
     }
 
     return(
         <div>
             <div className='flex justify-between items-center'>
                 <div>
-                    <span className='m-label'> Whatsapp Group </span>
+                    <span className='m-label'> Documents </span>
                     <span style={{margin:"0 10px"}}>/</span>
-                    <span className='m-label'> {whatsappDetail.name} </span>
+                    <span className='m-label'> {documentDetail.name} </span>
                 </div>
             </div>
             <Pane width="100%" height="30vh" className='my-7 backCol-WH p-10' elevation={2}>
                 <div className='flex justify-between '>
                     <div className='flex flex-col '>
                         <div className='text-2xl '>
-                            {whatsappDetail.name}
+                            {documentDetail.name}
                         </div>
                         <div className='pb-10'>
-                            {whatsappDetail.link}
+                            {documentDetail.link}
                         </div>
                         
                     </div>
@@ -224,7 +221,7 @@ const WhatsappDetails = () =>{
                 <span className='pr-2'>MEMBERS</span><span className='pr-2'>/</span><span>OWNERS</span>
             </div> */}
 
-            <div className='py-10'>
+<div className='py-10'>
                 <div className='flex justify-between items-center mb-6'>
                     <div className='text-xl'>MEMBERS</div>
                     <div className='search-bar flex mr-4'>
@@ -258,7 +255,7 @@ const WhatsappDetails = () =>{
                 })}
             </div>
 
-            <div className='sm:w-full lg:w-1/2 bg-white search'>
+            <div className='sm:w-full lg:w-1/2 bg-white search pb-10'>
                 <TextInputField className='border-2' value={search} onChange={e=>{setSearch(e.target.value);getSearchQueryMember(e.target.value)}} />
                 <Pane style={{overflowY:"auto",maxHeight:"250px"}} onMouseLeave={(e=>handleBlur())} >
                 {suggestmember.map((item,index)=>{
@@ -293,7 +290,7 @@ const WhatsappDetails = () =>{
                 
             </div>
 
-            <div className='py-10'>
+            <div className='pb-10'>
                 <div className='flex justify-between items-center mb-6'>
                     <div className='text-xl'>INPUT SOURCES</div>
                     <div className='search-bar flex mr-4'>
@@ -305,7 +302,7 @@ const WhatsappDetails = () =>{
 				        </div>
 			        </div>
                 </div>
-                {whatsappInputSources.map((item,index)=>{
+                {documentInputSources.map((item,index)=>{
                     return(
                         <Pane className='flex justify-between items-center px-8 py-4 bg-slate-100 pb-1/2' elevation={3}>
                             <div className='flex flex-col'>
@@ -332,7 +329,7 @@ const WhatsappDetails = () =>{
 				        </div>
 			        </div>
                 </div>
-                {whatsappInputSources.map((item,index)=>{
+                {documentInputSources.map((item,index)=>{
                     return(
                         <Pane className='flex justify-between items-center px-8 py-4 bg-slate-100 pb-1/2' elevation={3}>
                             <div className='flex flex-col'>
@@ -347,10 +344,9 @@ const WhatsappDetails = () =>{
                 })}
             </div>
 
-
         </div>
     )
 
 }
 
-export default WhatsappDetails
+export default DocumentDetails

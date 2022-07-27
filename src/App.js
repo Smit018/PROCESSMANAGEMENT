@@ -22,6 +22,7 @@ import Dashboard from './screens/Dashboard/Dashboard';
 import Process from './screens/Process/Process';
 import Departments from './screens/Departments/Departments';
 import Documents from './screens/Documents/Documents';
+import DocumentDetails from './screens/Documents/DocumentDetails';
 import Employee from './screens/Employee/Employee';
 import Members from './screens/Members/Members';
 import ProcessMatrix from './screens/ProcessMatrix/ProcessMatrix';
@@ -52,6 +53,7 @@ function App() {
 							<Route path="whatsapp-groups" element={<WhatsappGroup />} />
 							<Route path="whatsapp-groups/:id" element={<WhatsappDetails />} />
 							<Route path="documents" element={<Documents />} />
+							<Route path="documents/:id" element={<DocumentDetails />} />
 							<Route path="department" element={<Departments />} />
 							<Route path="type" element={<Types />} />
 							<Route path="process-matrix" element={<ProcessMatrix />} />

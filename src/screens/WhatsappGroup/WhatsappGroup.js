@@ -59,7 +59,7 @@ const WhatsappGroup = () => {
     <div>
       <div className='flex justify-between items-center m-label'>
         <div>
-          <span> Types </span>
+          <span> Whatsapp Group </span>
         </div>
         <div className='flex justify-between items-center'>
 
@@ -84,27 +84,6 @@ const WhatsappGroup = () => {
           Add Whatsapp
         </Button>
       </div>
-
-      {/* <Table aria-label="simple table">
-        <Table.Head>
-
-          <Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
-          <Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
-          <Table.TextHeaderCell className="th-c">Link</Table.TextHeaderCell>
-
-        </Table.Head>
-        <Table.Body>
-          {documentData.map((item, index) => {
-            return (
-              <Table.Row>
-                <Table.TextCell className="tb-c">{index + 1}</Table.TextCell>
-                <Table.TextCell className="tb-c">{item.name}</Table.TextCell>
-                <Table.TextCell className="tb-c"><Link to={item.link}>{'See File'}</Link></Table.TextCell>
-              </Table.Row>
-            )
-          })}
-        </Table.Body>
-      </Table> */}
       
       {whatsappData.map((item,index)=>{
         return(
