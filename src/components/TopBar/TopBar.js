@@ -57,7 +57,7 @@ const TopBar = (props) => {
 
 	const downloadButton = () => {
 		return (
-			<button className='top-btn mr-4'>
+			<button className='top-btn mr-4' onClick={() => props.onDownload()}>
 				<span className="b-label l-blue">Download CSV</span>
 				<span className='b-icon'>
 					<DownloadIcon />

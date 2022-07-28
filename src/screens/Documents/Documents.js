@@ -41,14 +41,10 @@ const Documents = () => {
 		{ path: '/admin/documents', title: 'Documents' }
 	]
 
+
 	useEffect(() => {
 		fetchDocuments()
 	}, [])
-
-
-	useEffect(() => {
-		fetchDocuments()
-	}, [url])
 
 
 
@@ -68,21 +64,27 @@ const Documents = () => {
 	}
 
 	const documentUrl = (filters) => {
-		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}`
-		const include = (filters && filters.where) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
-		const order = (filters && filters.where) ? filters.order : `"order": "createdAt DESC"`
+		console.log(filters)
+		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
 		const _url = `documents?filter={${where}, ${order}, ${include}}`
-		console.log(_url)
 		setUrl(_url)
-		return _url
+		if(filters) {
+			fetchDocuments(_url)
+		}
+		else return _url 
 	}
 
 	const fetchDocuments = async (filter) => {
 		setDocumentData(null)
 		try {
-			const count = await fetchCount()
-			setTotalData(count)
+			if(!filter) {
+				const count = await fetchCount()
+				setTotalData(count)
+			}
 			const _url = filter || documentUrl()
+			console.log(_url)
 			const response = await get(_url)
 			if (response.statusCode >= 200 && response.statusCode < 300) {
 				setDocumentData(response.data)
@@ -163,11 +165,11 @@ const Documents = () => {
 	}
 
 	const changePage = (type) => {
-		const filter = {}
+		const filter = {where: '', include: '', order: ''}
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}}`
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			documentUrl(filter)
 		}
 		else if (type === 'prev') {
@@ -184,14 +186,22 @@ const Documents = () => {
 	}
 
 	const _filterDocuments = () => {
-		console.log(filterData)
-		const _filter = `, "createdAt": {"between": [${new Date(filterData.from)}, ${new Date(filterData.to)}]}`
+		const filter = {where: '', include: '', order: ''}
+		const _dateFilter = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}`
+		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+		documentUrl(filter)
+		setTotalData(1)
 		setFilterDialog(false)
 	}
 
 	const openFilterDialog = (value) => {
 		setFilterDialog(value)
 	}
+
+
+	const donwloadCsv = () => {
+		console.log('Download csv here')
+	} 
 
 	return (
 		<div className='h-full w-full'>
@@ -202,11 +212,13 @@ const Documents = () => {
 				addTitle="Add Document"
 				addEv={() => setOpen(true)}
 				csv="true"
+				onDownload={() => donwloadCsv()}
 				filter="true"
 				onFilter={() => openFilterDialog(true)}
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
+			<br></br>
 			<br></br>
 			{!documentData ? showSpinner() : documentData.length === 0 ? showEmpty() : showContent()}
 			<br></br>
