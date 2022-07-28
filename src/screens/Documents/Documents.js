@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import styles from './Documents.module.css';
+import './Documents.css';
 
 import { post, get } from '../../services/https.service';
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
