@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { post, get } from '../../services/https.service';
+import { post, get,patch,deleted } from '../../services/https.service';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Avatar, Button, Heading, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, toaster } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -35,10 +35,11 @@ const DocumentDetails = () => {
     ]
 
     useEffect(() => {
-        fetchMembers()
-        getDocumentMembers(id);
+        // fetchMembers()
+        getDocumentMembers();
         getDocumentDetail()
         getInputSources()
+        
     }, [0])
 
 
@@ -87,16 +88,18 @@ const DocumentDetails = () => {
         const saveDoc = await get(`documentMembers?filter={"where":{"documentId":"${id}"},"include":"member"}`)
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             let memberData = saveDoc.data;
-            memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
+            // memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
             setMembers(memberData);
+            getSearchQueryMember('',memberData)
         } else {
             console.log('Fetch Document member')
         }
     }
 
-    const addMembersToDocument = async () => {
-        if (newMembers.length > 0) {
-            let addMember = newMembers.map(e => { return { ...e, documentId: id } });
+    const addMembersToDocument = async (mem) => {
+        
+            // let addMember = newMembers.map(e => { return { ...e, documentId: id } });
+            let addMember = { memberId:mem.id, documentId: id };
             const saveDoc = await post(`documentMembers`, addMember);
             if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
                 console.log("Members added to Document group");
@@ -104,26 +107,27 @@ const DocumentDetails = () => {
             } else {
                 console.log('Fetch Document member')
             }
-        }
+        
         setSuggestMember([]);
         setNewMembers([]);
         console.log('Check')
     }
 
-    const getSearchQueryMember = async (text) => {
-        let alreadyMember = members.map(e => e.id);
+    const getSearchQueryMember = async (text,memberList) => {
+        let alreadyMember = memberList.map(e => e.member.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const saveDoc = await get(filter);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log("Fetch suggested Members", saveDoc.data);
             let dataMember = [...saveDoc.data];
             dataMember = dataMember.filter((e) => !alreadyMember.includes(e.id))
-            dataMember.forEach(element => {
-                element = { ...element, selected: false, admin: false }
-            });
+            // dataMember.forEach(element => {
+            //     element = { ...element, selected: false, admin: false }
+            // });
+            console.log('Fetch Document member')
             setSuggestMember(dataMember);
         } else {
-            console.log('Fetch Document member')
+            
         }
     }
 
@@ -185,6 +189,14 @@ const DocumentDetails = () => {
 
     }
 
+    const ToggleAdmin = async(id,admin)=>{
+        const toggleAdmin = await patch(`documentMembers/${id}`,{admin:admin});
+        if(toggleAdmin.statusCode>=200 && toggleAdmin.statusCode<300){
+            console.log('Tog');
+            getDocumentMembers();
+        }
+    }
+
 
     const addMemeber = (member) => {
         const _member = members
@@ -193,8 +205,16 @@ const DocumentDetails = () => {
         console.log(newMember)
     }
 
-    const removeMember = (member) => {
+    const removeMember = async(deleteId) => {
         // REMOVE FROM THE LIST
+
+        const removeMember = await deleted(`documentMembers/${deleteId}`);
+        if (removeMember.statusCode >= 200 && removeMember.statusCode < 300) {
+            console.log('Member Deleted');
+            getDocumentMembers();
+        }else{
+            console.log('Failed to remove Members')
+        }
     }
 
 
@@ -217,7 +237,9 @@ const DocumentDetails = () => {
 
     const autoItem = (item) => {
         return (
-            <span key={item.children.name} onClick={() => { setCurrMember(item.children); addMemeber(item.children) }}>
+            <span key={item.children.name} onClick={() => {
+                //  setCurrMember(item.children); addMemeber(item.children) 
+                addMembersToDocument(item.children);}}>
                 <AvatarList
                     avatar={ImageURL}
                     name={item.children.name}
@@ -264,7 +286,7 @@ const DocumentDetails = () => {
                             height={50}
                             placeholder={myProps.placeholder}
                             onFocus={openMenu}
-                            onChange={(e) => myProps.inputChange(e)}
+                            onChange={(e) => {myProps.inputChange(e);getSearchQueryMember(e.target.value,members)}}
                             {...getInputProps()}
                         />
                     </Pane>
@@ -307,7 +329,7 @@ const DocumentDetails = () => {
                     </div>
                     <div className='w-3/4 flex justify-around items-center'>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{members.length}</Heading>
                             <Heading size={400}>Members</Heading>
                         </div>
                         <div>
@@ -329,14 +351,18 @@ const DocumentDetails = () => {
                 />
                 {members.length === 0 ? showEmpty() : members.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/members`}>
+                        <Link key={item.id} to={`/admin/${(item?.member.memberType=='EMPLOYEE')?'employees':'vendors'}/${item.member.id}`}>
                             <MemberList
-                                name={item.name}
-                                designation={!item.admin ? (item.employeeCode + ', ' + item.designation) : ''}
+                                name={item.member.name}
+                                designation={!item.admin ? (item.member.employeeCode + ', ' + item.member.designation) : ''}
                                 type={item.admin ? 'Owner' : 'Member'}
                                 showSwitch={true}
-                                swithChange={(ev) => console.log(ev)}
-                                onClose={() => removeMember(item)}
+                                admin={item.admin}
+                                switchChange={(ev) => {
+                                    // console.log(ev)
+                                    ToggleAdmin(item.id,!item.admin)
+                                }}
+                                onClose={() => removeMember(item.id)}
                             />
                         </Link>
                     )

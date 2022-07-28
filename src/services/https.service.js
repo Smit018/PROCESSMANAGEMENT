@@ -33,6 +33,28 @@ export const post = async (url, data) => {
     }
 }
 
+export const patch = async (url, data) => {
+    try {
+        const res = await axios.patch(baseUrl + url, data)
+        return { statusCode: res.status, data: res.data };
+    }
+    catch (e) {
+        console.log(e)
+        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+    }
+}
+
+export const deleted = async (url) => {
+    try {
+        const res = await axios.delete(baseUrl + url)
+        return { statusCode: res.status, data: res.data };
+    }
+    catch (e) {
+        console.log(e)
+        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+    }
+}
+
 
 export const get = async (url) => {
     try {

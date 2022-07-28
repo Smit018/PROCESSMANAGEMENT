@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './WhatsappGroup.css';
-import { post, get } from '../../services/https.service';
+import { post, get, patch, deleted } from '../../services/https.service';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, PeopleIcon, toaster, Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -12,6 +12,7 @@ import { baseUrl } from '../../services/https.service';
 import TopBar from '../../components/TopBar/TopBar';
 import { AvatarList, MemberList, ProcessList } from '../../components/AvatarList/AvatarList';
 import { showEmpty } from '../../components/GlobalComponent';
+import { getSuggestedQuery } from '@testing-library/react';
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 const WhatsappDetails = () => {
@@ -36,10 +37,11 @@ const WhatsappDetails = () => {
 
 
     useEffect(() => {
-        fetchMembers()
-        getWhatsappMembers(id);
+        // fetchMembers()
+        getWhatsappMembers();
         getWhatsappDetail()
         getInputSources()
+        // getSearchQueryMember('')
     }, [0]);
 
 
@@ -89,17 +91,19 @@ const WhatsappDetails = () => {
         const whatsap = await get(`whatsappMembers?filter={"where":{"whatsappGroupId":"${id}"},"include":"member"}`)
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             let memberData = whatsap.data;
-            memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
+            // memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
             console.log(whatsap.data)
             setMembers(memberData);
+            getSearchQueryMember('',whatsap.data)
         } else {
             console.log('Fetch Whatsapp member')
         }
     }
 
-    const addMembersToWhatsapp = async () => {
-        if (newMembers.length > 0) {
-            let addMember = newMembers.map(e => { return { ...e, whatsappGroupId: id } });
+    const addMembersToWhatsapp = async (mem) => {
+            console.log(mem)
+            // let addMember = newMembers.map(e => { return { ...e, whatsappGroupId: id } });
+            let addMember ={whatsappGroupId: id, memberId:mem.id}
             const whatsap = await post(`whatsappMembers`, addMember);
             if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
                 console.log("Members added to Whatsapp group");
@@ -107,24 +111,31 @@ const WhatsappDetails = () => {
             } else {
                 console.log('Fetch Whatsapp member')
             }
-        }
-        setSuggestMember([]);
-        setNewMembers([]);
+        // setSuggestMember([]);
+        // setNewMembers([]);
         console.log('Check')
     }
 
-    const getSearchQueryMember = async (text) => {
-        let alreadyMember = members.map(e => e.id);
+    const ToggleAdmin = async(id,admin)=>{
+        const toggleAdmin = await patch(`whatsappMembers/${id}`,{admin:admin});
+        if(toggleAdmin.statusCode>=200 && toggleAdmin.statusCode<300){
+            console.log('Tog');
+            getWhatsappMembers();
+        }
+    }
+
+    const getSearchQueryMember = async (text,memberList) => {
+        let alreadyMember = memberList.map(e => e.member.id);
+    
         // let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
-            console.log("Fetch suggested Members", whatsap.data);
+            // console.log("Fetch suggested Members", whatsap.data);
             let dataMember = [...whatsap.data];
+            let filtered=[]
+            console.log(alreadyMember)
             dataMember = dataMember.filter((e) => !alreadyMember.includes(e.id))
-            dataMember.forEach(element => {
-                element = { ...element, selected: false, admin: false }
-            });
             console.log(dataMember)
             setSuggestMember(dataMember);
         } else {
@@ -200,8 +211,16 @@ const WhatsappDetails = () => {
         setMembers(_member)
     }
 
-    const removeMember = (member) => {
+    const removeMember = async(deleteId) => {
         // REMOVE FROM THE LIST
+        const removeMember = await deleted(`whatsappMembers/${deleteId}`);
+        if (removeMember.statusCode >= 200 && removeMember.statusCode < 300) {
+            console.log('Member Deleted');
+            getWhatsappMembers();
+        }else{
+            console.log('Failed to remove Members')
+        }
+
     }
 
     const HeaderSection = (myProps) => {
@@ -223,7 +242,10 @@ const WhatsappDetails = () => {
 
     const autoItem = (item) => {
         return (
-            <span key={item.children.name} onClick={() => { setCurrMember(item.children); addMemeber(item.children) }}>
+            <span key={item.children.name} onClick={() => { 
+                // setCurrMember(item.children); addMemeber(item.children) 
+                addMembersToWhatsapp(item.children)
+                }}>
                 <AvatarList
                     avatar={ImageURL}
                     name={item.children.name}
@@ -236,6 +258,7 @@ const WhatsappDetails = () => {
     }
 
     const filterAutoComplete = (items, text) => {
+        console.log(items,text)
         return items.filter(item => {
             return item.name.toLowerCase().includes(text)
         })
@@ -251,7 +274,9 @@ const WhatsappDetails = () => {
                 renderItem={(item, index) => autoItem(item)}
                 itemSize={75}
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
-                onInputValueChange={changedItem => console.log(changedItem)}
+                onInputValueChange={changedItem => {console.log(changedItem);
+                    
+                }}
             >
                 {({
                     key,
@@ -270,7 +295,7 @@ const WhatsappDetails = () => {
                             height={50}
                             placeholder={myProps.placeholder}
                             onFocus={openMenu}
-                            onChange={(e) => myProps.inputChange(e)}
+                            onChange={(e) =>{ myProps.inputChange(e);getSearchQueryMember(e.target.value,members)}}
                             {...getInputProps()}
                         />
                     </Pane>
@@ -308,7 +333,7 @@ const WhatsappDetails = () => {
                     </div>
                     <div className='w-3/4 flex justify-around items-center'>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{members.length}</Heading>
                             <Heading size={400}>Members</Heading>
                         </div>
                         <div>
@@ -330,14 +355,15 @@ const WhatsappDetails = () => {
                 />
                 {members.length === 0 ? showEmpty() : members.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/members`}>
+                        <Link key={item.id} to={`/admin/${(item?.member.memberType=='EMPLOYEE')?'employees':'vendors'}/${item.member.id}`}>
                             <MemberList
-                                name={item.name}
-                                designation={!item.admin ? (item.employeeCode + ', ' + item.designation) : ''}
+                                name={item.member.name}
+                                designation={!item.admin ? (item.member.employeeCode + ', ' + item.member.designation) : ''}
                                 type={item.admin ? 'Owner' : 'Member'}
+                                admin={item.admin}
                                 showSwitch={true}
-                                swithChange={(ev) => console.log(ev)}
-                                onClose={() => removeMember(item)}
+                                switchChange={(ev) => ToggleAdmin(item.id,!item.admin)}
+                                onClose={() => removeMember(item.id)}
                             />
                         </Link>
                     )
@@ -347,7 +373,7 @@ const WhatsappDetails = () => {
                         datasource={suggestmember}
                         placeholder="Add Member"
                         value={newMember}
-                        inputChange={(e) => setNewMember(e.target.value)}
+                        inputChange={(e) => {setNewMember(e.target.value)}}
                     />
                 </div>
             </div>

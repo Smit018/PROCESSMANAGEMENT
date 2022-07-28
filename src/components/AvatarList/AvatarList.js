@@ -93,7 +93,7 @@ const MemberList = (props) => {
             <div className='flex justify-end items-center'>
                 <div className='flex bottom-1 right-6'>
                     <Text size={300} marginRight={10}>admin</Text>
-                    <Switch height={16} checked onClick={(ev) => ev.preventDefault()} onChange={(ev) => {ev.preventDefault(); props.switchChange(ev)}} />
+                    <Switch height={16} checked={props.admin} onClick={(ev) => ev.preventDefault()} onClickCapture={(ev) => {props.switchChange(ev);ev.preventDefault(); }} />
                 </div>
                 &nbsp;
                 &nbsp;
