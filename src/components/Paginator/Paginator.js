@@ -6,6 +6,7 @@ import { Pagination } from 'evergreen-ui'
 const Paginator = (props) => {
     const _pages = parseInt(props.total)/parseInt(props.limit)
     const totalPages = _pages > Math.floor(_pages) ? Math.floor(_pages) + 1 : Math.floor(_pages)
+    console.log(props)
     return (
         <div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
             <Pagination

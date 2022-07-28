@@ -23,14 +23,18 @@ let allDocuments = []
 
 const Documents = () => {
 	const [search, setSearch] = useState('');
+	const [url, setUrl] = useState('');
 	const [name, setName] = useState('');
 	const [link, setLink] = useState('');
 	const [documentData, setDocumentData] = useState(null);
 	const [open, setOpen] = useState(false);
 	const [addMembers, setAddMembers] = useState([])
+	const [filterDialog, setFilterDialog] = useState(false)
+	const [filterData, setFilterData] = useState({})
+
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(3);
+	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
 
 	const paths = [
@@ -39,7 +43,13 @@ const Documents = () => {
 
 	useEffect(() => {
 		fetchDocuments()
-	}, []);
+	}, [])
+
+
+	useEffect(() => {
+		fetchDocuments()
+	}, [url])
+
 
 
 	const fetchCount = () => {
@@ -57,11 +67,23 @@ const Documents = () => {
 		})
 	}
 
+	const documentUrl = (filters) => {
+		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}`
+		const include = (filters && filters.where) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const order = (filters && filters.where) ? filters.order : `"order": "createdAt DESC"`
+		const _url = `documents?filter={${where}, ${order}, ${include}}`
+		console.log(_url)
+		setUrl(_url)
+		return _url
+	}
+
 	const fetchDocuments = async (filter) => {
+		setDocumentData(null)
 		try {
-			const documentMembers = `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
-			const url = `documents?filter={"where": {"deleted": {"neq": true}}, "order": "createdAt DESC", ${documentMembers}}`
-			const response = await get(url)
+			const count = await fetchCount()
+			setTotalData(count)
+			const _url = filter || documentUrl()
+			const response = await get(_url)
 			if (response.statusCode >= 200 && response.statusCode < 300) {
 				setDocumentData(response.data)
 				allDocuments = [...response.data]
@@ -82,8 +104,6 @@ const Documents = () => {
 		try {
 			let newDoc = { name: name.trim(), link: link.trim() };
 			let saveDoc = await post('documents', newDoc);
-			const count = await fetchCount()
-			setTotalData(count)
 			if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
 				toaster.success('Document added successfully!')
 				fetchDocuments();
@@ -143,24 +163,34 @@ const Documents = () => {
 	}
 
 	const changePage = (type) => {
-		const documentMembers = `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const filter = {}
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
-			fetchDocuments(filter)
+			filter.where = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}}`
+			documentUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
-			fetchDocuments(filter)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			documentUrl(filter)
 		}
 		else {
 			setPage(type)
-			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
-			fetchDocuments(filter)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			documentUrl(filter)
 		}
+	}
+
+	const _filterDocuments = () => {
+		console.log(filterData)
+		const _filter = `, "createdAt": {"between": [${new Date(filterData.from)}, ${new Date(filterData.to)}]}`
+		setFilterDialog(false)
+	}
+
+	const openFilterDialog = (value) => {
+		setFilterDialog(value)
 	}
 
 	return (
@@ -173,6 +203,7 @@ const Documents = () => {
 				addEv={() => setOpen(true)}
 				csv="true"
 				filter="true"
+				onFilter={() => openFilterDialog(true)}
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
@@ -192,6 +223,25 @@ const Documents = () => {
 						<TextInputField size={100} required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
 						<div style={{ margin: "0 10px" }}></div>
 						<TextInputField size={100} required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+					</div>
+				</form>
+			</Dialog>
+
+			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+				title="Filter Documents"
+				width={'50%'}
+				confirmLabel="Filter"
+				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				onConfirm={_filterDocuments}>
+				<form>
+					<div className='flex justify-center items-center w-full'>
+						<div className='w-full'>
+							<TextInputField required label="From" max={new Date()} type="date" value={filterData.from} onChange={(e) => setFilterData({ ...filterData, from: e.target.value })} />
+						</div>
+						<div style={{ margin: "0 10px" }}></div>
+						<div className='w-full'>
+							<TextInputField required label="To" type="date" min={filterData.from} value={filterData.to} onChange={(e) => setFilterData({ ...filterData, to: e.target.value })} />
+						</div>
 					</div>
 				</form>
 			</Dialog>

@@ -46,7 +46,7 @@ const TopBar = (props) => {
 
 	const filterButton = () => {
 		return (
-			<button className='top-btn mr-4'>
+			<button className='top-btn mr-4' onClick={() => props.onFilter()}>
 				<span className="b-label l-blue">Filter</span>
 				<span className='b-icon'>
 					<FilterAltIcon />
