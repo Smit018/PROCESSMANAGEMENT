@@ -115,7 +115,7 @@ const Employee = () => {
 		const source = ImageUrl('employee', img)
 		// alert(source)
 		return (
-			<img className='img-20' src={source} onError={(e) => imageErrHandling(e)} />
+			<img className='circleC1' src={source} onError={(e) => imageErrHandling(e)} />
 		)
 	}
 

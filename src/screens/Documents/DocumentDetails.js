@@ -112,7 +112,7 @@ const DocumentDetails = () => {
 
     const getSearchQueryMember = async (text) => {
         let alreadyMember = members.map(e => e.id);
-        let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const saveDoc = await get(filter);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log("Fetch suggested Members", saveDoc.data);

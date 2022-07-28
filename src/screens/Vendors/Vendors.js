@@ -106,6 +106,22 @@ const Vendors = () => {
 		}
 	}
 
+	const ImageUrl = (container, file) => {
+		return `${baseUrl}photos/${container}/download/${file}`
+	}
+
+	const showMemberImage = (img) => {
+		const source = ImageUrl('vendor', img)
+		// alert(source)
+		return (
+			<img className='circleC1' src={source} onError={(e) => imageErrHandling(e)} />
+		)
+	}
+
+	const imageErrHandling = (e) => {
+		e.target.src = USERIMG
+	}
+
 
 	const paths = [
 		{ path: '/admin/vendors/', title: 'Vendors' }
@@ -147,14 +163,14 @@ const Vendors = () => {
 						return (
 							<Link to={item.id}>
 							<Table.Row key={index.toString()}>
-								<Table.TextCell className="tableB-Color">{getImage(item?.profile) ? <img src={USERIMG} className="img-20" /> : <img className="img-20" src={`${baseUrl}photos/vendor/download/${item.profile}}`} />}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.vendorName}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{DateFormat(item.doj)}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.doe || "-"}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{showMemberImage(item?.profile)}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.name}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.vendorName}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.employeeCode}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{(item.doe)?DateFormat(item.doe) : "-"}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.doe || "-"}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.contactNo}</Table.TextCell>
+								<Table.TextCell className="tableB-Color">{item?.bankDetails}</Table.TextCell>
 							</Table.Row>
 							</Link>
 						)

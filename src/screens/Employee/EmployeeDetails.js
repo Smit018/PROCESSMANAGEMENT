@@ -10,6 +10,17 @@ import USERIMG from "../../assets/images/userImgs.png";
 import { baseUrl } from '../../services/https.service';
 import { WhatsApp } from '@mui/icons-material';
 
+import {
+    Accordion,
+    AccordionItem,
+    AccordionItemHeading,
+    AccordionItemButton,
+    AccordionItemPanel,
+} from 'react-accessible-accordion';
+
+// Demo styles, see 'Styles' section below for some notes on use.
+import 'react-accessible-accordion/dist/fancy-example.css';
+
 export default function EmployeeDetails(){
 
     const [employeeDetail,setEmployeeDetail] = useState({});
@@ -31,13 +42,14 @@ export default function EmployeeDetails(){
 
 
     function getAllProcesses(){
-        let obj={name:"OPHSB3A",description:"Uploading Youtube Video for APT Students",role:"Member",accordian:false,
+        let obj={name:"OPHSB3A",description:"Uploading Youtube Video for APT Students",role:"Member",
                 process:[
                         {name:"Step 2",description:"Add Cases"},
                         {name:"Step 5",description:"Register Case"},
                         {name:"Step 6",description:"Collect Fee"},
                         {name:"Step 10",description:"Welcome Call"},
-                    ]
+                    ],
+                    process1:"Add Cases"
                 };
         let arr=[];
         for(let i=0;i<10;i++){
@@ -85,12 +97,14 @@ export default function EmployeeDetails(){
 	}
 
     const showAccordian = (index,item)=>{
-        console.log(index,item)
-        allProcess.forEach((e)=>{
+        console.log(index,item);
+        let getProcess = [...allProcess]
+        getProcess.forEach((e)=>{
             e.accordian=false
         })
-        allProcess[index].accordian=true;
-        setAllProcess(allProcess)
+        getProcess[index].accordian=true;
+        setAllProcess(getProcess)
+        console.log(allProcess)
     }
 
     return(
@@ -168,10 +182,10 @@ export default function EmployeeDetails(){
 				        </div>
 			        </div>
                 </div>
-                {allProcess.map((item,index)=>{
+                {/* {allProcess.map((item,index)=>{
                     return(
-                        <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
-                        <Pane className='flex justify-between items-center px-10 py-2 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>
+                        <div className='pointer-Mouse' >
+                        <Pane className='flex justify-between items-center px-10 py-2 bg-slate-100' onClick={()=>{showAccordian(index,item)}} style={{borderBottom:"1px solid #66788A"}}>
                             <div className='flex flex-col'>
                                 <div className='text-xl pb-1'>{item?.name}</div>
                                 <div className='text-pri-col text-sm pb-1'>{item?.description}</div>
@@ -181,8 +195,10 @@ export default function EmployeeDetails(){
                                 <ChevronRightIcon/>
                             </div>
                         </Pane>
-                        {(item?.accordian)==true?<>
+                        {(item?.accordian)===true?<>
                             {item?.process.map((item1,index1)=>{
+                                <div>
+                                <div>Hello</div>
                                 <Pane className='flex justify-between  px-10 py-4 bg-slate-100 bg-slate-300' >
                                     <div>
                                         <div className='text-lg pr-2'>{item1?.name}:</div>
@@ -192,11 +208,51 @@ export default function EmployeeDetails(){
                                         <ChevronUpIcon/>
                                     </div>
                             </Pane>
+                            </div>
                             })}
                         </>:null}
                         </div>
                     )
-                })}
+                })} */}
+                <Accordion allowZeroExpanded>
+                    {allProcess.map((item,index) => (
+                    <AccordionItem key={item.id}>
+                        <AccordionItemHeading>
+                            <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-slate-100'>
+                            <div className='flex flex-col'>
+                                <div className='text-xl pb-1'>{item?.name}</div>
+                                <div className='text-pri-col text-sm pb-1'>{item?.description}</div>
+                                <div className='text-pri-col text-sm'>{item?.role}</div>
+                            </div>
+                            <div className='text-lg text-pri-col'>
+                                <ChevronRightIcon/>
+                            </div>
+                            </AccordionItemButton>
+                        </AccordionItemHeading>
+                        <AccordionItemPanel>
+                            <div className='flex items-center justify-between'>
+                                <div className='flex flex-col px-4'>
+
+                                
+                            {item?.process.map((item1,index1)=>{
+                                return(
+                                <div className='flex' >
+                                    
+                                        <div className='text-lg pr-4'>{item1?.name} :</div>
+                                        <div className=' text-lg'>{item1?.description}</div>
+                                    
+                                    
+                            </div>)
+                            })}
+                            </div>
+                            <div>
+                                <ChevronUpIcon/>
+                            </div>
+                            </div>
+                        </AccordionItemPanel>
+                    </AccordionItem>
+                    ))}
+                </Accordion>
             </div>
 
             <div className='py-10'>

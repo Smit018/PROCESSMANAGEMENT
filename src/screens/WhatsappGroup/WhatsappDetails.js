@@ -115,7 +115,8 @@ const WhatsappDetails = () => {
 
     const getSearchQueryMember = async (text) => {
         let alreadyMember = members.map(e => e.id);
-        let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
+        // let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Fetch suggested Members", whatsap.data);

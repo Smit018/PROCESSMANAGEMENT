@@ -8,7 +8,18 @@ import { Pane, Text } from 'evergreen-ui'
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
 import USERIMG from "../../assets/images/userImgs.png";
 import { baseUrl } from '../../services/https.service';
-import { WhatsApp } from '@mui/icons-material';
+
+
+import {
+    Accordion,
+    AccordionItem,
+    AccordionItemHeading,
+    AccordionItemButton,
+    AccordionItemPanel,
+} from 'react-accessible-accordion';
+
+// Demo styles, see 'Styles' section below for some notes on use.
+import 'react-accessible-accordion/dist/fancy-example.css';
 
 export default function VendorDetails(){
 
@@ -73,7 +84,7 @@ export default function VendorDetails(){
 	}
 
 	const showMemberImage = (img) => {
-		const source = ImageUrl('employee', img)
+		const source = ImageUrl('vendor', img)
 		// alert(source)
 		return (
 			<img className='circleC1' src={source} onError={(e) => imageErrHandling(e)} />
@@ -168,10 +179,11 @@ export default function VendorDetails(){
 				        </div>
 			        </div>
                 </div>
-                {allProcess.map((item,index)=>{
-                    return(
-                        <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
-                        <Pane className='flex justify-between items-center px-10 py-2 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>
+                <Accordion allowZeroExpanded>
+                    {allProcess.map((item,index) => (
+                    <AccordionItem key={item.id}>
+                        <AccordionItemHeading>
+                            <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-slate-100'>
                             <div className='flex flex-col'>
                                 <div className='text-xl pb-1'>{item?.name}</div>
                                 <div className='text-pri-col text-sm pb-1'>{item?.description}</div>
@@ -180,23 +192,32 @@ export default function VendorDetails(){
                             <div className='text-lg text-pri-col'>
                                 <ChevronRightIcon/>
                             </div>
-                        </Pane>
-                        {(item?.accordian)==true?<>
+                            </AccordionItemButton>
+                        </AccordionItemHeading>
+                        <AccordionItemPanel>
+                            <div className='flex items-center justify-between'>
+                                <div className='flex flex-col px-4'>
+
+                                
                             {item?.process.map((item1,index1)=>{
-                                <Pane className='flex justify-between  px-10 py-4 bg-slate-100 bg-slate-300' >
-                                    <div>
-                                        <div className='text-lg pr-2'>{item1?.name}:</div>
+                                return(
+                                <div className='flex' >
+                                    
+                                        <div className='text-lg pr-4'>{item1?.name} :</div>
                                         <div className=' text-lg'>{item1?.description}</div>
-                                    </div>
-                                    <div>
-                                        <ChevronUpIcon/>
-                                    </div>
-                            </Pane>
+                                    
+                                    
+                            </div>)
                             })}
-                        </>:null}
-                        </div>
-                    )
-                })}
+                            </div>
+                            <div>
+                                <ChevronUpIcon/>
+                            </div>
+                            </div>
+                        </AccordionItemPanel>
+                    </AccordionItem>
+                    ))}
+                </Accordion>
             </div>
 
             <div className='py-10'>
