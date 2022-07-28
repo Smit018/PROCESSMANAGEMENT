@@ -19,11 +19,11 @@ const Types = () => {
 	const [typeCode, setTypeCode] = useState('');
 	const [typeData, setTypeData] = useState(null);
 	const [open, setOpen] = useState(false);
-	const [search, setSearch] = useState('');
+	// const [search, setSearch] = useState('');
 	const [innerHeight, setInnerHeight] = useState();
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(2);
+	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
 
 
@@ -42,8 +42,7 @@ const Types = () => {
 			try {
 				const count = await get('types/count')
 				if (count.statusCode >= 200 && count.statusCode < 300) {
-					console.log(count)
-					resolve(count.data)
+					resolve(count.data.count)
 				}
 			}
 			catch (err) {
@@ -55,9 +54,10 @@ const Types = () => {
 	const fetchTypes = async (filter) => {
 		// FETCH ALL TYPES FROM THE SERVER
 		try {
-			const url = filter ? `types?filter=${filter}` : 'types?filter={"limit": 2, "skip": 2}'
+			setTypeData(null)
+			const url = filter ? `types?filter=${filter}` : `types?filter={"limit": ${pageLimit}, "skip": 0, "order": "createdAt DESC"}`
 			const allTypes = await get(url)
-			const count  = await fetchCount()
+			const count = await fetchCount()
 			setTotalData(count)
 			if (allTypes.statusCode >= 200 && allTypes.statusCode < 300) {
 				setTypeData(allTypes.data)
@@ -108,19 +108,21 @@ const Types = () => {
 
 	const changePage = (type) => {
 		if (type === 'next') {
-			setPage(page + 1)
-			const filter = `{"limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}}`
-			console.log(filter)
+			const _page = page + 1
+			setPage(_page)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC"}`
+			fetchTypes(filter)
 		}
 		else if (type === 'prev') {
-			setPage(page + 1)
-			const filter = `{"limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}}`
-			console.log(filter)
+			const _page = page - 1
+			setPage(_page)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC"}`
+			fetchTypes(filter)
 		}
 		else {
 			setPage(type)
-			const filter = `{"limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}}`
-			console.log(filter)
+			const filter = `{"limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}, "order": "createdAt DESC"}`
+			fetchTypes(filter)
 		}
 	}
 
@@ -132,10 +134,6 @@ const Types = () => {
 				add={true}
 				addTitle="Add Type"
 				addEv={() => setOpen(true)}
-				csv="true"
-				filter="true"
-				search={search}
-				onSearch={(e) => setSearch(e.target.value)}
 			/>
 			<br></br>
 			<br></br>
@@ -145,11 +143,11 @@ const Types = () => {
 					<Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
 				</Table.Head>
-				<Table.Body height={innerHeight - 350}>
+				<Table.Body height={typeData?.length > 8 ? innerHeight - 350 : 'auto'}>
 					{!typeData ? showSpinner() : typeData.length === 0 ? showEmpty() : typeData.map((item, index) => {
 						return (
 							<Table.Row key={index}>
-								<Table.TextCell className="tb-c">{index + 1}</Table.TextCell>
+								<Table.TextCell className="tb-c">{(index + 1) + (page > 1 ? (page > 2 ? (pageLimit * (page - 1)) : pageLimit) : 0)}</Table.TextCell>
 								<Table.TextCell className="tb-c">{item.name}</Table.TextCell>
 								<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
 							</Table.Row>

@@ -8,7 +8,7 @@ import { DateFormat } from '../../services/dateFormat';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
-import { Table } from 'evergreen-ui'
+import { Table, toaster } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui'
 import { Pane, Dialog, Button, PeopleIcon, DocumentIcon } from 'evergreen-ui'
 import TopBar from "../../components/TopBar/TopBar";
@@ -16,10 +16,12 @@ import TopBar from "../../components/TopBar/TopBar";
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
 import { ListCard } from '../../components/AvatarList/AvatarList';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
+import Paginator from '../../components/Paginator/Paginator';
 
+
+let allDocuments = []
 
 const Documents = () => {
-	const [showForm, setShowForm] = useState(false)
 	const [search, setSearch] = useState('');
 	const [name, setName] = useState('');
 	const [link, setLink] = useState('');
@@ -27,34 +29,74 @@ const Documents = () => {
 	const [open, setOpen] = useState(false);
 	const [addMembers, setAddMembers] = useState([])
 
+	const [page, setPage] = useState(1);
+	const [pageLimit, setPageLimit] = useState(3);
+	const [totalData, setTotalData] = useState(0);
+
 	const paths = [
 		{ path: '/admin/documents', title: 'Documents' }
 	]
 
 	useEffect(() => {
-		getAllDocument()
-	}, [0]);
+		fetchDocuments()
+	}, []);
 
-	const getAllDocument = async () => {
-		const saveDoc = await get("documents");
-		if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
-			let dataFromServer = saveDoc.data;
-			setDocumentData(dataFromServer);
-		} else {
-			alert('Error Document Group')
+
+	const fetchCount = () => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const url = `documents/count?where={"deleted": {"neq": true}}`
+				const count = await get(url)
+				if (count.statusCode >= 200 && count.statusCode < 300) {
+					resolve(count.data.count)
+				}
+			}
+			catch (err) {
+				resolve(err)
+			}
+		})
+	}
+
+	const fetchDocuments = async (filter) => {
+		try {
+			const documentMembers = `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+			const url = `documents?filter={"where": {"deleted": {"neq": true}}, "order": "createdAt DESC", ${documentMembers}}`
+			const response = await get(url)
+			if (response.statusCode >= 200 && response.statusCode < 300) {
+				setDocumentData(response.data)
+				allDocuments = [...response.data]
+			}
+			else {
+				setDocumentData([])
+				toaster.danger('Failed to fetch decuments!')
+			}
+		}
+		catch (err) {
+			console.log(err)
+			setDocumentData([])
+			toaster.danger('Failed to fetch documents!')
 		}
 	}
 
 	const createDocument = async () => {
-		let newDoc = { name: name.trim(), link: link.trim() };
-		let saveDoc = await post('documents', newDoc);
-		if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
-			console.log('Document Saved');
-			getAllDocument();
-		} else {
-			console.log(saveDoc.message)
+		try {
+			let newDoc = { name: name.trim(), link: link.trim() };
+			let saveDoc = await post('documents', newDoc);
+			const count = await fetchCount()
+			setTotalData(count)
+			if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
+				toaster.success('Document added successfully!')
+				fetchDocuments();
+				setOpen(false);
+			} else {
+				console.log(saveDoc.message)
+				toaster.danger('Failed to add document!')
+			}
 		}
-		handleClose();
+		catch (err) {
+			console.log(err)
+			toaster.danger('Failed to add document!')
+		}
 	}
 
 	const handleClose = () => {
@@ -67,18 +109,58 @@ const Documents = () => {
 	}
 
 	const showContent = () => {
-		return documentData.map((item, index) => {
-			return (
-				<Link key={item.id} to={`${item.id}/${item.name}`}>
-					<ListCard
-						icon={<DocumentIcon size={20} color={'#262626'} />}
-						title={item.name}
-						subTitle={DateFormat(item.createdAt, "date-time")}
-						actionText={'42 Members'}
-					/>
-				</Link>
-			)
+		return (
+			<div>
+				{documentData.map((item, index) => {
+					return (
+						<Link key={item.id} to={`${item.id}/${item.name}`}>
+							<ListCard
+								icon={<DocumentIcon size={20} color={'#262626'} />}
+								title={item.name}
+								subTitle={DateFormat(item.createdAt, "date-time")}
+								actionText={`${item?.documentMember?.length} ${item?.documentMember?.length > 1 ? 'Members' : 'Member'}`}
+							/>
+						</Link>
+					)
+				})}
+				<Paginator
+					page={page}
+					total={totalData}
+					limit={pageLimit}
+					prev={(e) => changePage('prev')}
+					next={(e) => changePage('next')}
+					pageChange={(e) => changePage(e)}
+				/>
+			</div>
+		)
+	}
+
+	const onSearchType = (value) => {
+		const _data = allDocuments.filter(doc => {
+			return doc.name.toLowerCase().includes(value?.toLowerCase())
 		})
+		setDocumentData(_data)
+	}
+
+	const changePage = (type) => {
+		const documentMembers = `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		if (type === 'next') {
+			const _page = page + 1
+			setPage(_page)
+			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
+			fetchDocuments(filter)
+		}
+		else if (type === 'prev') {
+			const _page = page - 1
+			setPage(_page)
+			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
+			fetchDocuments(filter)
+		}
+		else {
+			setPage(type)
+			const filter = `{"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}, "order": "createdAt DESC", ${documentMembers}}`
+			fetchDocuments(filter)
+		}
 	}
 
 	return (
@@ -88,15 +170,18 @@ const Documents = () => {
 				breadscrubs={paths}
 				add={true}
 				addTitle="Add Document"
-				addEv={() => setShowForm(true)}
+				addEv={() => setOpen(true)}
 				csv="true"
 				filter="true"
 				search={search}
-				onSearch={(e) => setSearch(e.target.value)}
+				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
 			{!documentData ? showSpinner() : documentData.length === 0 ? showEmpty() : showContent()}
-			<Dialog isShown={showForm} onCloseComplete={handleClose}
+			<br></br>
+			<br></br>
+			<br></br>
+			<Dialog isShown={open} onCloseComplete={handleClose}
 				title="ADD DOCUMENT"
 				width={'50%'}
 				confirmLabel="Save Document"

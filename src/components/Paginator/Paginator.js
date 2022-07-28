@@ -4,12 +4,13 @@ import { Pagination } from 'evergreen-ui'
 
 
 const Paginator = (props) => {
-    const totalPages = Math.floor(parseInt(props.total)/parseInt(props.limit))
+    const _pages = parseInt(props.total)/parseInt(props.limit)
+    const totalPages = _pages > Math.floor(_pages) ? Math.floor(_pages) + 1 : Math.floor(_pages)
     return (
         <div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
             <Pagination
                 page={props.page}
-                totalPages={totalPages}
+                totalPages={totalPages || 1}
                 onPageChange={(e) => props.pageChange(e)}
                 onPreviousPage={(e) => props.prev(e)}
                 onNextPage={(e) => props.next(e)}>
