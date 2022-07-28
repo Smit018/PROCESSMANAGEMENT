@@ -115,5 +115,6 @@ export const REGEX =  {
     PWD: /.{6,}/g,
     NAME: /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/g,
     TITLE: /^[a-zA-Z0-9 ]*$/gm,
-    ALL: /.*/gm
+    // ALL: /.*/gm
+    ALL: /[^\s\\]/
 }

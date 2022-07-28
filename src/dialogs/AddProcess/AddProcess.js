@@ -50,7 +50,7 @@ const _formDefault = {
 	"inputProcess": {
 		value: '',
 		error: false,
-		regex: REGEX.ALL
+		regex: /.*/
 	},
 	"frequency": {
 		value: '',
@@ -80,19 +80,48 @@ const AddProcess = (props) => {
 	const [hours, setHours] = useState('')
 	const [minutes, setMinutes] = useState('')
 	const [loading, setLoading] = React.useState(false);
+	const [pTypeCode,setpTypeCode] = useState('');
+	const [dTypeCode,setdTypeCode] = useState('');
 
 
 	useEffect(() => {
 		console.log(props.data)
-	}, [])
+	}, []);
+
+	const departmentChange = (item,type)=>{
+		let formData ={...formValues};
+		if(type=='department'){
+		setdTypeCode(item.typeCode);
+		
+		formData['departmentId']['value']=item.id;
+		formData['processNumber']['value']=pTypeCode+item.typeCode+props.uniqueNumber;
+		
+		console.log(formData)
+		}
+		else{
+			formData['processOwner']['value']=item.id;
+		}
+		console.log(formData)
+		setFormValues(formData);
+	}
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
+		
 		const { name, value } = e.target;
+		console.log(name)
+		
 		const _formValues = { ...formValues }
-		_formValues[name]['value'] = value
+		_formValues[name]['value'] =value;
+		if(name=="typeId"){
+			let processTypeCode=props.data.types.filter(e=>e.id==value)[0]['typeCode']
+			console.log(processTypeCode);
+			setpTypeCode(processTypeCode);
+			_formValues['processNumber']['value']=processTypeCode+dTypeCode+props.uniqueNumber
+		}
 		setFormValues(_formValues);
 		console.log(_formValues);
+		
 	};
 
 	const handleChange = (e) => {
@@ -117,6 +146,10 @@ const AddProcess = (props) => {
 
 	}
 
+	const validateProcessNumber = (e)=>{
+		props.onVerify(e.target.value)
+	}
+
 	const validateForm = (_form) => {
 		// VALIDATES THE DATA IN FORM
 		return new Promise(resolve => {
@@ -124,6 +157,7 @@ const AddProcess = (props) => {
 			for (let index = 0; index < _formKeys.length; index++) {
 				const _key = _formKeys[index];
 				let pattern = _form[_key]['regex']
+				console.log(_key)
 				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
 				console.log('Key -->', _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
 				if (index === _formKeys.length - 1) resolve(_form)
@@ -157,7 +191,7 @@ const AddProcess = (props) => {
 								{props.data.types.map(_type => {
 									return (
 										<option key={_type.id} value={_type.id}>
-											{_type.name}
+											{_type.name} ({_type.typeCode})
 										</option>
 									)
 								})}
@@ -166,9 +200,9 @@ const AddProcess = (props) => {
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues.departmentId.error ? "Process department is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => console.log(changedItem)}
+								onChange={changedItem => {console.log(changedItem);departmentChange(changedItem,'department')}}
 								items={props.data.departments}
-								itemToString={(item) => { return item ? item.name : '' }}
+								itemToString={(item) => { return item ? `${item.name} (${item.typeCode})` : '' }}
 							>
 								{({
 									key,
@@ -203,7 +237,7 @@ const AddProcess = (props) => {
 								isInvalid={formValues.processNumber.error}
 								value={formValues.processNumber.value}
 								validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}
-								onChange={e => handleInputChange(e)}
+								onChange={e => {handleInputChange(e);}}
 							/>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
@@ -220,7 +254,7 @@ const AddProcess = (props) => {
 					</div>
 					<br></br>
 					<div className="flex">
-						<FormField className='w-full' isRequired label="Input Process" validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}>
+						<FormField className='w-full' label="Input Process" validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}>
 							<Autocomplete
 								onChange={changedItem => console.log(changedItem)}
 								items={props.data.process}
@@ -239,7 +273,7 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="inputProcess"
-											isInvalid={formValues.inputProcess.error}
+											// isInvalid={formValues.inputProcess.error}
 											value={formValues.inputProcess.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
@@ -252,7 +286,7 @@ const AddProcess = (props) => {
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => console.log(changedItem)}
+								onChange={changedItem => {console.log(changedItem);departmentChange(changedItem,'owner')}}
 								items={props.data.members}
 								itemToString={(item) => { return item ? item.name : '' }}
 							>

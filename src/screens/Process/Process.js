@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { get } from '../../services/https.service';
+import { get, post } from '../../services/https.service';
 import { useNavigate, Outlet } from "react-router-dom";
 
 import { SearchInput, Table, Pagination } from 'evergreen-ui';
@@ -17,7 +17,8 @@ const Process = () => {
 	const [types, setTypes] = useState([])
 	const [departments, setDept] = useState([])
 	const [members, setMembers] = useState([])
-	const [process, setProcess] = useState([])
+	const [process, setProcess] = useState([]);
+	const [uniqueNumber, setUniqueNumber] = useState(1);
 
 	useEffect(() => {
 		setScreenHeight(window.innerHeight)
@@ -50,7 +51,7 @@ const Process = () => {
 	}
 
 	const fetchMembers = async () => {
-		const response = await get('members?filter={"where": {"memberType": "employee"}}')
+		const response = await get('members?filter={"where": {"memberType": "EMPLOYEE"}}')
 		if (response) {
 			if (response.statusCode == 200) {
 				setMembers(response.data)
@@ -69,6 +70,24 @@ const Process = () => {
 		}
 	}
 
+	const saveProcess = async (form)=>{
+		console.log(form)
+		let process={};
+		for(let i in form){
+			process[`${i}`]=form[i].value.trim();
+		}
+		if(process['inputProcess']==""){
+			delete process.inputProcess
+		}
+		process['duration'] = `${process['hours']}:${process['hours']}`;
+		const processSave = await post("processes",process);
+		if(processSave.statusCode>=200 && processSave.statusCode<300){
+			console.log('process Save');
+		}
+
+		console.log(process)
+	}
+
 	// let showForm = true
 	const _setShowForm = (data) => {
 		setShowForm(data)
@@ -77,6 +96,15 @@ const Process = () => {
 	const paths = [
 		{ path: '/admin/processes/', title: 'Processes' }
 	]
+
+	const verifyProcessNumber = async(e)=>{
+		const check = await get(`processes?filter={"where":{"processNumber":"${e}"}}`);
+		if(check.statusCode>=200 && check.statusCode<300){
+			if(check.data.length>0){
+				setUniqueNumber(uniqueNumber+1);
+			}
+		}
+	}
 
 	const nestedTableHead = (columns) => {
 		return (
@@ -128,7 +156,7 @@ const Process = () => {
 					</div>
 				</Table>
 				<div>
-					<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { console.log(form) }} />
+					<AddProcess open={showForm} data={{ types, members, departments, process }} uniqueNumber={uniqueNumber} onVerify={(e)=>{verifyProcessNumber(e)}} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
 				</div>
 			</div>
 		)
