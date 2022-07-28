@@ -5,13 +5,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import "../Employee/Employee.css";
 import { baseUrl, get, post } from '../../services/https.service';
 import { DateFormat } from '../../services/dateFormat';
-import { Table } from 'evergreen-ui'
+import { Table, toaster } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui';
 import USERIMG from "../../assets/images/userImgs.png";
 import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
 import AddMember from '../../dialogs/AddMember/AddMember';
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import TopBar from '../../components/TopBar/TopBar';
+import { showEmpty, showSpinner } from '../../components/GlobalComponent';
+import Paginator from '../../components/Paginator/Paginator';
+
+let allData = []
 
 const Vendors = () => {
 
@@ -24,7 +28,16 @@ const Vendors = () => {
 	const [employeeData, setEmployeeData] = useState([]);
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
+	const [url, setUrl] = useState('');
+
+	const [page, setPage] = useState(1);
+	const [pageLimit, setPageLimit] = useState(10);
+	const [totalData, setTotalData] = useState(0);
+
 	let imageHandler = useRef(null);
+
+
+
 
 	const createVendor = async () => {
 		let imgToServer, saveEmp;
@@ -46,41 +59,90 @@ const Vendors = () => {
 
 	useEffect(() => {
 		setHeight(window.innerHeight)
-		getAllVendors()
-		// setEmployeeData();
-	}, [0]);
+		fetchVendors()
+	}, []);
 
-	const getAllVendors = async () => {
-		const employ = await get('members?filter={"where":{"memberType":"VENDOR"}}');
-		console.log(employ)
-		if (employ.statusCode >= 200 && employ.statusCode < 300) {
-			setEmployeeData(employ.data);
+	const fetchCount = () => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const url = `members/count?where={"memberType":"VENDOR", "deleted": {"neq": true}}`
+				const count = await get(url)
+				if (count.statusCode >= 200 && count.statusCode < 300) {
+					resolve(count.data.count)
+				}
+			}
+			catch (err) {
+				resolve(err)
+			}
+		})
+	}
+
+	const vendorUrl = (filters) => {
+		console.log(filters)
+		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
+		const _url = `members?filter={${where}, ${order}, ${include}}`
+		setUrl(_url)
+		if (filters) {
+			fetchVendors(_url)
+		}
+		else return _url
+	}
+
+
+	const fetchVendors = async (filter) => {
+		setEmployeeData(null)
+		try {
+			if (filter) {
+				const count = await fetchCount()
+				setTotalData(count)
+			}
+			const _url = filter || vendorUrl()
+			const employ = await get(_url);
+			console.log(employ)
+			if (employ.statusCode >= 200 && employ.statusCode < 300) {
+				setEmployeeData(employ.data);
+				allData = employ.data
+			}
+			else {
+				setEmployeeData([])
+				toaster.danger('Failed to fetch vendors!')
+			}
+		}
+		catch (err) {
+			setEmployeeData([])
+			toaster.danger('Failed to fetch vendors!')
 		}
 	}
 
-	const handleClose = () => {
-		setOpen(false);
+
+	const onSearchType = (value) => {
+		const _data = allData.filter(vendor => {
+			return vendor.name.toLowerCase().includes(value?.toLowerCase())
+		})
+		setEmployeeData(_data)
 	}
 
-	const formValidation = () => {
+	const _upload = async (file) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let _formdata = new FormData()
+				_formdata.append('file', file)
+				const _img = await post(`photos/vendor/upload`, _formdata)
+				if(_img.data) {
+					resolve(image.data.result.files.file[0].name)
+				}
+				else reject({ err: 'Failed to upload image!' })
+			}
+			catch(err) {
+				reject(err)
+			}
+		})
 	}
 
-	const removeImage = (e) => {
-		e.stopPropagation();
-		setImgPresent(false);
-		setImage(null)
-	}
-
-	const handleImage = async (e) => {
-		// UploadImage(e.target.files[0]);
-		setSaveImage(e.target.files[0]);
-		setImage(URL.createObjectURL(e.target.files[0]))
-		setImgPresent(true);
-
-	}
 
 	const UploadImage = async (file) => {
-
 		let formData = new FormData();
 		formData.append('file', file)
 		const image = await post("photos/vendor/upload", formData)
@@ -127,13 +189,46 @@ const Vendors = () => {
 		{ path: '/admin/vendors/', title: 'Vendors' }
 	]
 
-	const validateForm = (_form) => {
+	const validateForm = async (_form) => {
 		console.log(_form)
 		setShowForm(false)
+		let body = _form
+		body.profile = _form.image ? await _upload(_form.image) : ''
+		body = { ...body,  memberType: "VENDOR", userName: _form.email }
+		const response = await post('members', body);
+		if(response.statusCode >= 200 && response.statusCode < 300) {
+			toaster.success('Vendor added successfully!')
+			setShowForm(false)
+			fetchVendors();
+		}
+		else {
+			toaster.danger('Failed to add vendor!')
+		}
+	
+	}
+
+	const changePage = (type) => {
+		const filter = { where: '', include: '', order: '' }
+		if (type === 'next') {
+			const _page = page + 1
+			setPage(_page)
+			filter.where = `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			vendorUrl(filter)
+		}
+		else if (type === 'prev') {
+			const _page = page - 1
+			setPage(_page)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			vendorUrl(filter)
+		}
+		else {
+			setPage(type)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			vendorUrl(filter)
+		}
 	}
 
 	return (
-
 		<div className='w-full h-full'>
 			<TopBar
 				title="Vendors"
@@ -144,7 +239,7 @@ const Vendors = () => {
 				csv="true"
 				filter="true"
 				search={search}
-				onSearch={(e) => setSearch(e.target.value)}
+				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value)}}
 			/>
 			<br></br>
 			<Table aria-label="simple table">
@@ -158,28 +253,32 @@ const Vendors = () => {
 					<Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
 				</Table.Head>
-				<Table.Body height={innerHeight - 300}>
-					{employeeData.map((item, index) => {
+				<Table.Body height={employeeData?.length > 10 ? innerHeight - 300 : 'auto'}>
+					{!employeeData ? showSpinner() : employeeData?.length === 0 ? showEmpty() : employeeData.map((item, index) => {
 						return (
-							<Link to={item.id}>
-							<Table.Row key={index.toString()}>
-								<Table.TextCell className="tableB-Color">{showMemberImage(item?.profile)}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.name}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.vendorName}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.employeeCode}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{(item.doe)?DateFormat(item.doe) : "-"}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.doe || "-"}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.contactNo}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item?.bankDetails}</Table.TextCell>
-							</Table.Row>
+							<Link key={index} to={item.id}>
+								<Table.Row key={index.toString()}>
+									<Table.TextCell className="tableB-Color">{showMemberImage(item?.profile)}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.name}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.vendorName}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.employeeCode}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{(item.doe) ? DateFormat(item.doe) : "-"}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.doe || "-"}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.contactNo}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.bankDetails}</Table.TextCell>
+								</Table.Row>
 							</Link>
 						)
 					})}
-				
 				</Table.Body>
-				<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
-					<Pagination page={1} totalPages={5}></Pagination>
-				</div>
+				<Paginator
+					page={page}
+					total={totalData}
+					limit={pageLimit}
+					prev={(e) => changePage('prev')}
+					next={(e) => changePage('next')}
+					pageChange={(e) => changePage(e)}
+				/>
 			</Table>
 			<AddMember
 				open={showForm}
@@ -187,58 +286,6 @@ const Vendors = () => {
 				onSubmit={(formData) => { validateForm(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
-			{/* <Dialog isShown={open} onCloseComplete={handleClose}
-				title="Add vendor"
-				confirmLabel="Save vendor"
-				isConfirmDisabled={formValidation()}
-				onConfirm={createVendor}
-			>
-				<form className='employee'>
-					<div className='flex flex-col justify-center items-center'>
-						<div className="flex-col flex justify-center items-center pol" style={{ position: "relative", cursor: "pointer" }} onClick={() => { console.log(imageHandler); imageHandler.current.click() }}>
-							{!imgPresent ? <>
-								<SmallPlusIcon size={21} style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "black", borderRadius: "30px" }} />
-								<UserIcon size={90} />
-							</> :
-								<>
-									<SmallCrossIcon style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "black", borderRadius: "30px" }} onClick={removeImage} />
-									<img src={image} className="pol" onClick={(e) => e.stopPropagation()} />
-								</>}
-						</div>
-						<TextInputField accept='image/*' ref={imageHandler} type="file" onChange={(e) => handleImage(e)} />
-					</div>
-					<TextInputField required label="Name" value={vendor.name} onChange={(e) => setVendor({ ...vendor, name: e.target.value })} />
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Email" value={vendor.email} onChange={(e) => setVendor({ ...vendor, email: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Password" type="password" value={vendor.password} onChange={(e) => setVendor({ ...vendor, password: e.target.value })} />
-					</div>
-
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Vendor Name" value={vendor.vendorName} onChange={(e) => setVendor({ ...vendor, vendorName: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Vendor Code" value={vendor.employeeCode} onChange={(e) => setVendor({ ...vendor, employeeCode: e.target.value })} />
-					</div>
-
-					<div className='flex justify-center items-center doe-doj' >
-						<TextInputField size={100} type="date" required label="Date Of Joining" value={vendor.doj} onChange={(e) => setVendor({ ...vendor, doj: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} type="date" label="Date Of Exit" value={vendor.doe} onChange={(e) => setVendor({ ...vendor, doe: e.target.value })} />
-					</div>
-
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Contact Number" value={vendor.contactNo} onChange={(e) => setVendor({ ...vendor, contactNo: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Bank Details" value={vendor.bankDetails} onChange={(e) => setVendor({ ...vendor, bankDetails: e.target.value })} />
-					</div>
-
-
-
-
-
-				</form>
-
-			</Dialog> */}
 		</div>
 
 	)

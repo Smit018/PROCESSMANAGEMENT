@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { post, get,patch,deleted } from '../../services/https.service';
+import { post, get, patch, deleted } from '../../services/https.service';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Avatar, Button, Heading, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, toaster } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -11,9 +11,13 @@ import { baseUrl } from '../../services/https.service';
 import TopBar from '../../components/TopBar/TopBar';
 import { AvatarList, MemberList, ProcessList } from '../../components/AvatarList/AvatarList';
 import { showEmpty } from '../../components/GlobalComponent';
+import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
+import DocDialog from '../../dialogs/DocDialog/DocDialog';
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
+
+let initData;
 
 const DocumentDetails = () => {
     const params = useParams()
@@ -29,6 +33,10 @@ const DocumentDetails = () => {
     const [newMember, setNewMember] = useState([])
     const [currMember, setCurrMember] = useState([])
 
+    const [openDelete, setOpenDelete] = useState(false)
+    const [openEdit, setOpenEdit] = useState(false)
+
+
     const paths = [
         { path: '/admin/documents', title: 'Documents' },
         { path: `/admin/documents/${params.id}/${params.name}`, title: params?.name }
@@ -39,7 +47,7 @@ const DocumentDetails = () => {
         getDocumentMembers();
         getDocumentDetail()
         getInputSources()
-        
+
     }, [0])
 
 
@@ -63,6 +71,26 @@ const DocumentDetails = () => {
         }
     }
 
+
+    const updateDocument = async (body) => {
+        if (body.name && body.link) {
+            try {
+                const _body = { name: body.name, link: body.link }
+                const response = await patch(`documents/${id}`, _body)
+                if (response && response.statusCode == 200) {
+                    toaster.success('Document updated successfully!')
+                    getDocumentDetail()
+                }
+            }
+            catch (err) {
+                console.log(err)
+                toaster.danger('Unable to update the document!')
+            }
+        }
+        else toaster.danger('Please fill valid details')
+    }
+
+
     const getInputSources = () => {
         let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
         let arr = []
@@ -77,6 +105,7 @@ const DocumentDetails = () => {
         const saveDoc = await get(`documents/${id}`);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log(saveDoc.data)
+            initData = saveDoc.data
             setDocumentDetail(saveDoc.data);
         } else {
             console.log('Fetch Document member')
@@ -90,30 +119,30 @@ const DocumentDetails = () => {
             let memberData = saveDoc.data;
             // memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
             setMembers(memberData);
-            getSearchQueryMember('',memberData)
+            getSearchQueryMember('', memberData)
         } else {
             console.log('Fetch Document member')
         }
     }
 
     const addMembersToDocument = async (mem) => {
-        
-            // let addMember = newMembers.map(e => { return { ...e, documentId: id } });
-            let addMember = { memberId:mem.id, documentId: id };
-            const saveDoc = await post(`documentMembers`, addMember);
-            if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
-                console.log("Members added to Document group");
-                getDocumentMembers();
-            } else {
-                console.log('Fetch Document member')
-            }
-        
+
+        // let addMember = newMembers.map(e => { return { ...e, documentId: id } });
+        let addMember = { memberId: mem.id, documentId: id };
+        const saveDoc = await post(`documentMembers`, addMember);
+        if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
+            console.log("Members added to Document group");
+            getDocumentMembers();
+        } else {
+            console.log('Fetch Document member')
+        }
+
         setSuggestMember([]);
         setNewMembers([]);
         console.log('Check')
     }
 
-    const getSearchQueryMember = async (text,memberList) => {
+    const getSearchQueryMember = async (text, memberList) => {
         let alreadyMember = memberList.map(e => e.member.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const saveDoc = await get(filter);
@@ -127,7 +156,7 @@ const DocumentDetails = () => {
             console.log('Fetch Document member')
             setSuggestMember(dataMember);
         } else {
-            
+
         }
     }
 
@@ -189,9 +218,9 @@ const DocumentDetails = () => {
 
     }
 
-    const ToggleAdmin = async(id,admin)=>{
-        const toggleAdmin = await patch(`documentMembers/${id}`,{admin:admin});
-        if(toggleAdmin.statusCode>=200 && toggleAdmin.statusCode<300){
+    const ToggleAdmin = async (id, admin) => {
+        const toggleAdmin = await patch(`documentMembers/${id}`, { admin: admin });
+        if (toggleAdmin.statusCode >= 200 && toggleAdmin.statusCode < 300) {
             console.log('Tog');
             getDocumentMembers();
         }
@@ -205,14 +234,14 @@ const DocumentDetails = () => {
         console.log(newMember)
     }
 
-    const removeMember = async(deleteId) => {
+    const removeMember = async (deleteId) => {
         // REMOVE FROM THE LIST
 
         const removeMember = await deleted(`documentMembers/${deleteId}`);
         if (removeMember.statusCode >= 200 && removeMember.statusCode < 300) {
             console.log('Member Deleted');
             getDocumentMembers();
-        }else{
+        } else {
             console.log('Failed to remove Members')
         }
     }
@@ -239,7 +268,8 @@ const DocumentDetails = () => {
         return (
             <span key={item.children.name} onClick={() => {
                 //  setCurrMember(item.children); addMemeber(item.children) 
-                addMembersToDocument(item.children);}}>
+                addMembersToDocument(item.children);
+            }}>
                 <AvatarList
                     avatar={ImageURL}
                     name={item.children.name}
@@ -286,7 +316,7 @@ const DocumentDetails = () => {
                             height={50}
                             placeholder={myProps.placeholder}
                             onFocus={openMenu}
-                            onChange={(e) => {myProps.inputChange(e);getSearchQueryMember(e.target.value,members)}}
+                            onChange={(e) => { myProps.inputChange(e); getSearchQueryMember(e.target.value, members) }}
                             {...getInputProps()}
                         />
                     </Pane>
@@ -314,9 +344,9 @@ const DocumentDetails = () => {
                         </Heading>
                     </div>
                     <div>
-                        <Button color="red">Delete</Button>
+                        <Button color="red" onClick={() => setOpenDelete(true)}>Delete</Button>
                         &nbsp;&nbsp;
-                        <Button appearance="primary">Edit</Button>
+                        <Button appearance="primary" onClick={() => setOpenEdit(true)}>Edit</Button>
                     </div>
                 </div>
                 <div className='flex flex-wrap items-center px-4 py-5'>
@@ -351,7 +381,7 @@ const DocumentDetails = () => {
                 />
                 {members.length === 0 ? showEmpty() : members.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/${(item?.member.memberType=='EMPLOYEE')?'employees':'vendors'}/${item.member.id}`}>
+                        <Link key={item.id} to={`/admin/${(item?.member.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member.id}`}>
                             <MemberList
                                 name={item.member.name}
                                 designation={!item.admin ? (item.member.employeeCode + ', ' + item.member.designation) : ''}
@@ -360,7 +390,7 @@ const DocumentDetails = () => {
                                 admin={item.admin}
                                 switchChange={(ev) => {
                                     // console.log(ev)
-                                    ToggleAdmin(item.id,!item.admin)
+                                    ToggleAdmin(item.id, !item.admin)
                                 }}
                                 onClose={() => removeMember(item.id)}
                             />
@@ -410,6 +440,21 @@ const DocumentDetails = () => {
                     )
                 })}
             </div>
+            <PromptDialog
+                open={openDelete}
+                title={`Delete Document!`}
+                onClose={() => setOpenDelete(false)}
+                onConfirm={() => setOpenDelete(false)}
+                message={`Do you really want to delete document ${params.name}?`}
+            />
+            <DocDialog
+                open={openEdit}
+                title={`Update Document`}
+                onClose={() => { setOpenEdit(false); setDocumentDetail(initData) }}
+                onConfirm={() => { updateDocument(documentDetail); setOpenEdit(false) }}
+                inject={documentDetail}
+                onChange={(e) => { e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link }) }}
+            />
         </div>
     )
 }

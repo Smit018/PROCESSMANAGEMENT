@@ -8,9 +8,14 @@ import { Table } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui';
 import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import USERIMG from "../../assets/images/userImgs.png";
-import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination } from 'evergreen-ui'
+import { Pane, Dialog, Button, MediaIcon, SmallPlusIcon, UserIcon, SmallCrossIcon, Pagination, toaster } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
 import AddMember from '../../dialogs/AddMember/AddMember';
+import { showEmpty, showSpinner } from '../../components/GlobalComponent';
+import Paginator from '../../components/Paginator/Paginator';
+
+
+let allData = []
 
 const Employee = () => {
 	const [showForm, setShowForm] = useState(false)
@@ -22,6 +27,13 @@ const Employee = () => {
 	const [search, setSearch] = useState('');
 	const [saveImage, setSaveImage] = useState();
 	const [height, setHeight] = useState(0);
+
+	const [url, setUrl] = useState('');
+
+	const [page, setPage] = useState(1);
+	const [pageLimit, setPageLimit] = useState(3);
+	const [totalData, setTotalData] = useState(0);
+
 	let imageHandler = useRef(null);
 
 	const createEmployee = async () => {
@@ -37,7 +49,7 @@ const Employee = () => {
 		if (saveType.statusCode >= 200 && saveType.statusCode < 300) {
 			handleClose()
 			console.log("Employee added");
-			getAllEmpoloyees();
+			fetchAllEmployees();
 
 		} else {
 			console.log(saveType.message)
@@ -47,16 +59,69 @@ const Employee = () => {
 
 	useEffect(() => {
 		setHeight(window.innerHeight)
-		getAllEmpoloyees()
+		fetchAllEmployees()
 		// setEmployeeData();
 	}, [0]);
 
-	const getAllEmpoloyees = async () => {
-		const employ = await get('members?filter={"where":{"memberType":"EMPLOYEE"}}');
-		console.log(employ)
-		if (employ.statusCode >= 200 && employ.statusCode < 300) {
-			setEmployeeData(employ.data);
+	const fetchCount = () => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const url = `members/count?where={"memberType":"EMPLOYEE", "deleted": {"neq": true}}`
+				const count = await get(url)
+				if (count.statusCode >= 200 && count.statusCode < 300) {
+					resolve(count.data.count)
+				}
+			}
+			catch (err) {
+				resolve(err)
+			}
+		})
+	}
+
+	const fetchAllEmployees = async (filter) => {
+		setEmployeeData(null)
+		try {
+			if (!filter) {
+				const count = await fetchCount()
+				setTotalData(count)
+			}
+			const _url = filter || employeeUrl()
+			console.log(_url)
+			const employ = await get(_url);
+			console.log(employ)
+			if (employ.statusCode >= 200 && employ.statusCode < 300) {
+				setEmployeeData(employ.data);
+				allData = employ.data
+			}
+			else {
+				setEmployeeData([])
+				toaster.danger('Failed to fetch vendors!')
+			}
 		}
+		catch (err) {
+			setEmployeeData([])
+			toaster.danger('Failed to fetch vendors!')
+		}
+	}
+
+	const employeeUrl = (filters) => {
+		console.log(filters)
+		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
+		const _url = `members?filter={${where}, ${order}, ${include}}`
+		setUrl(_url)
+		if (filters) {
+			fetchAllEmployees(_url)
+		}
+		else return _url
+	}
+
+	const onSearchType = (value) => {
+		const _data = allData.filter(employee => {
+			return employee.name.toLowerCase().includes(value?.toLowerCase())
+		})
+		setEmployeeData(_data)
 	}
 
 	const handleClose = () => {
@@ -133,6 +198,28 @@ const Employee = () => {
 		setShowForm(false)
 	}
 
+
+	const changePage = (type) => {
+		const filter = { where: '', include: '', order: '' }
+		if (type === 'next') {
+			const _page = page + 1
+			setPage(_page)
+			filter.where = `"where": {"memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			employeeUrl(filter)
+		}
+		else if (type === 'prev') {
+			const _page = page - 1
+			setPage(_page)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			employeeUrl(filter)
+		}
+		else {
+			setPage(type)
+			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			employeeUrl(filter)
+		}
+	}
+
 	return (
 		<div className="w-full h-full">
 			<TopBar
@@ -144,7 +231,7 @@ const Employee = () => {
 				csv="true"
 				filter="true"
 				search={search}
-				onSearch={(e) => setSearch(e.target.value)}
+				onSearch={(e) => {setSearch(e.target.value); onSearchType(e.target.value)}}
 			/>
 			<br></br>
 			<Table aria-label="simple table">
@@ -159,30 +246,32 @@ const Employee = () => {
 					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
 
 				</Table.Head>
-				<Table.Body height={height - 300}>
-					{employeeData.map((item, index) => {
+				<Table.Body height={employeeData?.length > 10 ? (height - 300) : 'auto'}>
+					{!employeeData ? showSpinner() : employeeData?.length === 0 ? showEmpty() : employeeData.map((item, index) => {
 						return (
-							<Link to={item.id}>
-							<Table.Row key={index}>
-								
-								<Table.TextCell className="tableB-Color">{showMemberImage(item.profile)}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{DateFormat(item.doj)}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{(item.doe)?DateFormat(item.doe) : "-"}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
-								<Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
-								
-							</Table.Row>
+							<Link key={item.id} to={item.id}>
+								<Table.Row key={index}>
+									<Table.TextCell className="tableB-Color">{showMemberImage(item.profile)}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item.name}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item.designation}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item.employeeCode}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{DateFormat(item.doj)}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{(item.doe) ? DateFormat(item.doe) : "-"}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item.contactNo}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item.bankDetails}</Table.TextCell>
+								</Table.Row>
 							</Link>
-							
 						)
 					})}
 				</Table.Body>
-				<div className='py-2 flex justify-end bg-white border-t h-16 items-center'>
-					<Pagination page={1} totalPages={5}></Pagination>
-				</div>
+				<Paginator
+					page={page}
+					total={totalData}
+					limit={pageLimit}
+					prev={(e) => changePage('prev')}
+					next={(e) => changePage('next')}
+					pageChange={(e) => changePage(e)}
+				/>
 			</Table>
 			<AddMember
 				open={showForm}
@@ -190,93 +279,7 @@ const Employee = () => {
 				onSubmit={(formData) => { validateForm(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
-			{/* <Dialog isShown={open} onCloseComplete={handleClose}
-				title="Add Employee"
-				confirmLabel="Save Employee"
-				isConfirmDisabled={formValidation()}
-				onConfirm={createEmployee}
-			>
-				<form className='employee'>
-					<div className='flex flex-col justify-center items-center'>
-						<div className="flex-col flex justify-center items-center pol" style={{ position: "relative", cursor: "pointer" }} onClick={() => { console.log(imageHandler); imageHandler.current.click() }}>
-							{!imgPresent ? <>
-								<SmallPlusIcon size={21} style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "black", borderRadius: "30px" }} />
-								<UserIcon size={90} />
-							</> :
-								<>
-									<SmallCrossIcon style={{ position: "absolute", top: 0, right: 0, color: "white", backgroundColor: "black", borderRadius: "30px" }} onClick={removeImage} />
-									<img src={image} className="pol" onClick={(e) => e.stopPropagation()} />
-								</>}
-						</div>
-						<TextInputField accept='image/*' ref={imageHandler} type="file" onChange={(e) => handleImage(e)} />
-					</div>
-					<TextInputField required label="Name" value={employee.name} onChange={(e) => setEmployee({ ...employee, name: e.target.value })} />
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Email" value={employee.email} onChange={(e) => setEmployee({ ...employee, email: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Password" type="password" value={employee.password} onChange={(e) => setEmployee({ ...employee, password: e.target.value })} />
-					</div>
-
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Designation" value={employee.designation} onChange={(e) => setEmployee({ ...employee, designation: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Employee Code" value={employee.employeeCode} onChange={(e) => setEmployee({ ...employee, employeeCode: e.target.value })} />
-					</div>
-
-					<div className='w-full flex justify-center items-center doe-doj' >
-						<div className='w-full'>
-							<TextInputField size={100} type="date" required label="Date Of Joining" value={employee.doj} onChange={(e) => setEmployee({ ...employee, doj: e.target.value })} />
-						</div>
-						<div style={{ margin: "0 10px" }}></div>
-						<div className='w-full'>
-							<TextInputField size={100} type="date" label="Date Of Exit" value={employee.doe} onChange={(e) => setEmployee({ ...employee, doe: e.target.value })} />
-						</div>
-					</div>
-
-					<div className='flex justify-center items-center'>
-						<TextInputField size={100} required label="Contact Number" value={employee.contactNo} onChange={(e) => setEmployee({ ...employee, contactNo: e.target.value })} />
-						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Bank Details" value={employee.bankDetails} onChange={(e) => setEmployee({ ...employee, bankDetails: e.target.value })} />
-					</div>
-				</form>
-
-			</Dialog> */}
 		</div>
-
-		// <div className={styles.Employee}>
-		// <div>
-		// 	<div className='flex justify-between items-center'>
-		// 		<div>
-		// 			<span className='m-label'> Employees </span>
-		// 		</div>
-		// 		<div className='flex justify-between items-center'>
-
-		// 			<span>
-		// 				<span className='m-label'>Filter By</span>
-		// 				{/* <span>?</span> */}
-		// 			</span>
-
-		// 			<span style={{ margin: '0 20px' }}></span>
-
-		// 			<span>
-		// 				<span className='m-label'>Download CSV</span>
-		// 				{/* <span>?</span> */}
-		// 			</span>
-
-
-		// 		</div>
-		// 	</div>
-
-		// 	<div className='flex justify-end' style={{ margin: "20px 0" }}>
-		// 		<Button appearance="primary" onClick={() => setOpen(true)}>
-		// 			Add Employee
-		// 		</Button>
-		// 	</div>
-
-
-
-
-		// </div >
 	)
 };
 

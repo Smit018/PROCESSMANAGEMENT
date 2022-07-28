@@ -108,6 +108,8 @@ const Documents = () => {
 			let saveDoc = await post('documents', newDoc);
 			if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
 				toaster.success('Document added successfully!')
+				setName('')
+				setLink('')
 				fetchDocuments();
 				setOpen(false);
 			} else {
