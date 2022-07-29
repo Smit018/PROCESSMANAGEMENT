@@ -33,6 +33,7 @@ import ProcessDetails from './screens/Process/ProcessDetails';
 import WhatsappDetails from './screens/WhatsappGroup/WhatsappDetails';
 import EmployeeDetails from './screens/Employee/EmployeeDetails';
 import VendorDetails from './screens/Vendors/VendorDetails';
+import ProcessDetails1 from './screens/Process/processDetails1';
 
 
 function App() {
@@ -49,7 +50,8 @@ function App() {
 							<Route path="" element={<Dashboard />} />
 							<Route path="dashboard" element={<Dashboard />} />
 							<Route path="processes" exact element={<Process />} />
-							<Route path="processes/:id" element={<ProcessDetails />} />
+							{/* <Route path="processes/:id" element={<ProcessDetails />} /> */}
+							<Route path="processes/:id" element={<ProcessDetails1 />} />
 							<Route path="employees" element={<Employee />} />
 							<Route path="employees/:id" element={<EmployeeDetails />} />
 							<Route path="vendors" element={<Vendors />} />

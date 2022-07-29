@@ -17,7 +17,7 @@ import { REGEX } from '../../services/https.service';
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import InputAdornment from '@mui/material/InputAdornment';
 // import Autocomplete from '@mui/material/Autocomplete';
-
+import { get, post } from '../../services/https.service';
 
 import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField } from "evergreen-ui";
 
@@ -82,6 +82,7 @@ const AddProcess = (props) => {
 	const [loading, setLoading] = React.useState(false);
 	const [pTypeCode,setpTypeCode] = useState('');
 	const [dTypeCode,setdTypeCode] = useState('');
+	const [uniqueNumber, setUniqueNumber] = useState(1);
 
 
 	useEffect(() => {
@@ -95,7 +96,7 @@ const AddProcess = (props) => {
 		
 		formData['departmentId']['value']=item.id;
 		formData['processNumber']['value']=pTypeCode+item.typeCode+props.uniqueNumber;
-		
+		verifyProcessNumber(pTypeCode+item.typeCode+uniqueNumber);
 		console.log(formData)
 		}
 		else{
@@ -117,7 +118,8 @@ const AddProcess = (props) => {
 			let processTypeCode=props.data.types.filter(e=>e.id==value)[0]['typeCode']
 			console.log(processTypeCode);
 			setpTypeCode(processTypeCode);
-			_formValues['processNumber']['value']=processTypeCode+dTypeCode+props.uniqueNumber
+			_formValues['processNumber']['value']=processTypeCode+dTypeCode+uniqueNumber;
+			verifyProcessNumber(processTypeCode+dTypeCode+uniqueNumber);
 		}
 		setFormValues(_formValues);
 		console.log(_formValues);
@@ -146,8 +148,20 @@ const AddProcess = (props) => {
 
 	}
 
-	const validateProcessNumber = (e)=>{
-		props.onVerify(e.target.value)
+	const verifyProcessNumber = async(e)=>{
+		console.log(e)
+		const check = await get(`processes?filter={"where":{"processNumber":"${e}"}}`);
+		console.log(check)
+		if(check.statusCode>=200 && check.statusCode<300){
+			if(check.data.length>0){
+				let formData = {...formValues};
+
+				formData['processNumber']['value'] = pTypeCode+dTypeCode+uniqueNumber+1;
+				setUniqueNumber(uniqueNumber+1);
+				
+				
+			}
+		}
 	}
 
 	const validateForm = (_form) => {
@@ -237,7 +251,7 @@ const AddProcess = (props) => {
 								isInvalid={formValues.processNumber.error}
 								value={formValues.processNumber.value}
 								validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}
-								onChange={e => {handleInputChange(e);}}
+								onChange={e => {handleInputChange(e);verifyProcessNumber(e.target.value)}}
 							/>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;

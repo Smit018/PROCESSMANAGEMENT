@@ -19,6 +19,7 @@ const Process = () => {
 	const [members, setMembers] = useState([])
 	const [process, setProcess] = useState([]);
 	const [uniqueNumber, setUniqueNumber] = useState(1);
+	const [allProcess, setAllProcess] = useState([]);
 
 	useEffect(() => {
 		setScreenHeight(window.innerHeight)
@@ -26,6 +27,7 @@ const Process = () => {
 		fetchMembers()
 		fetchProcesses()
 		fetchTypes()
+		fetchAllProcess()
 	}, [])
 
 	window.addEventListener('resize', (event) => {
@@ -37,6 +39,17 @@ const Process = () => {
 		if (response) {
 			if (response.statusCode == 200) {
 				setTypes(response.data)
+			}
+		}
+	}
+
+	const fetchAllProcess=async()=>{
+		const response = await get('processes?filter={"include":["processOwner","type","department"]}')
+		// const response = await get('processes')
+		if (response) {
+			console.log(response)
+			if (response.statusCode == 200) {
+				setAllProcess(response.data)
 			}
 		}
 	}
@@ -62,6 +75,7 @@ const Process = () => {
 
 	const fetchProcesses = async () => {
 		const response = await get('processes?filter={"fields": ["id", "processNumber"]}')
+		// const response = await get('processes')
 		if (response) {
 			console.log(response)
 			if (response.statusCode == 200) {
@@ -98,9 +112,12 @@ const Process = () => {
 	]
 
 	const verifyProcessNumber = async(e)=>{
+		console.log(e)
 		const check = await get(`processes?filter={"where":{"processNumber":"${e}"}}`);
+		console.log(check)
 		if(check.statusCode>=200 && check.statusCode<300){
 			if(check.data.length>0){
+				console.log('hjjhb')
 				setUniqueNumber(uniqueNumber+1);
 			}
 		}
@@ -143,11 +160,14 @@ const Process = () => {
 						})}
 					</Table.Head>
 					<Table.Body height={screenHeight - 300}>
-						{profiles.map((profile, index) => (
+						{allProcess.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
-								<Table.TextCell className="tb-c">{profile.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile.lastActivity}</Table.TextCell>
-								<Table.TextCell isNumber className="tb-c">{profile.ltv}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile.processNumber}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile.title}</Table.TextCell>
+								{/* <Table.TextCell isNumber className="tb-c">{profile.ltv}</Table.TextCell> */}
+								<Table.TextCell className="tb-c">{profile?.type?.name}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile?.department?.name}</Table.TextCell>
+								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
 							</Table.Row>
 						))}
 					</Table.Body>
@@ -156,7 +176,7 @@ const Process = () => {
 					</div>
 				</Table>
 				<div>
-					<AddProcess open={showForm} data={{ types, members, departments, process }} uniqueNumber={uniqueNumber} onVerify={(e)=>{verifyProcessNumber(e)}} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
+					<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
 				</div>
 			</div>
 		)
