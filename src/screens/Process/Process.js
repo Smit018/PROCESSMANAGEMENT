@@ -27,6 +27,7 @@ const Process = () => {
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [allProcess, setAllProcess] = useState(null);
 	const [_csvDwn, setCSVDwn] = useState(false);
+	const [csv_data, set_csv_data] = useState([]);
 
 	const [url, setUrl] = useState('');
 
@@ -87,21 +88,30 @@ const Process = () => {
 	}
 
 	const fetchProccesses = async (filter) => {
-		setAllProcess(null)
-		if (!filter) {
-			const count = await fetchCount()
-			setTotalData(count)
-		}
-		const _url = filter || processUrl()
-		console.log(_url)
-		const response = await get(_url)
-		if (response) {
-			console.log(response)
-			if (response.statusCode == 200) {
-				setAllProcess(response.data)
-				allData = response.data
+		try {
+			setAllProcess(null)
+			if (!filter) {
+				const count = await fetchCount()
+				setTotalData(count)
 			}
-			else setAllProcess([])
+			const _url = filter || processUrl()
+			const response = await get(_url)
+			if (response) {
+				if (response.statusCode == 200) {
+					setAllProcess(response.data)
+					allData = response.data
+					if (response.data.length) {
+						const csv = await createCSVData(response.data)
+						set_csv_data(csv)
+					}
+					else set_csv_data([])
+				}
+				else setAllProcess([])
+			}
+		}
+		catch (err) {
+			console.log(err)
+			toaster.danger('Something went wrong!!')
 		}
 	}
 
@@ -135,7 +145,6 @@ const Process = () => {
 		const response = await get('processes?filter={"fields": ["id", "processNumber"]}')
 		// const response = await get('processes')
 		if (response) {
-			console.log(response)
 			if (response.statusCode == 200) {
 				setProcess(response.data)
 			}
@@ -154,7 +163,6 @@ const Process = () => {
 		process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
 		try {
 			const response = await post("processes", process);
-			console.log(response);
 			if (response.statusCode >= 200 && response.statusCode < 300) {
 				toaster.success('Process created successfully!')
 				setShowForm(false)
@@ -166,7 +174,6 @@ const Process = () => {
 			console.log(err)
 			toaster.danger('Failed to create process!')
 		}
-		console.log(process)
 	}
 
 	const changePage = (type) => {
@@ -200,12 +207,9 @@ const Process = () => {
 	]
 
 	const verifyProcessNumber = async (e) => {
-		console.log(e)
 		const check = await get(`processes?filter={"where":{"processNumber":"${e}"}}`);
-		console.log(check)
 		if (check.statusCode >= 200 && check.statusCode < 300) {
 			if (check.data.length > 0) {
-				console.log('hjjhb')
 				setUniqueNumber(uniqueNumber + 1);
 			}
 		}
@@ -217,7 +221,7 @@ const Process = () => {
 				<span className='my-1 className="th-c"'>{columns._value}</span>
 				<div className='flex justify-between'>
 					{columns.value.map((column, index) => {
-						return (<Table.TextHeaderCell  minWidth={column.width} maxWidth={column.width} className="th-c" key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
+						return (<Table.TextHeaderCell minWidth={column.width} maxWidth={column.width} className="th-c" key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
 					})}
 				</div>
 			</div>
@@ -231,41 +235,74 @@ const Process = () => {
 		const doc = row.documentProcess.filter(_row => {
 			return _row.source.toLowerCase() === source.toLowerCase()
 		})
-		console.log(wag, doc)
 		return (
 			<div className='flex justify-between'>
-				<Table.TextCell  minWidth={'50%'} maxWidth={'50%'} className="tb-c">{wag.length > 0 ? `${wag[0]?.whatsappGroup?.name}` : '--'}&nbsp;<span className="primary">{wag.length === 0 ? '' : '+' + (wag.length - 1)}</span></Table.TextCell>
-				<Table.TextCell  minWidth={'50%'} maxWidth={'50%'} className="tb-c">{doc.length > 0 ? `${doc[0]?.document?.name}` : '--'}&nbsp;<span className="primary">{ doc.length === 0 ? '' : '+' + (doc.length - 1)}</span></Table.TextCell>
+				<Table.TextCell minWidth={'50%'} maxWidth={'50%'} className="tb-c">{wag.length > 0 ? `${wag[0]?.whatsappGroup?.name}` : '--'}&nbsp;<span className="primary">{wag.length === 0 ? '' : '+' + (wag.length - 1)}</span></Table.TextCell>
+				<Table.TextCell minWidth={'50%'} maxWidth={'50%'} className="tb-c">{doc.length > 0 ? `${doc[0]?.document?.name}` : '--'}&nbsp;<span className="primary">{doc.length === 0 ? '' : '+' + (doc.length - 1)}</span></Table.TextCell>
 			</div>
 		)
 	}
 
+	const headers = [
+		{ label: "Process Number", key: "processNo" },
+		{ label: "Process Title", key: "title" },
+		{ label: "Type", key: "type" },
+		{ label: "Department", key: "dept" },
+		{ label: "Process Owner", key: "processOwner" },
+		{ label: "Members", key: "members" },
+		{ label: "Input Documents", key: "inputDocuments" },
+		{ label: "Input Whatsapp Group", key: "inputWAGroup" },
+		{ label: "Output Documents", key: "outputDocuments" },
+		{ label: "Output Whatsapp Group", key: "outputWAGroup" },
+		{ label: "Status", key: "status" },
+		{ label: "Time Created", key: "createdAt" },
+	];
+
 	const createCSVData = (data) => {
 		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
-		return new Promise((resolve, reject) => {
-			for (let index = 0; index < data.length; index++) {
-				const _process = data[index];
-				const obj = {
-					processNo: _process.processNumber,
-					title: _process.title,
-					type: `${_process.type?.name} (${_process.type?.typeCode})`,
-					dept: `${_process.department?.name} (${_process.department?.typeCode})`,
-					processOwner: _process.processOwner?.name,
-					members: _process.personProcess?.length,
-					inputDocuments: _process.processNumber,
-					processNo: _process.processNumber,
-					processNo: _process.processNumber,
-					processNo: _process.processNumber,
-					processNo: _process.processNumber,
+		let csvHolder = [];
+		return new Promise(async (resolve, reject) => {
+			try {
+				for (let index = 0; index < data.length; index++) {
+					const _process = data[index];
+					const obj = {
+						processNo: _process.processNumber,
+						title: _process.title,
+						type: `${_process.type?.name} (${_process.type?.typeCode})`,
+						dept: `${_process.department?.name} (${_process.department?.typeCode})`,
+						processOwner: _process.processOwner?.name,
+						members: _process.personProcess?.length,
+						inputDocuments: await differInputOutput(_process.documentProcess, 'document', 'input'),
+						inputWAGroup: await differInputOutput(_process.whatsappProcess, 'whatsappGroup', 'input'),
+						outputDocuments: await differInputOutput(_process.documentProcess, 'document', 'output'),
+						outputWAGroup: await differInputOutput(_process.whatsappProcess, 'whatsappGroup', 'output'),
+						status: _process.status,
+						createdAt: DateFormat(_process.createdAt),
+					}
+					csvHolder.push(obj)
+					if (index === data.length - 1) resolve(csvHolder)
 				}
+			}
+			catch (err) {
+				reject(err)
 			}
 		})
 	}
 
 
-	const differInputOutput = () => {
+	const differInputOutput = (array, key, type) => {
 		return new Promise((resolve, reject) => {
-
+			let text = ''
+			if (array.length) {
+				for (let index = 0; index < array.length; index++) {
+					const ioProcess = array[index];
+					if (ioProcess.source?.toLowerCase() == type.toLowerCase()) {
+						text = text ? text + ', ' + ioProcess[key]['name'] : ioProcess[key]['name']
+					}
+					if (index === array.length - 1) resolve(text)
+				}
+			}
+			else resolve(text || '--')
 		})
 	}
 
@@ -303,16 +340,16 @@ const Process = () => {
 					<Table.Body height={allProcess?.length > 10 ? screenHeight - 300 : 'auto'}>
 						{!allProcess ? showSpinner() : allProcess?.length === 0 ? showEmpty() : allProcess.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile.processNumber}</Table.TextCell>
-								<Table.TextCell  minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile.title}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.type?.name}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.department?.name}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.personProcess?.length}</Table.TextCell>
-								<Table.TextCell  minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'input')}</Table.TextCell>
-								<Table.TextCell  minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'output')}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.status}</Table.TextCell>
-								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{DateFormat(profile?.createdAt)}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile.processNumber}</Table.TextCell>
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile.title}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.type?.name}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.department?.name}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.personProcess?.length}</Table.TextCell>
+								<Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'input')}</Table.TextCell>
+								<Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'output')}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.status}</Table.TextCell>
+								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{DateFormat(profile?.createdAt)}</Table.TextCell>
 							</Table.Row>
 						))}
 					</Table.Body>
@@ -328,7 +365,7 @@ const Process = () => {
 				<div>
 					<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
 				</div>
-				{ _csvDwn ? <CSV/> : null}
+				{_csvDwn ? <CSV body={csv_data} headers={headers} filename="process.csv" /> : null}
 			</div>
 		)
 	}
