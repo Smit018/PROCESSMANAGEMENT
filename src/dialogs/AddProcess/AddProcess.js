@@ -19,7 +19,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 // import Autocomplete from '@mui/material/Autocomplete';
 import { get, post } from '../../services/https.service';
 
-import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField } from "evergreen-ui";
+import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, Text } from "evergreen-ui";
 
 const _formDefault = {
 	"title": {
@@ -80,54 +80,78 @@ const AddProcess = (props) => {
 	const [hours, setHours] = useState('')
 	const [minutes, setMinutes] = useState('')
 	const [loading, setLoading] = React.useState(false);
-	const [pTypeCode,setpTypeCode] = useState('');
-	const [dTypeCode,setdTypeCode] = useState('');
+	const [pTypeCode, setpTypeCode] = useState('');
+	const [dTypeCode, setdTypeCode] = useState('');
 	const [uniqueNumber, setUniqueNumber] = useState(1);
+	const [processNoPrefix, setProcessNoPrefix] = useState('');
 
 
 	useEffect(() => {
-		console.log(props.data)
 	}, []);
 
-	const departmentChange = (item,type)=>{
-		let formData ={...formValues};
-		if(type=='department'){
-		setdTypeCode(item.typeCode);
-		
-		formData['departmentId']['value']=item.id;
-		formData['processNumber']['value']=pTypeCode+item.typeCode+props.uniqueNumber;
-		verifyProcessNumber(pTypeCode+item.typeCode+uniqueNumber);
-		console.log(formData)
+	const departmentChange = (item, type) => {
+		let formData = { ...formValues };
+		if (type == 'department') {
+			setdTypeCode(item.typeCode);
+
+			formData['departmentId']['value'] = item.id;
+			// formData['processNumber']['value'] = pTypeCode + item.typeCode + props.uniqueNumber;
+			// verifyProcessNumber(pTypeCode + item.typeCode + uniqueNumber);
 		}
-		else{
-			formData['processOwner']['value']=item.id;
+		else {
+			formData['processOwner']['value'] = item.id;
 		}
-		console.log(formData)
 		setFormValues(formData);
 	}
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
-		
 		const { name, value } = e.target;
-		console.log(name)
-		
 		const _formValues = { ...formValues }
-		_formValues[name]['value'] =value;
-		if(name=="typeId"){
-			let processTypeCode=props.data.types.filter(e=>e.id==value)[0]['typeCode']
-			console.log(processTypeCode);
-			setpTypeCode(processTypeCode);
-			_formValues['processNumber']['value']=processTypeCode+dTypeCode+uniqueNumber;
-			verifyProcessNumber(processTypeCode+dTypeCode+uniqueNumber);
-		}
+		_formValues[name]['value'] = value;
+		// if (name == "typeId") {
+		// 	let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
+		// 	setpTypeCode(processTypeCode);
+		// 	_formValues['processNumber']['value'] = processTypeCode + dTypeCode + uniqueNumber;
+		// 	verifyProcessNumber(processTypeCode + dTypeCode + uniqueNumber);
+		// }
 		setFormValues(_formValues);
-		console.log(_formValues);
-		
 	};
 
-	const handleChange = (e) => {
-		console.log(e.target.value)
+
+	const setProcessNumberPrefix = (e) => {
+		const { name, value } = e.target ? e.target : { name: null, value: null }
+		let prefix = ''
+		const _code = processNoPrefix
+		if (name === 'typeId') {
+			const processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
+			if(formValues.departmentId.value) {
+				// ALREADY DEPT OPTED
+				if(processNoPrefix && processNoPrefix.length == 5) {
+					// ALREADY TYPE ADDED -- REPLACE TYPE WITH CURRENT
+					const currTypeCode = _code.substring(0, 2)
+					prefix = _code.replace(currTypeCode, processTypeCode)
+				}
+				else prefix = processTypeCode + processNoPrefix
+				
+			}
+			else prefix = processTypeCode
+			setProcessNoPrefix(prefix)
+		}
+		else {
+			// THIS WILL BE TRIGGERED FOR DEPT
+			let processDeptCode = e['typeCode']
+			if(formValues.typeId.value) {
+				// TYPE CODE ALREADY OPTED
+				if(processNoPrefix && processNoPrefix.length === 5) {
+					const currDeptCode = _code.substring(2, 5)
+					prefix = _code.replace(currDeptCode, processDeptCode)
+				}
+				else prefix = _code + processDeptCode 
+			}
+			else prefix = processDeptCode
+			setProcessNoPrefix(prefix)
+		}
 	}
 
 	const header = () => {
@@ -141,25 +165,20 @@ const AddProcess = (props) => {
 	const submit = async () => {
 		setLoading(true)
 		const _form = await validateForm(formValues)
-		props.onSubmit(_form)
+		props.onSubmit({ ..._form, processNoPrefix })
 	}
 
 	const setDuration = () => {
 
 	}
 
-	const verifyProcessNumber = async(e)=>{
-		console.log(e)
+	const verifyProcessNumber = async (e) => {
 		const check = await get(`processes?filter={"where":{"processNumber":"${e}"}}`);
-		console.log(check)
-		if(check.statusCode>=200 && check.statusCode<300){
-			if(check.data.length>0){
-				let formData = {...formValues};
-
-				formData['processNumber']['value'] = pTypeCode+dTypeCode+uniqueNumber+1;
-				setUniqueNumber(uniqueNumber+1);
-				
-				
+		if (check.statusCode >= 200 && check.statusCode < 300) {
+			if (check.data.length > 0) {
+				let formData = { ...formValues };
+				formData['processNumber']['value'] = pTypeCode + dTypeCode + uniqueNumber + 1;
+				setUniqueNumber(uniqueNumber + 1);
 			}
 		}
 	}
@@ -171,9 +190,11 @@ const AddProcess = (props) => {
 			for (let index = 0; index < _formKeys.length; index++) {
 				const _key = _formKeys[index];
 				let pattern = _form[_key]['regex']
-				console.log(_key)
+				// if(_key == 'processNumber') {
+				// 	// CONCATENATION -- PROCESS NUMBER WITH TYPE AND DEPT
+				// 	_form[_key]['value'] = processNoPrefix + _form[_key]['value']
+				// }
 				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
-				console.log('Key -->', _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
 				if (index === _formKeys.length - 1) resolve(_form)
 			}
 		})
@@ -198,9 +219,9 @@ const AddProcess = (props) => {
 								name="typeId"
 								label=""
 								isInvalid={formValues.typeId.error}
-								value={formValues.typeId.value}
+								value={formValues.typeId.value || ""}
 								validationMessage={formValues.typeId.error ? "Type is mandatory!" : null}
-								onChange={e => handleInputChange(e)}>
+								onChange={e => { handleInputChange(e); setProcessNumberPrefix(e) }}>
 								<option disabled>Select Process Type</option>
 								{props.data.types.map(_type => {
 									return (
@@ -214,7 +235,7 @@ const AddProcess = (props) => {
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues.departmentId.error ? "Process department is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => {console.log(changedItem);departmentChange(changedItem,'department')}}
+								onChange={changedItem => { setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
 								itemToString={(item) => { return item ? `${item.name} (${item.typeCode})` : '' }}
 							>
@@ -244,15 +265,20 @@ const AddProcess = (props) => {
 					</div>
 					<br></br>
 					<div className="flex">
-						<FormField className='w-full' isRequired label="Process No.">
-							<TextInputField
-								name="processNumber"
-								label=""
-								isInvalid={formValues.processNumber.error}
-								value={formValues.processNumber.value}
-								validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}
-								onChange={e => {handleInputChange(e);verifyProcessNumber(e.target.value)}}
-							/>
+						<FormField position="relative" className='w-full' isRequired label="Process No." validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}>
+							<span className='flex items-center'>
+								<TextInputField className='border-r-0 rounded-r-none' isInvalid={processNoPrefix || formValues.processNumber.error} width={90} value={processNoPrefix} />
+								{/* <input value="HHTYU"/> */}
+								<TextInputField
+									width={'100%'}
+									className='border-l-0 rounded-l-none'
+									name="processNumber"
+									label=""
+									isInvalid={formValues.processNumber.error}
+									value={formValues.processNumber.value}
+									onChange={e => { handleInputChange(e); verifyProcessNumber(e.target.value) }}
+								/>
+							</span>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Title">
@@ -300,7 +326,7 @@ const AddProcess = (props) => {
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => {console.log(changedItem);departmentChange(changedItem,'owner')}}
+								onChange={changedItem => { departmentChange(changedItem, 'owner') }}
 								items={props.data.members}
 								itemToString={(item) => { return item ? item.name : '' }}
 							>
