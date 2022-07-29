@@ -280,7 +280,7 @@ const ProcessDetails1 = () => {
     }
 
     const getAllSteps = async()=>{
-        const getSteps = await get(`steps?filter={"where":{"processId":"${id}"}}`);
+        const getSteps = await get(`steps?filter={"where":{"processId":"${id}"},"order":"createdAt ASC"}`);
         if(getSteps.statusCode>=200 && getSteps.statusCode<300){
             let step=[...getSteps.data];
             for(let i=0;i<step.length;i++){
