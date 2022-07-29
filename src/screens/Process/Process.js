@@ -93,7 +93,7 @@ const Process = () => {
 		if(process['inputProcess']==""){
 			delete process.inputProcess
 		}
-		process['duration'] = `${process['hours']}:${process['hours']}`;
+		process['duration'] = `${process['hours']}:${process['minutes']}`;
 		const processSave = await post("processes",process);
 		if(processSave.statusCode>=200 && processSave.statusCode<300){
 			console.log('process Save');
