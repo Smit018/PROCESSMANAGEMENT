@@ -2,13 +2,13 @@
     display: flex;
     flex-direction: column;
     margin: 0;
-    width: calc(100% - 270px);
+    width: calc(100% - 200px);
     background-color: #fafafa;
 }
 
 .sidenav {
-    max-width: 270px;
-    width: 270px;
+    max-width: 200px;
+    width: 200px;
     background-color: white;
 }
 

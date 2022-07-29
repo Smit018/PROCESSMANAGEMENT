@@ -9,6 +9,8 @@ import { useNavigate, Outlet } from "react-router-dom";
 import { SearchInput, Table, Pagination, toaster } from 'evergreen-ui';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { DateFormat } from '../../services/dateFormat';
+import { CSV } from '../../services/csv.service';
 
 
 let allData = []
@@ -24,6 +26,7 @@ const Process = () => {
 	const [process, setProcess] = useState([]);
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [allProcess, setAllProcess] = useState(null);
+	const [_csvDwn, setCSVDwn] = useState(false);
 
 	const [url, setUrl] = useState('');
 
@@ -210,15 +213,67 @@ const Process = () => {
 
 	const nestedTableHead = (columns) => {
 		return (
-			<div className='flex flex-col items-center w-60'>
+			<div className='flex flex-col items-center'>
 				<span className='my-1 className="th-c"'>{columns._value}</span>
 				<div className='flex justify-between'>
 					{columns.value.map((column, index) => {
-						return (<Table.TextHeaderCell className="th-c" key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
+						return (<Table.TextHeaderCell  minWidth={column.width} maxWidth={column.width} className="th-c" key={`${column.key}_${index}`}>{column.value}</Table.TextHeaderCell>)
 					})}
 				</div>
 			</div>
 		)
+	}
+
+	const nestedTableBody = (row, source) => {
+		const wag = row.whatsappProcess.filter(_row => {
+			return _row.source.toLowerCase() === source.toLowerCase()
+		})
+		const doc = row.documentProcess.filter(_row => {
+			return _row.source.toLowerCase() === source.toLowerCase()
+		})
+		console.log(wag, doc)
+		return (
+			<div className='flex justify-between'>
+				<Table.TextCell  minWidth={'50%'} maxWidth={'50%'} className="tb-c">{wag.length > 0 ? `${wag[0]?.whatsappGroup?.name}` : '--'}&nbsp;<span className="primary">{wag.length === 0 ? '' : '+' + (wag.length - 1)}</span></Table.TextCell>
+				<Table.TextCell  minWidth={'50%'} maxWidth={'50%'} className="tb-c">{doc.length > 0 ? `${doc[0]?.document?.name}` : '--'}&nbsp;<span className="primary">{ doc.length === 0 ? '' : '+' + (doc.length - 1)}</span></Table.TextCell>
+			</div>
+		)
+	}
+
+	const createCSVData = (data) => {
+		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
+		return new Promise((resolve, reject) => {
+			for (let index = 0; index < data.length; index++) {
+				const _process = data[index];
+				const obj = {
+					processNo: _process.processNumber,
+					title: _process.title,
+					type: `${_process.type?.name} (${_process.type?.typeCode})`,
+					dept: `${_process.department?.name} (${_process.department?.typeCode})`,
+					processOwner: _process.processOwner?.name,
+					members: _process.personProcess?.length,
+					inputDocuments: _process.processNumber,
+					processNo: _process.processNumber,
+					processNo: _process.processNumber,
+					processNo: _process.processNumber,
+					processNo: _process.processNumber,
+				}
+			}
+		})
+	}
+
+
+	const differInputOutput = () => {
+		return new Promise((resolve, reject) => {
+
+		})
+	}
+
+	const setDownLoad = () => {
+		setCSVDwn(true)
+		setTimeout(() => {
+			setCSVDwn(false)
+		}, 3000);
 	}
 
 	const ProcessPage = () => {
@@ -227,6 +282,7 @@ const Process = () => {
 				<TopBar
 					filter="true"
 					csv="true"
+					onDownload={() => setDownLoad()}
 					title="Processes"
 					breadscrubs={paths}
 					add={true}
@@ -239,7 +295,7 @@ const Process = () => {
 				<Table>
 					<Table.Head>
 						{columns.map((column, index) => {
-							return (<Table.TextHeaderCell key={column.key} className="th-c">
+							return (<Table.TextHeaderCell minWidth={column.width} maxWidth={column.width} key={column.key} className="th-c">
 								{column.key == 'inputSource' || column.key == 'outputSource' ? nestedTableHead(column) : column.value}
 							</Table.TextHeaderCell>)
 						})}
@@ -247,16 +303,16 @@ const Process = () => {
 					<Table.Body height={allProcess?.length > 10 ? screenHeight - 300 : 'auto'}>
 						{!allProcess ? showSpinner() : allProcess?.length === 0 ? showEmpty() : allProcess.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
-								<Table.TextCell className="tb-c">{profile.processNumber}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile.title}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.type?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.department?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.personProcess?.length}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile.processNumber}</Table.TextCell>
+								<Table.TextCell  minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile.title}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.type?.name}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.department?.name}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.personProcess?.length}</Table.TextCell>
+								<Table.TextCell  minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'input')}</Table.TextCell>
+								<Table.TextCell  minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'output')}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.status}</Table.TextCell>
+								<Table.TextCell  minWidth={'8%'} maxWidth={'8%'} className="tb-c">{DateFormat(profile?.createdAt)}</Table.TextCell>
 							</Table.Row>
 						))}
 					</Table.Body>
@@ -272,6 +328,7 @@ const Process = () => {
 				<div>
 					<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
 				</div>
+				{ _csvDwn ? <CSV/> : null}
 			</div>
 		)
 	}
@@ -287,25 +344,24 @@ Process.defaultProps = {};
 export default Process;
 
 const columns = [
-	{ key: 'processNumber', value: 'Processess' },
-	{ key: 'title', value: 'Process Title' },
-	{ key: 'type', value: 'Type' },
-	{ key: 'department', value: 'Department' },
-	{ key: 'processOwner', value: 'Owner' },
-	{ key: 'members', value: 'Members' },
+	{ key: 'processNumber', value: 'Processess', width: '8%' },
+	{ key: 'title', value: 'Process Title', width: '10%' },
+	{ key: 'type', value: 'Type', width: '8%' },
+	{ key: 'department', value: 'Department', width: '8%' },
+	{ key: 'processOwner', value: 'Owner', width: '8%' },
+	{ key: 'members', value: 'Members', width: '8%' },
 	{
-		key: 'inputSource', _value: 'Input Source', value: [
-			{ key: 'whatsapp', value: 'Whatsapp' },
-			{ key: 'documents', value: 'Documents' }
+		key: 'inputSource', _value: 'Input Source', width: '16%', value: [
+			{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
+			{ key: 'documents', value: 'Documents', width: '50%' }
 		]
 	},
 	{
-		key: 'outputSource', _value: 'Output Source', value: [
-			{ key: 'whatsapp', value: 'Whatsapp' },
-			{ key: 'documents', value: 'Documents' }
+		key: 'outputSource', _value: 'Output Source', width: '16%', value: [
+			{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
+			{ key: 'documents', value: 'Documents', width: '50%' }
 		]
 	},
-
-	{ key: 'status', value: 'Status' },
-	{ key: 'createdAt', value: 'Created At' }
+	{ key: 'status', value: 'Status', width: '8%' },
+	{ key: 'createdAt', value: 'Created At', width: '8%' }
 ]
