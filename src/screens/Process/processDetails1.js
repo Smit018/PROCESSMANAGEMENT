@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { get, post } from '../../services/https.service';
+import { deleted, get, post } from '../../services/https.service';
 import { useParams } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
@@ -288,7 +288,7 @@ const ProcessDetails1 = () => {
                 if(memberStep.statusCode>=200 && memberStep.statusCode<300){
                     let memStep = memberStep.data.map(e=>{ 
                         return {name:e.member.name,code:e.member.employeeCode,position:e.member.designation,
-                        type:e.member.memberType, memberid:e.member.id, id:e.id}
+                        type:e.member.memberType, memberid:e.member.id, id:e.id,stepId:step[i].id}
                         })
                     step[i]['member'] = memStep;
                 }
@@ -301,7 +301,7 @@ const ProcessDetails1 = () => {
 
     async function suggestQueryStepMembers(text,memberList){
         console.log(memberList)
-        const alreadyGroup = memberList.map(e=>e.memberId);
+        const alreadyGroup = memberList.map(e=>e.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -319,12 +319,12 @@ const ProcessDetails1 = () => {
     const pushStepmember=(mem)=>{
         let memArr = [...saveStepMember];
         console.log(mem)
-        memArr.push({memberId:mem.id});
+        memArr.push({...mem});
         setSaveStepMember(memArr)
         suggestQueryStepMembers('',memArr)
     }
 
-    const popStepmember=(mem,index)=>{
+    const popStepmember=(index)=>{
         let memArr = [...saveStepMember];
         memArr.splice(index,1)
         setSaveStepMember(memArr)
@@ -364,7 +364,7 @@ const ProcessDetails1 = () => {
         if(addStep.statusCode>=200 && addStep.statusCode<300){
             let StepData = addStep.data;
             let stepData_DB = saveStepMember.map(e=>{
-                return {...e,stepId:StepData.id}
+                return {memberId:e.id,stepId:StepData.id}
             })
             const addStepMem = await post(`stepsMembers`,stepData_DB);
             if(addStepMem.statusCode>=200 && addStepMem.statusCode<300){
@@ -398,6 +398,7 @@ const ProcessDetails1 = () => {
             console.log('Failed to add process whatsapp')
         }
     }
+
 
     const addInput_OutputDocument = async (doc,source)=>{
         let addGroup = { processId: id, documentId: doc.id, source:source }
@@ -513,6 +514,7 @@ const ProcessDetails1 = () => {
 
 
     const Steps = (myProps) => {
+        // console.log(myProps.datasource)
         return (
             myProps.datasource.map((data, index) => {
                 return (<div key={index} className="flex flex-col mb-6">
@@ -520,7 +522,7 @@ const ProcessDetails1 = () => {
                         <Heading size={500}>{index + 1}. {data.description}</Heading>
                         <div className='flex items-center'>
                             <IconButton icon={EditIcon} marginRight={2} />
-                            <IconButton icon={CrossIcon} marginRight={2} />
+                            <IconButton icon={CrossIcon} marginRight={2} onClick={()=>removeMember('step',data)} />
                         </div>
                     </div>
                     <div className='flex flex-wrap my-3'>
@@ -529,6 +531,7 @@ const ProcessDetails1 = () => {
                                 <div key={_index} className='mx-2 my-2'>
                                     <AvatarCard
                                         avatar={ImageURL}
+                                        sendDelete={e=>fetchRemovelist('step',index,member)}
                                         name={member.name}
                                         description={`${member.code}, ${member.position}`}
                                         type={member.type}
@@ -540,6 +543,72 @@ const ProcessDetails1 = () => {
                 </div>)
             })
         );
+    }
+
+    const removeMember = async (type,data)=>{
+        let deleteRecord;
+        if(type=="step-member"){
+            deleteRecord = await deleted(`stepsMembers/${data}`);
+        }
+        else if(type=="step"){
+            console.log(data)
+            for(let mem of data.member){
+                let deleteMember = await deleted(`stepsMembers/${mem.id}`);
+                if(deleteMember.statusCode>300){
+                    console.log('failed to delete Member')
+                }
+            }
+            deleteRecord= await deleted(`steps/${data.id}`);
+
+        }
+        else if(type=="processMember"){
+            deleteRecord = await deleted(`processMembers/${data}`);
+        }
+        else if(type=="processPerson"){
+            deleteRecord = await deleted(`personProcesses/${data}`);
+        }
+        else if(type=="whatsappProcess"){
+            deleteRecord = await deleted(`whatsappProcesses/${data}`);
+        }
+        else if(type=="documentProcess"){
+            deleteRecord = await deleted(`documentProcesses/${data}`);
+        }
+
+        if(deleteRecord?.statusCode>=200 && deleteRecord?.statusCode<300){
+            if(type=="step-member"){
+                getAllSteps()
+            }
+            else if(type=='step'){
+                getAllSteps();
+            }
+            else if(type=='processMember'){
+                getAllProcessMembers()
+            }
+            else if(type=='processPerson'){
+                getAllInputPerson();
+                getAllOutputPerson()
+            }
+            else if(type=='whatsappProcess'){
+                getAllOutputWhatsapp()
+                getAllInputWhatsapp()
+            }
+            else if(type=='documentProcess'){
+                getAllOutputDocument()
+                getAllOutputDocument()
+            }
+            console.log('Success Delete')
+        }
+    }
+
+
+    async function fetchRemovelist(type,ind,mem){
+        console.log(mem)
+        if(type=="suggestedStep"){
+        popStepmember(ind)
+        }
+        else if(type=="step"){
+            removeMember("step-member",mem.id)
+        }
     }
 
     return (
@@ -601,6 +670,7 @@ const ProcessDetails1 = () => {
                         return(
                             <AvatarList
                         avatar={ImageURL}
+                        sendDelete={e=>removeMember('processMember',item.id)}
                         name={item?.member?.name}
                         description={item?.member?.designation}
                         actionText={item?.member?.memberType}
@@ -627,6 +697,7 @@ const ProcessDetails1 = () => {
                     {saveStepMember.map((item,index)=>{
                         return(
                             <AvatarList
+                            sendDelete={e=>fetchRemovelist('suggestedStep',index)}
                         avatar={ImageURL}
                         name={item?.name}
                         description={item?.designation}
@@ -682,6 +753,7 @@ const ProcessDetails1 = () => {
                             <AvatarList
                         avatar={ImageURL}
                         name={item?.member?.name}
+                        sendDelete={e=>removeMember('processPerson',item.id)}
                         description={''}
                         actionText={''}
                     />
@@ -711,6 +783,7 @@ const ProcessDetails1 = () => {
                             <AvatarList
                         avatar={ImageURL}
                         name={item?.whatsappGroup?.name}
+                        sendDelete={e=>removeMember('whatsappProcess',item.id)}
                         description={''}
                         actionText={''}
                     />
@@ -742,6 +815,7 @@ const ProcessDetails1 = () => {
                             <AvatarList
                         avatar={ImageURL}
                         name={item?.document?.name}
+                        sendDelete={e=>removeMember('documentProcess',item.id)}
                         description={''}
                         actionText={''}
                     />
@@ -778,6 +852,7 @@ const ProcessDetails1 = () => {
                             <AvatarList
                         avatar={ImageURL}
                         name={item?.member?.name}
+                        sendDelete={e=>removeMember('processPerson',item.id)}
                         description={''}
                         actionText={''}
                     />
@@ -800,6 +875,7 @@ const ProcessDetails1 = () => {
                         return(
                             <AvatarList
                         avatar={ImageURL}
+                        sendDelete={e=>removeMember('whatsappProcess',item.id)}
                         name={item?.whatsappGroup?.name}
                         description={''}
                         actionText={''}
@@ -830,6 +906,7 @@ const ProcessDetails1 = () => {
                             <AvatarList
                         avatar={ImageURL}
                         name={item?.document?.name}
+                        sendDelete={e=>removeMember('documentProcess',item.id)}
                         description={''}
                         actionText={''}
                     />
