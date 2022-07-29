@@ -35,15 +35,30 @@ const ProcessDetails1 = () => {
     const [suggestOutputWhatsapp, setSuggestOutputWhatsapp] = useState([]);
     const [outputWhatsapp, setOutputWhatsapp] = useState([]);
 
-// For Input Whatsapp    
+// For Input Document    
 
     const [suggestInputDocument, setSuggestInputDocument] = useState([]);
     const [inputDocument, setInputDocument] = useState([]);
 
-// For Output Whatsapp    
+// For Output Document    
 
     const [suggestOutputDocument, setSuggestOutputDocument] = useState([]);
     const [outputDocument, setOutputDocument] = useState([]);
+
+// For Input Person    
+
+    const [suggestInputPerson, setSuggestInputPerson] = useState([]);
+    const [inputPerson, setInputPerson] = useState([]);
+
+// For Output Person    
+
+    const [suggestOutputPerson, setSuggestOutputPerson] = useState([]);
+    const [outputPerson, setOutputPerson] = useState([]);
+
+    const [allStep,setAllStep] = useState([]);
+    const [description,setDescription] = useState('');
+    const [suggestStepMember, setSuggestStepMember] = useState([]);
+    const [saveStepMember,setSaveStepMember] = useState([]);
 
     const paths = [
         { path: '/admin/processes', title: 'Processes' },
@@ -58,7 +73,10 @@ const ProcessDetails1 = () => {
         getAllOutputWhatsapp()
         getAllInputDocument()
         getAllOutputDocument()
-    }, [])
+        getAllInputPerson()
+        getAllOutputPerson()
+        getAllSteps()
+    }, [0])
 
     const  getProcessDetails= async ()=>{
         const getDetaills = await get(`processes/${id}?filter={"include":["processOwner"]}`);
@@ -207,6 +225,112 @@ const ProcessDetails1 = () => {
         }
     }
 
+    const getAllInputPerson =async ()=>{
+        const inputsperson = await get(`personProcesses?filter={"where":{"processId":"${id}","source":"INPUT"},"include":"member"}`);
+        if(inputsperson.statusCode>=200 && inputsperson.statusCode<300){
+            setInputPerson(inputsperson.data);
+            getSearchQueryInputPerson('',inputsperson.data);
+        }
+        else{
+            console.log('Process Input Person Not FOund')
+        }
+    }
+
+    const getAllOutputPerson =async ()=>{
+        const outputsperson = await get(`personProcesses?filter={"where":{"processId":"${id}","source":"OUTPUT"},"include":"member"}`);
+        if(outputsperson.statusCode>=200 && outputsperson.statusCode<300){
+            setOutputPerson(outputsperson.data);
+            getSearchQueryOutputPerson('',outputsperson.data);
+        }
+        else{
+            console.log('Process Output Whtsapp Not Found')
+        }
+    }
+
+    const getSearchQueryInputPerson =async(text,groupList)=>{
+        const alreadyGroup = groupList.map(e=>e.member.id);
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        const members = await get(filter);
+        if (members.statusCode >= 200 && members.statusCode < 300) {
+            // console.log("Fetch suggested Members", whatsap.data);
+            let dataMember = [...members.data];
+            console.log(alreadyGroup)
+            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
+            console.log(dataMember)
+            setSuggestInputPerson(dataMember);
+        } else {
+            console.log('Failed fetching Input Person')
+        }
+    }
+
+    const getSearchQueryOutputPerson =async(text,groupList)=>{
+        const alreadyGroup = groupList.map(e=>e.member.id);
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        const members = await get(filter);
+        if (members.statusCode >= 200 && members.statusCode < 300) {
+            // console.log("Fetch suggested Members", whatsap.data);
+            let dataMember = [...members.data];
+            console.log(alreadyGroup)
+            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
+            console.log(dataMember)
+            setSuggestOutputPerson(dataMember);
+        } else {
+            console.log('Failed fetching Output Person')
+        }
+    }
+
+    const getAllSteps = async()=>{
+        const getSteps = await get(`steps?filter={"where":{"processId":"${id}"},"order":"createdAt ASC"}`);
+        if(getSteps.statusCode>=200 && getSteps.statusCode<300){
+            let step=[...getSteps.data];
+            for(let i=0;i<step.length;i++){
+                let memberStep = await get(`stepsMembers?filter={"where":{"stepId":"${step[i].id}"},"include":"member"}`);
+                if(memberStep.statusCode>=200 && memberStep.statusCode<300){
+                    let memStep = memberStep.data.map(e=>{ 
+                        return {name:e.member.name,code:e.member.employeeCode,position:e.member.designation,
+                        type:e.member.memberType, memberid:e.member.id, id:e.id}
+                        })
+                    step[i]['member'] = memStep;
+                }
+            }
+            suggestQueryStepMembers('',[])
+            setAllStep(step);
+        }
+
+    }
+
+    async function suggestQueryStepMembers(text,memberList){
+        console.log(memberList)
+        const alreadyGroup = memberList.map(e=>e.memberId);
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        const members = await get(filter);
+        if (members.statusCode >= 200 && members.statusCode < 300) {
+            // console.log("Fetch suggested Members", whatsap.data);
+            let dataMember = [...members.data];
+            console.log(alreadyGroup)
+            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
+            console.log(dataMember)
+            setSuggestStepMember(dataMember);
+        } else {
+            console.log('Failed fetching Output Person')
+        }
+    }
+
+    const pushStepmember=(mem)=>{
+        let memArr = [...saveStepMember];
+        console.log(mem)
+        memArr.push({memberId:mem.id});
+        setSaveStepMember(memArr)
+        suggestQueryStepMembers('',memArr)
+    }
+
+    const popStepmember=(mem,index)=>{
+        let memArr = [...saveStepMember];
+        memArr.splice(index,1)
+        setSaveStepMember(memArr)
+        suggestQueryStepMembers('',memArr)
+    }
+
     const checkSuggest = (variable,e)=>{
         console.log(e)
         if(variable=='processMember'){
@@ -223,6 +347,32 @@ const ProcessDetails1 = () => {
         }
         else if(variable=='output-document'){
             getSearchQueryOutputDocument(e,outputDocument);
+        }
+        else if(variable=='input-person'){
+            getSearchQueryInputPerson(e,inputPerson);
+        }
+        else if(variable=='output-person'){
+            getSearchQueryOutputPerson(e,outputPerson);
+        }
+        else if(variable=='step'){
+            suggestQueryStepMembers(e,saveStepMember);
+        }
+    }
+
+    const addSteps = async ()=>{
+        const addStep = await post(`steps`,{description:description,processId:id});
+        if(addStep.statusCode>=200 && addStep.statusCode<300){
+            let StepData = addStep.data;
+            let stepData_DB = saveStepMember.map(e=>{
+                return {...e,stepId:StepData.id}
+            })
+            const addStepMem = await post(`stepsMembers`,stepData_DB);
+            if(addStepMem.statusCode>=200 && addStepMem.statusCode<300){
+                console.log('Added Step and Step Members');
+                setSaveStepMember([]);
+                setDescription('');
+                getAllSteps();
+            }
         }
     }
 
@@ -261,6 +411,18 @@ const ProcessDetails1 = () => {
         }
     }
 
+    const addInput_OutputPerson = async (mem,source)=>{
+        let addMember = { processId: id, memberId: mem.id, source:source }
+        const persons = await post(`personProcesses`, addMember);
+        if (persons.statusCode >= 200 && persons.statusCode < 300) {
+            console.log("Persons added to process");
+            (source=='INPUT')?getAllInputPerson():getAllOutputPerson()
+            
+        } else {
+            console.log('Failed to add process Persons')
+        }
+    }
+
     const postProcess = (type,mem)=>{
         if(type=="processMember"){
             addProcessMember(mem);
@@ -276,6 +438,16 @@ const ProcessDetails1 = () => {
         }
         else if(type=='output-document'){
             addInput_OutputDocument(mem,'OUTPUT')
+        }
+        else if(type=='input-person'){
+            addInput_OutputPerson(mem,'INPUT')
+        }
+        else if(type=='output-person'){
+            addInput_OutputPerson(mem,'OUTPUT')
+        }
+        else if(type=='step'){
+            // console.log(mem)
+            pushStepmember(mem)
         }
     }
 
@@ -450,24 +622,35 @@ const ProcessDetails1 = () => {
                 <div>
                     <Heading size={800} marginBottom={10}>STEPS</Heading>
                     <Steps
-                        datasource={steps}
+                        datasource={allStep}
                     />
+                    {saveStepMember.map((item,index)=>{
+                        return(
+                            <AvatarList
+                        avatar={ImageURL}
+                        name={item?.name}
+                        description={item?.designation}
+                        actionText={item?.memberType}
+                    />
+                        )
+                    })}
                     <div className='flex'>
                         <div className='w-1/2'>
-                            <TextInput className="w-full" height={50} placeholder="Enter step description here" />
+                            <TextInput className="w-full" height={50} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Enter step description here" />
                         </div>
                         &nbsp;&nbsp;&nbsp;
                         <div className='w-1/2'>
                             <AutoTextInput
-                                datasource={datasource}
+                                datasource={suggestStepMember}
                                 placeholder="Add Member"
+                                variable="step"
                                 value={newMember}
                                 inputChange={(e) => setNewMember(e.target.value)}
                             />
                         </div>
                     </div>
                     <div className='flex justify-end py-2'>
-                        <Button className="primary">
+                        <Button className="primary" onClick={addSteps}>
                             Add Step
                         </Button>
                     </div>
@@ -488,16 +671,27 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
-                    <AvatarList
+                    {/* <AvatarList
                         avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
+                    /> */}
+                    {inputPerson.map((item,index)=>{
+                        return(
+                            <AvatarList
+                        avatar={ImageURL}
+                        name={item?.member?.name}
+                        description={''}
+                        actionText={''}
                     />
+                        )
+                    })}
                     <div className='py-3 w-full'>
                         <AutoTextInput
-                            datasource={datasource}
+                            datasource={suggestInputPerson}
                             placeholder="Add Member"
+                            variable="input-person"
                             value={newMember}
                             inputChange={(e) => setNewMember(e.target.value)}
                         />
@@ -573,15 +767,26 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
-                    <AvatarList
+                    {/* <AvatarList
                         avatar={ImageURL}
                         name="Rajiv Ranjan"
                         description="Product Manager"
                         actionText="Employee"
+                    /> */}
+                    {outputPerson.map((item,index)=>{
+                        return(
+                            <AvatarList
+                        avatar={ImageURL}
+                        name={item?.member?.name}
+                        description={''}
+                        actionText={''}
                     />
+                        )
+                    })}
                     <div className='py-3 w-full'>
                         <AutoTextInput
-                            datasource={datasource}
+                            datasource={suggestOutputPerson}
+                            variable="output-person"
                             placeholder="Add Member"
                             value={newMember}
                             inputChange={(e) => setNewMember(e.target.value)}
