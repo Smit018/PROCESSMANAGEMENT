@@ -3,6 +3,11 @@ import * as React from 'react';
 import { DateFormat } from '../../services/dateFormat';
 
 const AvatarList = (props) => {
+
+    const crossAvatarList = (id)=>{
+        props.sendDelete(id)
+    }
+
     return (
         <div className='hover:bg-slate-100 hover:cursor-pointer flex items-center px-4 py-3 shadow rounded'>
             <div className='mr-4'>
@@ -18,7 +23,7 @@ const AvatarList = (props) => {
                     < div className='flex items-center'>
                         {props.actionText ? <Text size={300}>{props.actionText}</Text> : null}
                         &nbsp;&nbsp;
-                        <IconButton className='border-hidden outline-none' icon={CrossIcon} />
+                        <IconButton className='border-hidden outline-none' onClick={()=>crossAvatarList(props)} icon={CrossIcon} />
                     </div>
                 ) : null
                 }
@@ -28,6 +33,9 @@ const AvatarList = (props) => {
 }
 
 const AvatarCard = (props) => {
+    const crossAvatarList = (prop)=>{
+        props.sendDelete(prop)
+    }
     return (
         <div className='flex items-center px-4 py-3 shadow border rounded relative'>
             <div className='mr-4'>
@@ -40,7 +48,7 @@ const AvatarCard = (props) => {
                     <br></br>
                     <Text size={300}>{props.type}</Text>
                 </div>
-                <IconButton className='border-hidden outline-none absolute right-2 top-2' icon={CrossIcon} />
+                <IconButton className='border-hidden outline-none absolute right-2 top-2' onClick={()=>crossAvatarList(props)} icon={CrossIcon} />
             </div>
         </div>
     )
