@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { post, get, patch, deleted } from '../../services/https.service';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Avatar, Button, Heading, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, toaster } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
@@ -20,6 +20,7 @@ const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d
 let initData;
 
 const DocumentDetails = () => {
+    const navigate = useNavigate()
     const params = useParams()
     let saveObj = useRef();
     const id = params.id
@@ -311,6 +312,16 @@ const DocumentDetails = () => {
         }
     }
 
+    const deleteMe = async () => {
+        const response = await patch('documents/' + params.id, { deleted: true })
+        if(response.statusCode === 200) {
+            toaster.success('Deleted successfully!')
+            navigate(-1)
+            setOpenDelete(false)
+        }
+        else toaster.danger('Failed to delete!')
+    }
+
 
     const HeaderSection = (myProps) => {
         return (
@@ -542,7 +553,7 @@ const DocumentDetails = () => {
                 open={openDelete}
                 title={`Delete Document!`}
                 onClose={() => setOpenDelete(false)}
-                onConfirm={() => setOpenDelete(false)}
+                onConfirm={() => deleteMe()}
                 message={`Do you really want to delete document ${params.name}?`}
             />
             <DocDialog

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './WhatsappGroup.css';
 import { post, get, patch, deleted } from '../../services/https.service';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, PeopleIcon, toaster, Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
@@ -21,6 +21,7 @@ let initData;
 
 
 const WhatsappDetails = () => {
+    const navigate = useNavigate()
     const params = useParams()
     const pathArray = window.location.pathname.split('/');
     let saveObj = useRef();
@@ -401,6 +402,16 @@ const WhatsappDetails = () => {
         )
     }
 
+    const deleteMe = async () => {
+        const response = await patch('whatsappGroups/' + params.id, { deleted: true })
+        if(response.statusCode === 200) {
+            toaster.success('Deleted successfully!')
+            navigate(-1)
+            setOpenDelete(false)
+        }
+        else toaster.danger('Failed to delete!')
+    }
+
     return (
         <div className='h-full w-full'>
             <TopBar
@@ -546,7 +557,7 @@ const WhatsappDetails = () => {
                 open={openDelete}
                 title={`Delete Whatsapp Group!`}
                 onClose={() => setOpenDelete(false)}
-                onConfirm={() => setOpenDelete(false)}
+                onConfirm={() => deleteMe(false)}
                 message={`Do you really want to delete whatsapp group ${params.name}?`}
             />
             <DocDialog
