@@ -38,6 +38,10 @@ const WhatsappDetails = () => {
     const [openDelete, setOpenDelete] = useState(false)
     const [openEdit, setOpenEdit] = useState(false)
 
+    const [memberQuery, setMemberQuery] = useState([]);
+    const [whatsappInputQuery, setWhatsappInputQuery] = useState([]);
+    const [whatsappOutputQuery, setWhatsappOutputQuery] = useState([]);
+
     const paths = [
         { path: '/admin/whatsapp-groups', title: 'Whatsapp Groups' },
         { path: `/admin/whatsapp-groups/${params.id}/${params.name}`, title: params?.name }
@@ -74,14 +78,75 @@ const WhatsappDetails = () => {
     }
 
 
-    const getInputSources = () => {
-        let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
-        let arr = []
-        for (let i = 0; i < 4; i++) {
-            arr.push(obj)
-        };
-        setWhatsappInputSources(arr);
-        setWhatsappOutputSources(arr);
+    function onQuery(type,text){
+        console.log(type,text)
+        if(type=="member"){
+            if(text==""){
+                setMemberQuery(members)
+            }
+            else{
+                console.log(members)
+                let proc = members.filter(e=>{
+                    if(e.member.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                console.log(proc)
+                setMemberQuery(proc)
+            }
+        }
+        else if(type=="input"){
+            if(text==""){
+                setWhatsappInputQuery(whatsappInputSources)
+            }
+            else{
+                console.log(whatsappInputSources)
+                let proc = whatsappInputSources.filter(e=>{
+                    if(e.process.processNumber.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappInputQuery(proc)
+            }
+        }else{
+            if(text==""){
+                setWhatsappOutputQuery(whatsappOutputSources)
+            }
+            else{
+                let proc = whatsappOutputSources.filter(e=>{
+                    if(e.process.processNumber.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappOutputQuery(proc)
+            }
+        }
+    }
+
+
+    const getInputSources = async() => {
+        // let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
+        // let arr = []
+        // for (let i = 0; i < 4; i++) {
+        //     arr.push(obj)
+        // };
+        // setWhatsappInputSources(arr);
+        // setWhatsappOutputSources(arr);
+        const process = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"INPUT"}}`);
+        if(process.statusCode>=200 && process.statusCode<300){
+            let processData = process.data;
+            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
+            setWhatsappInputSources(processData);
+            setWhatsappInputQuery(processData)
+        }
+
+        const processout = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"OUTPUT"}}`);
+        if(processout.statusCode>=200 && processout.statusCode<300){
+            let processData = processout.data;
+            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
+            setWhatsappOutputSources(processData);
+            setWhatsappOutputQuery(processData)
+        }
     }
 
     const getWhatsappDetail = async () => {
@@ -104,10 +169,13 @@ const WhatsappDetails = () => {
             console.log(whatsap.data)
             setMembers(memberData);
             getSearchQueryMember('', whatsap.data)
+            setMemberQuery(whatsap.data)
         } else {
             console.log('Fetch Whatsapp member')
         }
     }
+
+    
 
     const addMembersToWhatsapp = async (mem) => {
         console.log(mem)
@@ -249,13 +317,15 @@ const WhatsappDetails = () => {
         else toaster.danger('Please fill valid details')
     }
 
+    
+
     const HeaderSection = (myProps) => {
         return (
             <div className='flex justify-between items-center mb-6'>
                 <div className='text-xl'>{myProps.title}</div>
                 <div className='search-bar flex mr-4'>
                     <div>
-                        <TextInput height={40} placeholder="Search..." className='l-blue' />
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery(myProps.variable,e.target.value)}} className='l-blue' />
                     </div>
                     <div className='h-10 rounded flex items-center justify-center px-2 white right'>
                         <SearchIcon size={18} className='primary' />
@@ -377,10 +447,21 @@ const WhatsappDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
-                    title="MEMBERS"
-                />
-                {members.length === 0 ? showEmpty() : members.map((item, index) => {
+                {/* <HeaderSection
+                    title="MEMBERS" variable="member"
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'MEMBERS'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('member',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+            </div>
+                {members.length === 0 ? showEmpty() : memberQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/${(item?.member.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member.id}`}>
                             <MemberList
@@ -407,14 +488,26 @@ const WhatsappDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
-                    title="INPUT SOURCES"
-                />
-                {whatsappInputSources.length === 0 ? showEmpty() : whatsappInputSources.map((item, index) => {
+                {/* <HeaderSection
+                    title="INPUT SOURCES" variable="input"
+                    
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'INPUT SOURCES'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('input',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+            </div>    
+                {whatsappInputSources.length === 0 ? showEmpty() : whatsappInputQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.name}
+                                title={item.processNumber}
                                 subTitle={item.description}
                             />
                         </Link>
@@ -424,14 +517,25 @@ const WhatsappDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
-                    title="OUTPUT SOURCES"
-                />
-                {whatsappInputSources.length === 0 ? showEmpty() : whatsappInputSources.map((item, index) => {
+                {/* <HeaderSection
+                    title="OUTPUT SOURCES" variable="output"
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'OUTPUT SOURCES'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('output',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+                </div>
+                {whatsappOutputSources.length === 0 ? showEmpty() : whatsappOutputQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.name}
+                                title={item.processNumber}
                                 subTitle={item.description}
                             />
                         </Link>

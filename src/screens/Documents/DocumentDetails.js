@@ -36,6 +36,10 @@ const DocumentDetails = () => {
     const [openDelete, setOpenDelete] = useState(false)
     const [openEdit, setOpenEdit] = useState(false)
 
+    const [memberQuery, setMemberQuery] = useState([]);
+    const [documentInputQuery, setDocumentInputQuery] = useState([]);
+    const [documentOutputQuery, setDocumentOutputQuery] = useState([]);
+
 
     const paths = [
         { path: '/admin/documents', title: 'Documents' },
@@ -68,6 +72,51 @@ const DocumentDetails = () => {
             // FAILED TO FECTH ALL MEMEBRES
             console.log(err)
             toaster.dander('Failed to fetch members')
+        }
+    }
+
+    function onQuery(type,text){
+        console.log(type,text)
+        if(type=="member"){
+            if(text==""){
+                setMemberQuery(members)
+            }
+            else{
+                console.log(members)
+                let proc = members.filter(e=>{
+                    if(e.member.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                console.log(proc)
+                setMemberQuery(proc)
+            }
+        }
+        else if(type=="input"){
+            if(text==""){
+                setDocumentInputQuery(documentInputSources)
+            }
+            else{
+                // console.log(whatsappInputSources)
+                let proc = documentInputSources.filter(e=>{
+                    if(e.process.processNumber.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setDocumentInputQuery(proc)
+            }
+        }else{
+            if(text==""){
+                setDocumentOutputQuery(documentOutputSources)
+            }
+            else{
+                let proc = documentOutputSources.filter(e=>{
+                    if(e.process.processNumber.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setDocumentOutputQuery(proc)
+            }
         }
     }
 
@@ -104,6 +153,7 @@ const DocumentDetails = () => {
             let processData = process.data;
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentInputSources(processData);
+            setDocumentInputQuery(processData)
         }
 
         const processout = await get(`documentProcesses?filter={"include":{"relation":"process"},"where":{"documentId":"${id}","source":"OUTPUT"}}`);
@@ -111,6 +161,7 @@ const DocumentDetails = () => {
             let processData = processout.data;
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentOutputSources(processData);
+            setDocumentOutputQuery(processData)
         }
     }
 
@@ -133,6 +184,7 @@ const DocumentDetails = () => {
             // memberData = memberData.map(e => { return { ...e.member, admin: e.admin } })
             setMembers(memberData);
             getSearchQueryMember('', memberData)
+            setMemberQuery(memberData)
         } else {
             console.log('Fetch Document member')
         }
@@ -389,10 +441,21 @@ const DocumentDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
+                {/* <HeaderSection
                     title="MEMBERS"
-                />
-                {members.length === 0 ? showEmpty() : members.map((item, index) => {
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'MEMBERS'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('member',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+            </div>
+                {members.length === 0 ? showEmpty() : memberQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/${(item?.member.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member.id}`}>
                             <MemberList
@@ -422,10 +485,21 @@ const DocumentDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
+                {/* <HeaderSection
                     title="INPUT SOURCES"
-                />
-                {documentInputSources.length === 0 ? showEmpty() : documentInputSources.map((item, index) => {
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'INPUT SOURCES'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('input',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+            </div>
+                {documentInputSources.length === 0 ? showEmpty() : documentInputQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
@@ -439,10 +513,21 @@ const DocumentDetails = () => {
             <br></br>
             <br></br>
             <div className='py-5'>
-                <HeaderSection
+                {/* <HeaderSection
                     title="OUTPUT SOURCES"
-                />
-                {documentInputSources.length === 0 ? showEmpty() : documentInputSources.map((item, index) => {
+                /> */}
+                <div className='flex justify-between items-center mb-6'>
+                <div className='text-xl'>{'OUTPUT SOURCES'}</div>
+                <div className='search-bar flex mr-4'>
+                    <div>
+                        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('output',e.target.value)}} className='l-blue' />
+                    </div>
+                    <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                        <SearchIcon size={18} className='primary' />
+                    </div>
+                </div>
+            </div>
+                {documentInputSources.length === 0 ? showEmpty() : documentOutputQuery.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
