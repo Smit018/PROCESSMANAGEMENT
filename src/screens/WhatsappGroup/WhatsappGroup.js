@@ -13,6 +13,7 @@ import TopBar from '../../components/TopBar/TopBar';
 import { ListCard } from '../../components/AvatarList/AvatarList';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { CSV } from '../../services/csv.service';
 
 
 let allData = []
@@ -33,6 +34,11 @@ const WhatsappGroup = () => {
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
 
+	// FOR CSV
+	const [_csvDwn, setCSVDwn] = useState(false);
+	const [csv_data, set_csv_data] = useState([]);
+
+
 	const paths = [
 		{ path: 'whatsapp-groups', title: 'Whatsapp Groups' }
 	]
@@ -40,6 +46,7 @@ const WhatsappGroup = () => {
 
 	useEffect(() => {
 		fetchWhatsappGroups();
+		fetchForCsv()
 	}, []);
 
 
@@ -58,10 +65,10 @@ const WhatsappGroup = () => {
 		})
 	}
 
-	const whatsappUrl = (filters) => {
+	const whatsappUrl = (filters, all) => {
 		console.log(filters)
-		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
-		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "whatsappMember", "scope": {"fields": ["id"]}}]`
+		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}} ${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
+		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "whatsappMember", "scope": {"fields": ["id", "name"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
 		const _url = `whatsappGroups?filter={${where}, ${order}, ${include}}`
 		setUrl(_url)
@@ -197,6 +204,51 @@ const WhatsappGroup = () => {
 		)
 	}
 
+
+	const fetchForCsv = async () => {
+		const url = whatsappUrl(null, true)
+		const response = await get(url)
+		const csv = await createCSVData(response.data)
+		set_csv_data(csv)
+	}
+
+	const headers = [
+		{ label: "Name", key: "name" },
+		{ label: "Link/Location", key: "link" },
+		{ label: "Members", key: "members" },
+		{ label: "Time Created", key: "createdAt" },
+	];
+
+	const createCSVData = (data) => {
+		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
+		let csvHolder = [];
+		return new Promise(async (resolve, reject) => {
+			try {
+				for (let index = 0; index < data.length; index++) {
+					const wa = data[index];
+					const obj = {
+						name: wa.name,
+						link: wa.link,
+						members: wa.whatsappMember.map(mem => mem.name),
+						createdAt: DateFormat(wa.createdAt),
+					}
+					csvHolder.push(obj)
+					if (index === data.length - 1) resolve(csvHolder)
+				}
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
+	}
+
+	const setDownLoad = () => {
+		setCSVDwn(true)
+		setTimeout(() => {
+			setCSVDwn(false)
+		}, 3000);
+	}
+
 	return (
 		<div className='w-full h-full'>
 			<TopBar
@@ -206,7 +258,7 @@ const WhatsappGroup = () => {
 				addTitle="Add Whatsapp Group"
 				addEv={() => setOpen(true)}
 				csv="true"
-				onDownload={() => donwloadCsv()}
+				onDownload={() => setDownLoad()}
 				onFilter={() => openFilterDialog(true)}
 				filter="true"
 				search={search}
@@ -249,6 +301,7 @@ const WhatsappGroup = () => {
 					</div>
 				</form>
 			</Dialog>
+			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="wa.csv" /> : null}
 		</div>
 	)
 };

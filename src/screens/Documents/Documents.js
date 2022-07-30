@@ -17,6 +17,7 @@ import TWOPEOPLE from "../../assets/images/twoPeople.png"
 import { ListCard } from '../../components/AvatarList/AvatarList';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { CSV } from '../../services/csv.service';
 
 
 let allDocuments = []
@@ -37,6 +38,10 @@ const Documents = () => {
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
 
+	// FOR CSV
+	const [_csvDwn, setCSVDwn] = useState(false);
+	const [csv_data, set_csv_data] = useState([]);
+
 	const paths = [
 		{ path: '/admin/documents', title: 'Documents' }
 	]
@@ -44,6 +49,7 @@ const Documents = () => {
 
 	useEffect(() => {
 		fetchDocuments()
+		fetchForCsv()
 	}, [])
 
 
@@ -63,23 +69,23 @@ const Documents = () => {
 		})
 	}
 
-	const documentUrl = (filters) => {
+	const documentUrl = (filters, all) => {
 		console.log(filters)
-		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
-		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
+		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
+		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id", "name"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
 		const _url = `documents?filter={${where}, ${order}, ${include}}`
 		setUrl(_url)
-		if(filters) {
+		if (filters) {
 			fetchDocuments(_url)
 		}
-		else return _url 
+		else return _url
 	}
 
 	const fetchDocuments = async (filter) => {
 		setDocumentData(null)
 		try {
-			if(!filter) {
+			if (!filter) {
 				const count = await fetchCount()
 				setTotalData(count)
 			}
@@ -167,7 +173,7 @@ const Documents = () => {
 	}
 
 	const changePage = (type) => {
-		const filter = {where: '', include: '', order: ''}
+		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
@@ -188,7 +194,7 @@ const Documents = () => {
 	}
 
 	const _filterDocuments = () => {
-		const filter = {where: '', include: '', order: ''}
+		const filter = { where: '', include: '', order: '' }
 		const _dateFilter = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}`
 		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
 		documentUrl(filter)
@@ -203,7 +209,52 @@ const Documents = () => {
 
 	const donwloadCsv = () => {
 		console.log('Download csv here')
-	} 
+	}
+
+	const fetchForCsv = async () => {
+		const url = documentUrl(null, true)
+		const response = await get(url)
+		const csv = await createCSVData(response.data)
+		set_csv_data(csv)
+	}
+
+	const headers = [
+		{ label: "Name", key: "name" },
+		{ label: "Link/Location", key: "link" },
+		{ label: "Members", key: "members" },
+		{ label: "Time Created", key: "createdAt" },
+	];
+
+	const createCSVData = (data) => {
+		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
+		let csvHolder = [];
+		return new Promise(async (resolve, reject) => {
+			try {
+				for (let index = 0; index < data.length; index++) {
+					const wa = data[index];
+					const obj = {
+						name: wa.name,
+						link: wa.link,
+						members: wa.documentMember.map(mem => mem.name),
+						createdAt: DateFormat(wa.createdAt),
+					}
+					csvHolder.push(obj)
+					if (index === data.length - 1) resolve(csvHolder)
+				}
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
+	}
+
+
+	const setDownLoad = () => {
+		setCSVDwn(true)
+		setTimeout(() => {
+			setCSVDwn(false)
+		}, 3000);
+	}
 
 	return (
 		<div className='h-full w-full'>
@@ -214,7 +265,7 @@ const Documents = () => {
 				addTitle="Add Document"
 				addEv={() => setOpen(true)}
 				csv="true"
-				onDownload={() => donwloadCsv()}
+				onDownload={() => setDownLoad()}
 				filter="true"
 				onFilter={() => openFilterDialog(true)}
 				search={search}
@@ -259,6 +310,7 @@ const Documents = () => {
 					</div>
 				</form>
 			</Dialog>
+			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="wa.csv" /> : null}
 		</div>
 	)
 };

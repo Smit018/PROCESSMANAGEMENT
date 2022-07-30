@@ -13,6 +13,7 @@ import TopBar from '../../components/TopBar/TopBar';
 import AddMember from '../../dialogs/AddMember/AddMember';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { CSV } from '../../services/csv.service';
 
 
 let allData = []
@@ -33,6 +34,11 @@ const Employee = () => {
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(3);
 	const [totalData, setTotalData] = useState(0);
+
+	// FOR CSV
+	const [_csvDwn, setCSVDwn] = useState(false);
+	const [csv_data, set_csv_data] = useState([]);
+
 
 	let imageHandler = useRef(null);
 
@@ -61,6 +67,7 @@ const Employee = () => {
 		setHeight(window.innerHeight)
 		fetchAllEmployees()
 		// setEmployeeData();
+		fetchForCsv()
 	}, [0]);
 
 	const fetchCount = () => {
@@ -104,9 +111,9 @@ const Employee = () => {
 		}
 	}
 
-	const employeeUrl = (filters) => {
+	const employeeUrl = (filters, all) => {
 		console.log(filters)
-		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"EMPLOYEE", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
 		const _url = `members?filter={${where}, ${order}, ${include}}`
@@ -220,6 +227,58 @@ const Employee = () => {
 		}
 	}
 
+	const fetchForCsv = async () => {
+		const url = employeeUrl(null, true)
+		const response = await get(url)
+		const csv = await createCSVData(response.data)
+		set_csv_data(csv)
+	}
+
+	const headers = [
+		{ label: "Name", key: "name" },
+		{ label: "Designation", key: "designation" },
+		{ label: "Code", key: "code" },
+		{ label: "Date of Joining", key: "doj" },
+		{ label: "Date of Exit", key: "doe" },
+		{ label: "Contact Number", key: "mobile" },
+		{ label: "Bank Details", key: "bankDetails" },
+		{ label: "Time Created", key: "createdAt" },
+	];
+
+	const createCSVData = (data) => {
+		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
+		let csvHolder = [];
+		return new Promise(async (resolve, reject) => {
+			try {
+				for (let index = 0; index < data.length; index++) {
+					const member = data[index];
+					const obj = {
+						name: member.name,
+						designation: member.designation,
+						code: `${member?.employeeCode}`,
+						doj: DateFormat(member.doj),
+						doe: member.doe ? DateFormat(member.doe) : '--',
+						mobile: member.contactNo,
+						bankDetails: member.bankDetails,
+						createdAt: DateFormat(member.createdAt),
+					}
+					csvHolder.push(obj)
+					if (index === data.length - 1) resolve(csvHolder)
+				}
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
+	}
+
+	const setDownLoad = () => {
+		setCSVDwn(true)
+		setTimeout(() => {
+			setCSVDwn(false)
+		}, 3000);
+	}
+
 	return (
 		<div className="w-full h-full">
 			<TopBar
@@ -228,23 +287,23 @@ const Employee = () => {
 				add={true}
 				addTitle="Add Employee"
 				addEv={() => setShowForm(true)}
+				onDownload={() => setDownLoad()}
 				csv="true"
 				filter="true"
 				search={search}
-				onSearch={(e) => {setSearch(e.target.value); onSearchType(e.target.value)}}
+				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
 			<Table aria-label="simple table">
 				<Table.Head>
 					<Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Vendor Name</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Designation</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Employee Code</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Date Joining</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Date Exit</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
-
 				</Table.Head>
 				<Table.Body height={employeeData?.length > 10 ? (height - 300) : 'auto'}>
 					{!employeeData ? showSpinner() : employeeData?.length === 0 ? showEmpty() : employeeData.map((item, index) => {
@@ -279,12 +338,12 @@ const Employee = () => {
 				onSubmit={(formData) => { validateForm(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
+
+			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="employee" /> : null}
 		</div>
 	)
 };
 
 Employee.propTypes = {};
-
 Employee.defaultProps = {};
-
 export default Employee;

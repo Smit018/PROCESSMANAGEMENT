@@ -14,6 +14,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-rout
 import TopBar from '../../components/TopBar/TopBar';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { CSV } from '../../services/csv.service';
 
 let allData = []
 
@@ -35,6 +36,10 @@ const Vendors = () => {
 	const [totalData, setTotalData] = useState(0);
 
 	let imageHandler = useRef(null);
+
+	// FOR CSV
+	const [_csvDwn, setCSVDwn] = useState(false);
+	const [csv_data, set_csv_data] = useState([]);
 
 
 
@@ -60,6 +65,7 @@ const Vendors = () => {
 	useEffect(() => {
 		setHeight(window.innerHeight)
 		fetchVendors()
+		fetchForCsv()
 	}, []);
 
 	const fetchCount = () => {
@@ -77,9 +83,9 @@ const Vendors = () => {
 		})
 	}
 
-	const vendorUrl = (filters) => {
+	const vendorUrl = (filters, all) => {
 		console.log(filters)
-		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
 		const _url = `members?filter={${where}, ${order}, ${include}}`
@@ -130,12 +136,12 @@ const Vendors = () => {
 				let _formdata = new FormData()
 				_formdata.append('file', file)
 				const _img = await post(`photos/vendor/upload`, _formdata)
-				if(_img.data) {
+				if (_img.data) {
 					resolve(image.data.result.files.file[0].name)
 				}
 				else reject({ err: 'Failed to upload image!' })
 			}
-			catch(err) {
+			catch (err) {
 				reject(err)
 			}
 		})
@@ -194,9 +200,9 @@ const Vendors = () => {
 		setShowForm(false)
 		let body = _form
 		body.profile = _form.image ? await _upload(_form.image) : ''
-		body = { ...body,  memberType: "VENDOR", userName: _form.email }
+		body = { ...body, memberType: "VENDOR", userName: _form.email }
 		const response = await post('members', body);
-		if(response.statusCode >= 200 && response.statusCode < 300) {
+		if (response.statusCode >= 200 && response.statusCode < 300) {
 			toaster.success('Vendor added successfully!')
 			setShowForm(false)
 			fetchVendors();
@@ -204,7 +210,7 @@ const Vendors = () => {
 		else {
 			toaster.danger('Failed to add vendor!')
 		}
-	
+
 	}
 
 	const changePage = (type) => {
@@ -228,6 +234,58 @@ const Vendors = () => {
 		}
 	}
 
+	const fetchForCsv = async () => {
+		const url = vendorUrl(null, true)
+		const response = await get(url)
+		const csv = await createCSVData(response.data)
+		set_csv_data(csv)
+	}
+
+	const headers = [
+		{ label: "Name", key: "name" },
+		{ label: "Designation", key: "designation" },
+		{ label: "Code", key: "code" },
+		{ label: "Date of Joining", key: "doj" },
+		{ label: "Date of Exit", key: "doe" },
+		{ label: "Contact Number", key: "mobile" },
+		{ label: "Bank Details", key: "bankDetails" },
+		{ label: "Time Created", key: "createdAt" },
+	];
+
+	const createCSVData = (data) => {
+		// CREATE CSV DATA - data HERE IS ALL DATA -- EXCLUDE LIMIT AND INCLUDES ALL FILTER EVENTS
+		let csvHolder = [];
+		return new Promise(async (resolve, reject) => {
+			try {
+				for (let index = 0; index < data.length; index++) {
+					const member = data[index];
+					const obj = {
+						name: member.name,
+						designation: member.designation,
+						code: `${member?.employeeCode}`,
+						doj: DateFormat(member.doj),
+						doe: member.doe ? DateFormat(member.doe) : '--',
+						mobile: member.contactNo,
+						bankDetails: member.bankDetails,
+						createdAt: DateFormat(member.createdAt),
+					}
+					csvHolder.push(obj)
+					if (index === data.length - 1) resolve(csvHolder)
+				}
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
+	}
+
+	const setDownLoad = () => {
+		setCSVDwn(true)
+		setTimeout(() => {
+			setCSVDwn(false)
+		}, 3000);
+	}
+
 	return (
 		<div className='w-full h-full'>
 			<TopBar
@@ -237,9 +295,10 @@ const Vendors = () => {
 				addTitle="Add Vendor"
 				addEv={() => setShowForm(true)}
 				csv="true"
+				onDownload={() => setDownLoad()}
 				filter="true"
 				search={search}
-				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value)}}
+				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
 			<Table aria-label="simple table">
@@ -286,8 +345,8 @@ const Vendors = () => {
 				onSubmit={(formData) => { validateForm(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
+			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="vendors" /> : null}
 		</div>
-
 	)
 }
 

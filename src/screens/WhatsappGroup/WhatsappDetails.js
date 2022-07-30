@@ -74,28 +74,14 @@ const WhatsappDetails = () => {
     }
 
 
-    const getInputSources = async() => {
-        // let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
-        // let arr = []
-        // for (let i = 0; i < 4; i++) {
-        //     arr.push(obj)
-        // };
-        // setWhatsappInputSources(arr);
-        // setWhatsappOutputSources(arr);
-
-        const process = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"INPUT"}}`);
-        if(process.statusCode>=200 && process.statusCode<300){
-            let processData = process.data;
-            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
-            setWhatsappInputSources(processData);
-        }
-
-        const processout = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"OUTPUT"}}`);
-        if(processout.statusCode>=200 && processout.statusCode<300){
-            let processData = processout.data;
-            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
-            setWhatsappOutputSources(processData);
-        }
+    const getInputSources = () => {
+        let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
+        let arr = []
+        for (let i = 0; i < 4; i++) {
+            arr.push(obj)
+        };
+        setWhatsappInputSources(arr);
+        setWhatsappOutputSources(arr);
     }
 
     const getWhatsappDetail = async () => {
@@ -428,7 +414,7 @@ const WhatsappDetails = () => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.processNumber}
+                                title={item.name}
                                 subTitle={item.description}
                             />
                         </Link>
@@ -441,11 +427,11 @@ const WhatsappDetails = () => {
                 <HeaderSection
                     title="OUTPUT SOURCES"
                 />
-                {whatsappOutputSources.length === 0 ? showEmpty() : whatsappOutputSources.map((item, index) => {
+                {whatsappInputSources.length === 0 ? showEmpty() : whatsappInputSources.map((item, index) => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.processNumber}
+                                title={item.name}
                                 subTitle={item.description}
                             />
                         </Link>
