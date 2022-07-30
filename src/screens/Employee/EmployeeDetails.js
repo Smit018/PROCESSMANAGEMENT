@@ -32,9 +32,9 @@ export default function EmployeeDetails(){
     const [process,setProcess] = useState(0);
     const [whatsapps,setWhatsapps] = useState(0);
     const [documents,setDocuments] = useState(0);
-    const [processQuery, setProcessQuery] = useState('');
-    const [whatsappQuery, setWhatsappQuery] = useState('');
-    const [documentQuery, setDocumentQuery] = useState('');
+    const [processQuery, setProcessQuery] = useState([]);
+    const [whatsappQuery, setWhatsappQuery] = useState([]);
+    const [documentQuery, setDocumentQuery] = useState([]);
     const id = pathArray[3]
 
     useEffect(()=>{
@@ -69,18 +69,63 @@ export default function EmployeeDetails(){
             // setEmployeeDetails({...employeeDetails,process:arr.length});
             setProcess(arr.length)
             setAllProcess(arr);
+            setProcessQuery(arr)
         }
 
     }
 
-    const getAllWhatsapp_Documents =async(text="")=>{
+    function onQuery(type,text){
+        if(type=="process"){
+            if(text==""){
+                setProcessQuery(allProcess)
+            }
+            else{
+                console.log(allProcess)
+                let proc = allProcess.filter(e=>{
+                    if(e.processNumber.toLowerCase().includes(text.toLowerCase())){
+                        return {...e}
+                    }
+                })
+                
+                setProcessQuery(proc)
+            }
+        }
+        else if(type=="whatsapp"){
+            if(text==""){
+                setWhatsappQuery(whatsapp)
+            }
+            else{
+                let proc = whatsapp.filter(e=>{
+                    if(e.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappQuery(proc)
+            }
+        }else{
+            if(text==""){
+                setWhatsappQuery(document)
+            }
+            else{
+                let proc = document.filter(e=>{
+                    if(e.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappQuery(proc)
+            }
+        }
+    }
+
+    const getAllWhatsapp_Documents =async(what="",doc="")=>{
         
         const getWhatsapp = await get(`whatsappMembers?filter={"include":{"relation":"whatsappGroup"},"where":{"memberId":"${id}"}}`)
         // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
         if(getWhatsapp.statusCode>=200 && getWhatsapp.statusCode<300){
-            let arr = getWhatsapp.data.map(e=>{return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
+            let arr = getWhatsapp.data.map(e=>{ return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
             setWhatsapp(arr);
             setWhatsapps(arr.length);
+            setWhatsappQuery(arr)
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
@@ -88,6 +133,7 @@ export default function EmployeeDetails(){
             let arr = getDocument.data.map(e=>{return {name:e.document.name,role:e.admin?'Admin':'Member'}})
             setDocument(arr);
             setDocuments(arr.length)
+            setWhatsappQuery(arr)
         }
         
     }
@@ -197,7 +243,7 @@ export default function EmployeeDetails(){
                     <div className='text-xl'>PROCESSES</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..." value={processQuery} onChange={e=>{setProcessQuery(e.target.value);getAllProcesses(e.target.value)}}  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..."  onChange={e=>{onQuery('process',e.target.value)}}  className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>
@@ -237,7 +283,7 @@ export default function EmployeeDetails(){
                     )
                 })} */}
                 <Accordion allowZeroExpanded>
-                    {allProcess.map((item,index) => (
+                    {processQuery?.map((item,index) => (
                     <AccordionItem key={item.id}>
                         <AccordionItemHeading>
                             <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-slate-100'>
@@ -283,14 +329,14 @@ export default function EmployeeDetails(){
                     <div className='text-xl font-medium'>WHATSAPP GROUPS</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..."  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('whatsapp',e.target.value)}}  className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>
 				        </div>
 			        </div>
                 </div>
-                {whatsapp.map((item,index)=>{
+                {whatsappQuery?.map((item,index)=>{
                     return(
                         <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
                         <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>
@@ -326,14 +372,16 @@ export default function EmployeeDetails(){
                     <div className='text-xl font-medium'>DOCUMENTS</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..."  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..." 
+                            onChange={e=>{onQuery('document',e.target.value)}}
+                            className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>
 				        </div>
 			        </div>
                 </div>
-                {document.map((item,index)=>{
+                {documentQuery?.map((item,index)=>{
                     return(
                         <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
                         <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>

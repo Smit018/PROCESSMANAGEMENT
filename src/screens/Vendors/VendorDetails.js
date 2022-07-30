@@ -30,6 +30,9 @@ export default function VendorDetails(){
     const [documents,setDocuments] = useState(0);
     const [document, setDocument] = useState([])
     const pathArray = window.location.pathname.split('/');
+    const [whatsappQuery, setWhatsappQuery] = useState([]);
+    const [documentQuery, setDocumentQuery] = useState([]);
+    
     const id = pathArray[3]
 
     useEffect(()=>{
@@ -75,17 +78,51 @@ export default function VendorDetails(){
         if(getWhatsapp.statusCode>=200 && getWhatsapp.statusCode<300){
             let arr = getWhatsapp.data.map(e=>{return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
             setWhatsapp(arr);
+            console.log(arr)
             setWhatsapps(arr.length);
+            setWhatsappQuery(arr)
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
         if(getDocument.statusCode>=200 && getDocument.statusCode<300){
             let arr = getDocument.data.map(e=>{return {name:e.document.name,role:e.admin?'Admin':'Member'}})
+            console.log(arr)
             setDocument(arr);
             setDocuments(arr.length)
+            setDocumentQuery(arr)
+            
         }
 
     }
+
+    function onQuery(type,text){
+        if(type=="whatsapp"){
+            if(text==""){
+                setWhatsappQuery(whatsapp)
+            }
+            else{
+                let proc = whatsapp.filter(e=>{
+                    if(e.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappQuery(proc)
+            }
+        }else{
+            if(text==""){
+                setWhatsappQuery(document)
+            }
+            else{
+                let proc = document.filter(e=>{
+                    if(e.name.toLowerCase().includes(text.toLowerCase())){
+                        return e
+                    }
+                })
+                setWhatsappQuery(proc)
+            }
+        }
+    }
+
 
     const employeeDet = async ()=>{
         const getDetail = await get(`members/${id}`);
@@ -244,14 +281,14 @@ export default function VendorDetails(){
                     <div className='text-xl font-medium'>WHATSAPP GROUPS</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..."  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('whatsapp',e.target.value)}}  className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>
 				        </div>
 			        </div>
                 </div>
-                {whatsapp.map((item,index)=>{
+                {whatsappQuery?.map((item,index)=>{
                     return(
                         <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
                         <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>
@@ -287,14 +324,14 @@ export default function VendorDetails(){
                     <div className='text-xl font-medium'>DOCUMENTS</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..."  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..." onChange={e=>{onQuery('document',e.target.value)}} className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>
 				        </div>
 			        </div>
                 </div>
-                {document.map((item,index)=>{
+                {documentQuery?.map((item,index)=>{
                     return(
                         <div className='pointer-Mouse' onClick={()=>showAccordian(index,item)}>
                         <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{borderBottom:"1px solid #66788A"}}>
