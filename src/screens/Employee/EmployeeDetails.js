@@ -28,6 +28,13 @@ export default function EmployeeDetails(){
     const [whatsapp, setWhatsapp] = useState([]);
     const [document, setDocument] = useState([])
     const pathArray = window.location.pathname.split('/');
+    // const [employeeDetails,setEmployeeDetails] = useState({});
+    const [process,setProcess] = useState(0);
+    const [whatsapps,setWhatsapps] = useState(0);
+    const [documents,setDocuments] = useState(0);
+    const [processQuery, setProcessQuery] = useState('');
+    const [whatsappQuery, setWhatsappQuery] = useState('');
+    const [documentQuery, setDocumentQuery] = useState('');
     const id = pathArray[3]
 
     useEffect(()=>{
@@ -41,22 +48,7 @@ export default function EmployeeDetails(){
     },[0]);
 
 
-    async function getAllProcesses(){
-        // let obj={name:"OPHSB3A",description:"Uploading Youtube Video for APT Students",role:"Member",
-        //         process:[
-        //                 {name:"Step 2",description:"Add Cases"},
-        //                 {name:"Step 5",description:"Register Case"},
-        //                 {name:"Step 6",description:"Collect Fee"},
-        //                 {name:"Step 10",description:"Welcome Call"},
-        //             ],
-        //             process1:"Add Cases"
-        //         };
-        // let arr=[];
-        // for(let i=0;i<10;i++){
-        //     arr.push(obj);
-        // }
-        
-        // setAllProcess(arr);
+    async function getAllProcesses(text=""){
 
         const getProcessInfo = await get(`stepsMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"steps","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
         if(getProcessInfo.statusCode>=200 && getProcessInfo.statusCode<300){
@@ -68,36 +60,36 @@ export default function EmployeeDetails(){
                 new Map()
             );
             for(let [key, value] of groupedMap){
-                // arr.push({"processNumber":key,description:value[0].stepDescription ||'',process:[...]})
-                let stepProcess = value.map(e=>e.stepDescription);
-                arr.push({"processNumber":key,process:stepProcess,processTitle:value[0].processTitle})
+                if(key.toLowerCase().includes(text.toLowerCase())){
+                    let stepProcess = value.map(e=>e.stepDescription);
+                    arr.push({"processNumber":key,process:stepProcess,processTitle:value[0].processTitle})
+                }
             }
             console.log(arr)
+            // setEmployeeDetails({...employeeDetails,process:arr.length});
+            setProcess(arr.length)
             setAllProcess(arr);
         }
 
     }
 
-    const getAllWhatsapp_Documents =async()=>{
-        // let arr=[],arr1=[];
-        // for(let i=0;i<7;i++){
-        //     arr.push({name:`Whatsapp group-${i+1}`,role:(i%3==0)?'Admin':'Member'})
-        //     arr1.push({name:`Document-${i+1}`,role:(i%3==0)?'Admin':'Member'})
-        // }
-        // setDocument(arr1);
-        // setWhatsapp(arr);
-        const getWhatsapp = await get(`whatsappMembers?filter={"where":{"memberId":"${id}"},"include":"whatsappGroup"}`)
+    const getAllWhatsapp_Documents =async(text="")=>{
+        
+        const getWhatsapp = await get(`whatsappMembers?filter={"include":{"relation":"whatsappGroup"},"where":{"memberId":"${id}"}}`)
+        // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
         if(getWhatsapp.statusCode>=200 && getWhatsapp.statusCode<300){
             let arr = getWhatsapp.data.map(e=>{return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
             setWhatsapp(arr);
+            setWhatsapps(arr.length);
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
         if(getDocument.statusCode>=200 && getDocument.statusCode<300){
             let arr = getDocument.data.map(e=>{return {name:e.document.name,role:e.admin?'Admin':'Member'}})
             setDocument(arr);
+            setDocuments(arr.length)
         }
-
+        
     }
 
     const employeeDet = async ()=>{
@@ -172,7 +164,7 @@ export default function EmployeeDetails(){
                             
                             <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
-                                    0
+                                    {process || 0}
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Processes
@@ -180,7 +172,7 @@ export default function EmployeeDetails(){
                             </div>
                             <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
-                                    32
+                                    {whatsapps || 0}
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Whatsapp Groups
@@ -188,7 +180,7 @@ export default function EmployeeDetails(){
                             </div>
                             <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
-                                    17
+                                    {documents || 0}
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Documents
@@ -205,7 +197,7 @@ export default function EmployeeDetails(){
                     <div className='text-xl'>PROCESSES</div>
                     <div className='search-bar flex mr-4'>
 				        <div>
-					        <TextInput height={40} placeholder="Search..."  className='l-blue' />
+					        <TextInput height={40} placeholder="Search..." value={processQuery} onChange={e=>{setProcessQuery(e.target.value);getAllProcesses(e.target.value)}}  className='l-blue' />
 				        </div>
 				        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
 					        <SearchIcon size={18} className='primary'/>

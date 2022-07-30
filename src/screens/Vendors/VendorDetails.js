@@ -26,6 +26,8 @@ export default function VendorDetails(){
     const [employeeDetail,setEmployeeDetail] = useState({});
     const [allProcess, setAllProcess] = useState([]);
     const [whatsapp, setWhatsapp] = useState([]);
+    const [whatsapps,setWhatsapps] = useState(0);
+    const [documents,setDocuments] = useState(0);
     const [document, setDocument] = useState([])
     const pathArray = window.location.pathname.split('/');
     const id = pathArray[3]
@@ -59,14 +61,30 @@ export default function VendorDetails(){
 
     }
 
-    const getAllWhatsapp_Documents =()=>{
-        let arr=[],arr1=[];
-        for(let i=0;i<7;i++){
-            arr.push({name:`Whatsapp group-${i+1}`,role:(i%3==0)?'Admin':'Member'})
-            arr1.push({name:`Document-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+    const getAllWhatsapp_Documents =async ()=>{
+        // let arr=[],arr1=[];
+        // for(let i=0;i<7;i++){
+        //     arr.push({name:`Whatsapp group-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+        //     arr1.push({name:`Document-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+        // }
+        // setDocument(arr1);
+        // setWhatsapp(arr);
+
+        const getWhatsapp = await get(`whatsappMembers?filter={"include":{"relation":"whatsappGroup"},"where":{"memberId":"${id}"}}`)
+        // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
+        if(getWhatsapp.statusCode>=200 && getWhatsapp.statusCode<300){
+            let arr = getWhatsapp.data.map(e=>{return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
+            setWhatsapp(arr);
+            setWhatsapps(arr.length);
         }
-        setDocument(arr1);
-        setWhatsapp(arr);
+
+        const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
+        if(getDocument.statusCode>=200 && getDocument.statusCode<300){
+            let arr = getDocument.data.map(e=>{return {name:e.document.name,role:e.admin?'Admin':'Member'}})
+            setDocument(arr);
+            setDocuments(arr.length)
+        }
+
     }
 
     const employeeDet = async ()=>{
@@ -137,17 +155,17 @@ export default function VendorDetails(){
                         </div>
                     </div>
                             
-                            <div className='flex flex-col justify-center '>
+                            {/* <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
                                     0
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Processes
                                 </div>
-                            </div>
+                            </div> */}
                             <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
-                                    32
+                                    {whatsapps}
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Whatsapp Groups
@@ -155,7 +173,7 @@ export default function VendorDetails(){
                             </div>
                             <div className='flex flex-col justify-center '>
                                 <div className='font-medium'>
-                                    17
+                                    {documents}
                                 </div>
                                 <div className='text-xs text-pri-col'>
                                     Documents
@@ -166,7 +184,7 @@ export default function VendorDetails(){
                 
             </Pane>
 
-            <div className='py-10'>
+            {/* <div className='py-10'>
             
                 <div className='flex justify-between items-center mb-6'>
                     <div className='text-xl'>PROCESSES</div>
@@ -218,7 +236,7 @@ export default function VendorDetails(){
                     </AccordionItem>
                     ))}
                 </Accordion>
-            </div>
+            </div> */}
 
             <div className='py-10'>
             

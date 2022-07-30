@@ -91,14 +91,27 @@ const DocumentDetails = () => {
     }
 
 
-    const getInputSources = () => {
-        let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
-        let arr = []
-        for (let i = 0; i < 4; i++) {
-            arr.push(obj)
-        };
-        setDocumentInputSources(arr);
-        setDocumentOutputSources(arr);
+    const getInputSources = async() => {
+        // let obj = { name: "OPVNXKA", description: "Uploading youtube video for APT Study Students" };
+        // let arr = []
+        // for (let i = 0; i < 4; i++) {
+        //     arr.push(obj)
+        // };
+        // setDocumentInputSources(arr);
+        // setDocumentOutputSources(arr);
+        const process = await get(`documentProcesses?filter={"include":{"relation":"process"},"where":{"documentId":"${id}","source":"INPUT"}}`);
+        if(process.statusCode>=200 && process.statusCode<300){
+            let processData = process.data;
+            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
+            setDocumentInputSources(processData);
+        }
+
+        const processout = await get(`documentProcesses?filter={"include":{"relation":"process"},"where":{"documentId":"${id}","source":"OUTPUT"}}`);
+        if(processout.statusCode>=200 && processout.statusCode<300){
+            let processData = processout.data;
+            processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
+            setDocumentOutputSources(processData);
+        }
     }
 
     const getDocumentDetail = async () => {
@@ -416,7 +429,7 @@ const DocumentDetails = () => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.name}
+                                title={item.processNumber}
                                 subTitle={item.description}
                             />
                         </Link>
@@ -433,7 +446,7 @@ const DocumentDetails = () => {
                     return (
                         <Link key={item.id} to={`/admin/processes/${item.id}`}>
                             <ProcessList
-                                title={item.name}
+                                title={item.processNumber}
                                 subTitle={item.description}
                             />
                         </Link>
