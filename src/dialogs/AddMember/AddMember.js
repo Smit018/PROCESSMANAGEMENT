@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, SmallPlusIcon, UserIcon, SmallCrossIcon } from "evergreen-ui";
-import { REGEX } from '../../services/https.service';
+import { baseUrl, REGEX } from '../../services/https.service';
+import { DateFormat } from '../../services/dateFormat';
 
 
 
@@ -14,6 +15,21 @@ const AddMember = (props) => {
     const [saveImage, setSaveImage] = useState();
     let imageHandler = useRef(null);
 
+
+    useEffect(() => {
+        if (props.inject)
+            setForm(props.inject)
+    }, [])
+
+    const setForm = (data) => {
+        console.log(data)
+        setEmployee({ ...data, doe: DateFormat(data.doe, 'picker'), doj: DateFormat(data.doj, 'picker') })
+        if (data.profile) {
+            setImgPresent(true)
+            const url = `${baseUrl}photos/${data?.memberType?.toLowerCase()}/download/${data?.profile}`
+            setImage(url)
+        }
+    }
 
     const header = (title) => {
         return (
@@ -31,7 +47,7 @@ const AddMember = (props) => {
 
     const submit = async () => {
         setLoading(true)
-        props.onSubmit({...employee, ...{upload: saveImage}})
+        props.onSubmit({ ...employee, ...{ upload: saveImage } })
         // const _form = await validateForm(formValues)
         // props.onSubmit(_form)
     }
@@ -118,15 +134,17 @@ const AddMember = (props) => {
                             onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
                         />
                         <div style={{ margin: "0 10px" }}></div>
-                        <TextInputField
-                            size={100}
-                            required
-                            label="Password"
-                            name="password"
-                            type="password"
-                            value={employee.password}
-                            onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
-                        />
+                        {props.inject ? null :
+                            <TextInputField
+                                size={100}
+                                required
+                                label="Password"
+                                name="password"
+                                type="password"
+                                value={employee.password}
+                                onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
+                            />
+                        }
                     </div>
                     <div className='flex justify-center items-center'>
                         <TextInputField

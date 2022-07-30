@@ -4,7 +4,7 @@ import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
 import { deleted, get, patch, post } from '../../services/https.service';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon, toaster } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog'
@@ -12,6 +12,8 @@ import PromptDialog from '../../dialogs/PromptDialog/PromptDialog'
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 const ProcessDetails1 = () => {
+    const navigate = useNavigate();
+
     const pathArray = window.location.pathname.split('/');
     const id = pathArray[3]
     const params = useParams();
@@ -704,6 +706,16 @@ const ProcessDetails1 = () => {
     }
 
 
+    const deleteProcess = async () => {
+        const response = await patch('processes/' + params.id, { deleted: true })
+        if(response.statusCode === 200) {
+            toaster.success('Deleted successfully!')
+            navigate(-1)
+            showDelete(false)
+        }
+        else toaster.danger('Failed to delete member!')
+    }
+
     return (
         <div className="w-full h-full">
             <TopBar title="Processes" breadscrubs={paths} />
@@ -1026,7 +1038,7 @@ const ProcessDetails1 = () => {
                     open={_showDelete}
                     title={`Delete Process!`}
                     onClose={() => showDelete(false)}
-                    onConfirm={() => showDelete(false)}
+                    onConfirm={() => deleteProcess()}
                     message={`Do you really want to delete this process?`}
                 /> : null
             }
