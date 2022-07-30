@@ -41,33 +41,63 @@ export default function EmployeeDetails(){
     },[0]);
 
 
-    function getAllProcesses(){
-        let obj={name:"OPHSB3A",description:"Uploading Youtube Video for APT Students",role:"Member",
-                process:[
-                        {name:"Step 2",description:"Add Cases"},
-                        {name:"Step 5",description:"Register Case"},
-                        {name:"Step 6",description:"Collect Fee"},
-                        {name:"Step 10",description:"Welcome Call"},
-                    ],
-                    process1:"Add Cases"
-                };
-        let arr=[];
-        for(let i=0;i<10;i++){
-            arr.push(obj);
-        }
+    async function getAllProcesses(){
+        // let obj={name:"OPHSB3A",description:"Uploading Youtube Video for APT Students",role:"Member",
+        //         process:[
+        //                 {name:"Step 2",description:"Add Cases"},
+        //                 {name:"Step 5",description:"Register Case"},
+        //                 {name:"Step 6",description:"Collect Fee"},
+        //                 {name:"Step 10",description:"Welcome Call"},
+        //             ],
+        //             process1:"Add Cases"
+        //         };
+        // let arr=[];
+        // for(let i=0;i<10;i++){
+        //     arr.push(obj);
+        // }
         
-        setAllProcess(arr);
+        // setAllProcess(arr);
+
+        const getProcessInfo = await get(`stepsMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"steps","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        if(getProcessInfo.statusCode>=200 && getProcessInfo.statusCode<300){
+            let stepmemberArr = getProcessInfo.data;
+            stepmemberArr= stepmemberArr.map(e=>{return {...e,processNumber:e.steps.process.processNumber,stepDescription:e.steps.description,processTitle:e.steps.process.title}});
+            let arr=[];
+            const groupedMap = stepmemberArr.reduce(
+                (entryMap, e) => entryMap.set(e.processNumber, [...entryMap.get(e.processNumber)||[], e]),
+                new Map()
+            );
+            for(let [key, value] of groupedMap){
+                // arr.push({"processNumber":key,description:value[0].stepDescription ||'',process:[...]})
+                let stepProcess = value.map(e=>e.stepDescription);
+                arr.push({"processNumber":key,process:stepProcess,processTitle:value[0].processTitle})
+            }
+            console.log(arr)
+            setAllProcess(arr);
+        }
 
     }
 
-    const getAllWhatsapp_Documents =()=>{
-        let arr=[],arr1=[];
-        for(let i=0;i<7;i++){
-            arr.push({name:`Whatsapp group-${i+1}`,role:(i%3==0)?'Admin':'Member'})
-            arr1.push({name:`Document-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+    const getAllWhatsapp_Documents =async()=>{
+        // let arr=[],arr1=[];
+        // for(let i=0;i<7;i++){
+        //     arr.push({name:`Whatsapp group-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+        //     arr1.push({name:`Document-${i+1}`,role:(i%3==0)?'Admin':'Member'})
+        // }
+        // setDocument(arr1);
+        // setWhatsapp(arr);
+        const getWhatsapp = await get(`whatsappMembers?filter={"where":{"memberId":"${id}"},"include":"whatsappGroup"}`)
+        if(getWhatsapp.statusCode>=200 && getWhatsapp.statusCode<300){
+            let arr = getWhatsapp.data.map(e=>{return {name:e.whatsappGroup.name,role:e.admin?'Admin':'Member'}})
+            setWhatsapp(arr);
         }
-        setDocument(arr1);
-        setWhatsapp(arr);
+
+        const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
+        if(getDocument.statusCode>=200 && getDocument.statusCode<300){
+            let arr = getDocument.data.map(e=>{return {name:e.document.name,role:e.admin?'Admin':'Member'}})
+            setDocument(arr);
+        }
+
     }
 
     const employeeDet = async ()=>{
@@ -220,8 +250,8 @@ export default function EmployeeDetails(){
                         <AccordionItemHeading>
                             <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-slate-100'>
                             <div className='flex flex-col'>
-                                <div className='text-xl pb-1'>{item?.name}</div>
-                                <div className='text-pri-col text-sm pb-1'>{item?.description}</div>
+                                <div className='text-xl pb-1'>{item?.processNumber}</div>
+                                <div className='text-pri-col text-sm pb-1'>{item?.processTitle}</div>
                                 <div className='text-pri-col text-sm'>{item?.role}</div>
                             </div>
                             <div className='text-lg text-pri-col'>
@@ -238,8 +268,8 @@ export default function EmployeeDetails(){
                                 return(
                                 <div className='flex' >
                                     
-                                        <div className='text-lg pr-4'>{item1?.name} :</div>
-                                        <div className=' text-lg'>{item1?.description}</div>
+                                        {/* <div className='text-lg pr-4'>{item1?.name} :</div> */}
+                                        <div className=' text-lg'>{index1+1} : {item1}</div>
                                     
                                     
                             </div>)
