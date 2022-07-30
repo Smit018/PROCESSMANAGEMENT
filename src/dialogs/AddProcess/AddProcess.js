@@ -89,16 +89,17 @@ const AddProcess = (props) => {
 	const [processNoPrefix, setProcessNoPrefix] = useState('');
 	const [processFound, setProcessFound] = useState(false);
 
-	const [selectedDept, setSelectedDept] = useState(_formDefault.departmentId);
-	const [selectedInpProcess, setSelectedInpProcess] = useState(_formDefault.inputProcess);
-	const [selectedProcessOwner, setSelectedProcessOwner] = useState(_formDefault.processOwner);
+	const [selectedDept, setSelectedDept] = useState(null);
+	const [selectedInpProcess, setSelectedInpProcess] = useState(null);
+	const [selectedProcessOwner, setSelectedProcessOwner] = useState(null);
 
 
 	useEffect(() => {
 		if (props.inject)
 			setUpdateData(props.inject)
 		else {
-			setFormValues(myForm)
+			cleanUpForm()
+			setFormValues(_formDefault)
 		}
 	}, []);
 
@@ -107,6 +108,13 @@ const AddProcess = (props) => {
 			console.log("cleaned up");
 		};
 	}, []);
+
+	const cleanUpForm = () => {
+		for(let key in _formDefault) {
+			if(key !== 'frequency' && key !== 'status')
+			_formDefault[key]['value'] = ""
+		}
+	}
 
 
 	const setUpdateData = async (data) => {
