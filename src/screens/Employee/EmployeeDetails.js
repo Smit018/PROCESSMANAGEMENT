@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { post, get, patch } from '../../services/https.service';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon, toaster } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
@@ -23,9 +23,11 @@ import {
 
 // Demo styles, see 'Styles' section below for some notes on use.
 import 'react-accessible-accordion/dist/fancy-example.css';
+import TopBar from '../../components/TopBar/TopBar';
 
 export default function EmployeeDetails() {
     const navigate = useNavigate()
+    const params = useParams()
     const [employeeDetail, setEmployeeDetail] = useState({});
     const [allProcess, setAllProcess] = useState([]);
     const [whatsapp, setWhatsapp] = useState([]);
@@ -196,7 +198,7 @@ export default function EmployeeDetails() {
 
     const deleteMe = async () => {
         const response = await patch('members/' + id, { deleted: true })
-        if(response.statusCode === 200) {
+        if (response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
             showDelete(false)
@@ -204,16 +206,17 @@ export default function EmployeeDetails() {
         else toaster.danger('Failed to delete member!')
     }
 
+    const paths = [
+        { path: '/admin/employees', title: 'Employees' },
+        { path: `/admin/employees/${params.id}`, title: employeeDetail?.name }
+    ]
 
     return (
         <div>
-            <div className='flex justify-between items-center'>
-                <div>
-                    <span className='m-label'> Employee </span>
-                    <span style={{ margin: "0 10px" }}>/</span>
-                    <span className='m-label'> {employeeDetail.name} </span>
-                </div>
-            </div>
+            <TopBar
+                title="Whatsapp Groups"
+                breadscrubs={paths}
+            />
             <Pane width="100%" height="30vh" className='my-7 backCol-WH p-9' elevation={2}>
 
                 <div className='flex justify-end items-center pb-5'>

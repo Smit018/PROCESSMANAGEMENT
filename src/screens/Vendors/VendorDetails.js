@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { post, get, patch } from '../../services/https.service';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Table, toaster, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
@@ -22,8 +22,10 @@ import {
 
 // Demo styles, see 'Styles' section below for some notes on use.
 import 'react-accessible-accordion/dist/fancy-example.css';
+import TopBar from '../../components/TopBar/TopBar';
 
 export default function VendorDetails() {
+    const params = useParams()
     const navigate = useNavigate()
     const [employeeDetail, setEmployeeDetail] = useState({});
     const [allProcess, setAllProcess] = useState([]);
@@ -191,15 +193,18 @@ export default function VendorDetails() {
     }
 
 
+
+    const paths = [
+        { path: '/admin/vendors', title: 'Vendors' },
+        { path: `/admin/vendors/${params.id}`, title: employeeDetail?.name }
+    ]
+
     return (
         <div>
-            <div className='flex justify-between items-center'>
-                <div>
-                    <span className='m-label'> Employee </span>
-                    <span style={{ margin: "0 10px" }}>/</span>
-                    <span className='m-label'> {employeeDetail.name} </span>
-                </div>
-            </div>
+            <TopBar
+                title="Vendors"
+                breadscrubs={paths}
+            />
             <Pane width="100%" height="30vh" className='my-7 backCol-WH p-9' elevation={2}>
 
                 <div className='flex justify-end items-center pb-5'>
