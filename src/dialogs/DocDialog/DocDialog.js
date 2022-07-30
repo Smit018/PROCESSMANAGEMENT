@@ -5,7 +5,7 @@ import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, 
 
 const DocDialog = (props) => {
 
-    let _form = props.inject
+    let _form = props.inject || { name: '', link: '' }
 
     const header = (title) => {
         return (

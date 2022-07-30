@@ -44,6 +44,13 @@ const Process = () => {
 		fetchProccesses()
 	}, [])
 
+	useEffect(() => {
+		return () => {
+			console.log("cleaned up");
+		};
+	}, []);
+
+
 	window.addEventListener('resize', (event) => {
 		setScreenHeight(event.target.innerHeight)
 	})
@@ -362,9 +369,11 @@ const Process = () => {
 						pageChange={(e) => changePage(e)}
 					/>
 				</Table>
-				<div>
-					<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
-				</div>
+				{!showForm ? null :
+					<div>
+						<AddProcess open={showForm} data={{ types, members, departments, process }} onClose={(ev) => _setShowForm(ev)} onSubmit={(form) => { saveProcess(form) }} />
+					</div>
+				}
 				{_csvDwn ? <CSV body={csv_data} headers={headers} filename="process.csv" /> : null}
 			</div>
 		)

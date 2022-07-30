@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { deleted, get, post } from '../../services/https.service';
+import { deleted, get, patch, post } from '../../services/https.service';
 import { useParams } from 'react-router-dom';
-import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon } from 'evergreen-ui';
+import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon, toaster } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
+import PromptDialog from '../../dialogs/PromptDialog/PromptDialog'
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
@@ -15,50 +16,58 @@ const ProcessDetails1 = () => {
     const id = pathArray[3]
     const params = useParams();
     const [processId, setProcessId] = useState('');
-    const [processDetail,setProcessDetail] = useState({})
+    const [processDetail, setProcessDetail] = useState({})
     const [newMember, setNewMember] = useState('')
     const [newWaGroup, setNewWaGroup] = useState('')
     const [newDocument, setNewDocument] = useState('')
     const [processOwner, setProcessOwner] = useState('');
+    const [_showDelete, showDelete] = useState(false);
+    const [_showUpdate, showUpdate] = useState(false);
 
-// For Process Members
+    // FOR DIALOG
+    const [types, setTypes] = useState([])
+    const [departments, setDept] = useState([])
+    const [members, setMembers] = useState([])
+    const [process, setProcess] = useState([]);
+
+    // For Process Members
     const [suggestProcessMembers, setSuggestProcessMembers] = useState([]);
     const [processMembers, setProcessMembers] = useState([]);
 
-// For Input Whatsapp    
+    // For Input Whatsapp    
 
     const [suggestInputWhatsapp, setSuggestInputWhatsapp] = useState([]);
     const [inputWhatsapp, setInputWhatsapp] = useState([]);
 
-// For Output Whatsapp    
+    // For Output Whatsapp    
 
     const [suggestOutputWhatsapp, setSuggestOutputWhatsapp] = useState([]);
     const [outputWhatsapp, setOutputWhatsapp] = useState([]);
 
-// For Input Document    
+    // For Input Document    
 
     const [suggestInputDocument, setSuggestInputDocument] = useState([]);
     const [inputDocument, setInputDocument] = useState([]);
 
-// For Output Document    
+    // For Output Document    
 
     const [suggestOutputDocument, setSuggestOutputDocument] = useState([]);
     const [outputDocument, setOutputDocument] = useState([]);
 
-// For Input Person    
+    // For Input Person    
 
     const [suggestInputPerson, setSuggestInputPerson] = useState([]);
     const [inputPerson, setInputPerson] = useState([]);
 
-// For Output Person    
+    // For Output Person    
 
     const [suggestOutputPerson, setSuggestOutputPerson] = useState([]);
     const [outputPerson, setOutputPerson] = useState([]);
 
-    const [allStep,setAllStep] = useState([]);
-    const [description,setDescription] = useState('');
+    const [allStep, setAllStep] = useState([]);
+    const [description, setDescription] = useState('');
     const [suggestStepMember, setSuggestStepMember] = useState([]);
-    const [saveStepMember,setSaveStepMember] = useState([]);
+    const [saveStepMember, setSaveStepMember] = useState([]);
 
     const paths = [
         { path: '/admin/processes', title: 'Processes' },
@@ -76,20 +85,74 @@ const ProcessDetails1 = () => {
         getAllInputPerson()
         getAllOutputPerson()
         getAllSteps()
-    }, [0])
+    }, [])
 
-    const  getProcessDetails= async ()=>{
-        const getDetaills = await get(`processes/${id}?filter={"include":["processOwner"]}`);
-        if(getDetaills.statusCode>=200 && getDetaills.statusCode<300){
+
+    useEffect(() => {
+        fetchDepartments()
+        fetchTypes()
+        fetchProcessesNumbers()
+        fetchMembers()
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            console.log("cleaned up");
+        };
+    }, []);
+
+
+    const fetchTypes = async () => {
+        const response = await get('types')
+        if (response) {
+            if (response.statusCode == 200) {
+                setTypes(response.data)
+            }
+        }
+    }
+
+    const fetchMembers = async () => {
+        const response = await get('members?filter={"where": {"memberType": "EMPLOYEE"}}')
+        if (response) {
+            if (response.statusCode == 200) {
+                setMembers(response.data)
+            }
+        }
+    }
+
+
+    const fetchProcessesNumbers = async () => {
+        const response = await get('processes?filter={"fields": ["id", "processNumber"]}')
+        // const response = await get('processes')
+        if (response) {
+            if (response.statusCode == 200) {
+                setProcess(response.data)
+            }
+        }
+    }
+
+
+    const fetchDepartments = async () => {
+        const response = await get('departments')
+        if (response) {
+            if (response.statusCode == 200) {
+                setDept(response.data)
+            }
+        }
+    }
+
+    const getProcessDetails = async () => {
+        const getDetaills = await get(`processes/${id}?filter={"include":["processOwner", "process"]}`);
+        if (getDetaills.statusCode >= 200 && getDetaills.statusCode < 300) {
             setProcessDetail(getDetaills.data);
         }
-        else{
+        else {
             console.log('Process Detail Not FOund')
         }
     }
 
-    const getSearchQueryProcessMembers =async(text,memberList)=>{
-        const alreadyMember = memberList.map(e=>e.member.id);
+    const getSearchQueryProcessMembers = async (text, memberList) => {
+        const alreadyMember = memberList.map(e => e.member.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"memberType":"EMPLOYEE"}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
@@ -105,41 +168,41 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getAllProcessMembers =async ()=>{
+    const getAllProcessMembers = async () => {
         const allProcessMembers = await get(`processMembers?filter={"where":{"processId":"${id}"},"include":"member"}`);
-        if(allProcessMembers.statusCode>=200 && allProcessMembers.statusCode<300){
+        if (allProcessMembers.statusCode >= 200 && allProcessMembers.statusCode < 300) {
             setProcessMembers(allProcessMembers.data);
-            getSearchQueryProcessMembers('',allProcessMembers.data);
+            getSearchQueryProcessMembers('', allProcessMembers.data);
         }
-        else{
+        else {
             console.log('Process Members Not FOund')
         }
     }
 
-    const getAllInputWhatsapp =async ()=>{
+    const getAllInputWhatsapp = async () => {
         const inputswhatsap = await get(`whatsappProcesses?filter={"where":{"processId":"${id}","source":"INPUT"},"include":"whatsappGroup"}`);
-        if(inputswhatsap.statusCode>=200 && inputswhatsap.statusCode<300){
+        if (inputswhatsap.statusCode >= 200 && inputswhatsap.statusCode < 300) {
             setInputWhatsapp(inputswhatsap.data);
-            getSearchQueryInputWhatsapp('',inputswhatsap.data);
+            getSearchQueryInputWhatsapp('', inputswhatsap.data);
         }
-        else{
+        else {
             console.log('Process Input Whtsapp Not FOund')
         }
     }
 
-    const getAllOutputWhatsapp =async ()=>{
+    const getAllOutputWhatsapp = async () => {
         const outputswhatsap = await get(`whatsappProcesses?filter={"where":{"processId":"${id}","source":"OUTPUT"},"include":"whatsappGroup"}`);
-        if(outputswhatsap.statusCode>=200 && outputswhatsap.statusCode<300){
+        if (outputswhatsap.statusCode >= 200 && outputswhatsap.statusCode < 300) {
             setOutputWhatsapp(outputswhatsap.data);
-            getSearchQueryOutputWhatsapp('',outputswhatsap.data);
+            getSearchQueryOutputWhatsapp('', outputswhatsap.data);
         }
-        else{
+        else {
             console.log('Process Input Whtsapp Not FOund')
         }
     }
 
-    const getSearchQueryInputWhatsapp =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.whatsappGroup.id);
+    const getSearchQueryInputWhatsapp = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
         let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
@@ -154,8 +217,8 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getSearchQueryOutputWhatsapp =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.whatsappGroup.id);
+    const getSearchQueryOutputWhatsapp = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
         let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
@@ -171,30 +234,30 @@ const ProcessDetails1 = () => {
     }
 
 
-    const getAllInputDocument =async ()=>{
+    const getAllInputDocument = async () => {
         const inputsdocument = await get(`documentProcesses?filter={"where":{"processId":"${id}","source":"INPUT"},"include":"document"}`);
-        if(inputsdocument.statusCode>=200 && inputsdocument.statusCode<300){
+        if (inputsdocument.statusCode >= 200 && inputsdocument.statusCode < 300) {
             setInputDocument(inputsdocument.data);
-            getSearchQueryInputDocument('',inputsdocument.data);
+            getSearchQueryInputDocument('', inputsdocument.data);
         }
-        else{
+        else {
             console.log('Process Input Whtsapp Not FOund')
         }
     }
 
-    const getAllOutputDocument =async ()=>{
+    const getAllOutputDocument = async () => {
         const outputsdocument = await get(`documentProcesses?filter={"where":{"processId":"${id}","source":"OUTPUT"},"include":"document"}`);
-        if(outputsdocument.statusCode>=200 && outputsdocument.statusCode<300){
+        if (outputsdocument.statusCode >= 200 && outputsdocument.statusCode < 300) {
             setOutputDocument(outputsdocument.data);
-            getSearchQueryOutputDocument('',outputsdocument.data);
+            getSearchQueryOutputDocument('', outputsdocument.data);
         }
-        else{
+        else {
             console.log('Process Input Whtsapp Not FOund')
         }
     }
 
-    const getSearchQueryInputDocument =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.document.id);
+    const getSearchQueryInputDocument = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.document.id);
         let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
@@ -209,8 +272,8 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getSearchQueryOutputDocument =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.document.id);
+    const getSearchQueryOutputDocument = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.document.id);
         let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
@@ -225,30 +288,30 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getAllInputPerson =async ()=>{
+    const getAllInputPerson = async () => {
         const inputsperson = await get(`personProcesses?filter={"where":{"processId":"${id}","source":"INPUT"},"include":"member"}`);
-        if(inputsperson.statusCode>=200 && inputsperson.statusCode<300){
+        if (inputsperson.statusCode >= 200 && inputsperson.statusCode < 300) {
             setInputPerson(inputsperson.data);
-            getSearchQueryInputPerson('',inputsperson.data);
+            getSearchQueryInputPerson('', inputsperson.data);
         }
-        else{
+        else {
             console.log('Process Input Person Not FOund')
         }
     }
 
-    const getAllOutputPerson =async ()=>{
+    const getAllOutputPerson = async () => {
         const outputsperson = await get(`personProcesses?filter={"where":{"processId":"${id}","source":"OUTPUT"},"include":"member"}`);
-        if(outputsperson.statusCode>=200 && outputsperson.statusCode<300){
+        if (outputsperson.statusCode >= 200 && outputsperson.statusCode < 300) {
             setOutputPerson(outputsperson.data);
-            getSearchQueryOutputPerson('',outputsperson.data);
+            getSearchQueryOutputPerson('', outputsperson.data);
         }
-        else{
+        else {
             console.log('Process Output Whtsapp Not Found')
         }
     }
 
-    const getSearchQueryInputPerson =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.member.id);
+    const getSearchQueryInputPerson = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.member.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -263,8 +326,8 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getSearchQueryOutputPerson =async(text,groupList)=>{
-        const alreadyGroup = groupList.map(e=>e.member.id);
+    const getSearchQueryOutputPerson = async (text, groupList) => {
+        const alreadyGroup = groupList.map(e => e.member.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -279,29 +342,31 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const getAllSteps = async()=>{
+    const getAllSteps = async () => {
         const getSteps = await get(`steps?filter={"where":{"processId":"${id}"},"order":"createdAt ASC"}`);
-        if(getSteps.statusCode>=200 && getSteps.statusCode<300){
-            let step=[...getSteps.data];
-            for(let i=0;i<step.length;i++){
+        if (getSteps.statusCode >= 200 && getSteps.statusCode < 300) {
+            let step = [...getSteps.data];
+            for (let i = 0; i < step.length; i++) {
                 let memberStep = await get(`stepsMembers?filter={"where":{"stepId":"${step[i].id}"},"include":"member"}`);
-                if(memberStep.statusCode>=200 && memberStep.statusCode<300){
-                    let memStep = memberStep.data.map(e=>{ 
-                        return {name:e.member.name,code:e.member.employeeCode,position:e.member.designation,
-                        type:e.member.memberType, memberid:e.member.id, id:e.id,stepId:step[i].id}
-                        })
+                if (memberStep.statusCode >= 200 && memberStep.statusCode < 300) {
+                    let memStep = memberStep.data.map(e => {
+                        return {
+                            name: e.member.name, code: e.member.employeeCode, position: e.member.designation,
+                            type: e.member.memberType, memberid: e.member.id, id: e.id, stepId: step[i].id
+                        }
+                    })
                     step[i]['member'] = memStep;
                 }
             }
-            suggestQueryStepMembers('',[])
+            suggestQueryStepMembers('', [])
             setAllStep(step);
         }
 
     }
 
-    async function suggestQueryStepMembers(text,memberList){
+    async function suggestQueryStepMembers(text, memberList) {
         console.log(memberList)
-        const alreadyGroup = memberList.map(e=>e.id);
+        const alreadyGroup = memberList.map(e => e.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -316,58 +381,58 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const pushStepmember=(mem)=>{
+    const pushStepmember = (mem) => {
         let memArr = [...saveStepMember];
         console.log(mem)
-        memArr.push({...mem});
+        memArr.push({ ...mem });
         setSaveStepMember(memArr)
-        suggestQueryStepMembers('',memArr)
+        suggestQueryStepMembers('', memArr)
     }
 
-    const popStepmember=(index)=>{
+    const popStepmember = (index) => {
         let memArr = [...saveStepMember];
-        memArr.splice(index,1)
+        memArr.splice(index, 1)
         setSaveStepMember(memArr)
-        suggestQueryStepMembers('',memArr)
+        suggestQueryStepMembers('', memArr)
     }
 
-    const checkSuggest = (variable,e)=>{
+    const checkSuggest = (variable, e) => {
         console.log(e)
-        if(variable=='processMember'){
-            getSearchQueryProcessMembers(e,processMembers);
+        if (variable == 'processMember') {
+            getSearchQueryProcessMembers(e, processMembers);
         }
-        else if(variable=='input-whatsapp'){
-            getSearchQueryInputWhatsapp(e,inputWhatsapp);
+        else if (variable == 'input-whatsapp') {
+            getSearchQueryInputWhatsapp(e, inputWhatsapp);
         }
-        else if(variable=='output-whatsapp'){
-            getSearchQueryOutputWhatsapp(e,outputWhatsapp);
+        else if (variable == 'output-whatsapp') {
+            getSearchQueryOutputWhatsapp(e, outputWhatsapp);
         }
-        else if(variable=='input-document'){
-            getSearchQueryInputDocument(e,inputDocument);
+        else if (variable == 'input-document') {
+            getSearchQueryInputDocument(e, inputDocument);
         }
-        else if(variable=='output-document'){
-            getSearchQueryOutputDocument(e,outputDocument);
+        else if (variable == 'output-document') {
+            getSearchQueryOutputDocument(e, outputDocument);
         }
-        else if(variable=='input-person'){
-            getSearchQueryInputPerson(e,inputPerson);
+        else if (variable == 'input-person') {
+            getSearchQueryInputPerson(e, inputPerson);
         }
-        else if(variable=='output-person'){
-            getSearchQueryOutputPerson(e,outputPerson);
+        else if (variable == 'output-person') {
+            getSearchQueryOutputPerson(e, outputPerson);
         }
-        else if(variable=='step'){
-            suggestQueryStepMembers(e,saveStepMember);
+        else if (variable == 'step') {
+            suggestQueryStepMembers(e, saveStepMember);
         }
     }
 
-    const addSteps = async ()=>{
-        const addStep = await post(`steps`,{description:description,processId:id});
-        if(addStep.statusCode>=200 && addStep.statusCode<300){
+    const addSteps = async () => {
+        const addStep = await post(`steps`, { description: description, processId: id });
+        if (addStep.statusCode >= 200 && addStep.statusCode < 300) {
             let StepData = addStep.data;
-            let stepData_DB = saveStepMember.map(e=>{
-                return {memberId:e.id,stepId:StepData.id}
+            let stepData_DB = saveStepMember.map(e => {
+                return { memberId: e.id, stepId: StepData.id }
             })
-            const addStepMem = await post(`stepsMembers`,stepData_DB);
-            if(addStepMem.statusCode>=200 && addStepMem.statusCode<300){
+            const addStepMem = await post(`stepsMembers`, stepData_DB);
+            if (addStepMem.statusCode >= 200 && addStepMem.statusCode < 300) {
                 console.log('Added Step and Step Members');
                 setSaveStepMember([]);
                 setDescription('');
@@ -376,8 +441,8 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const addProcessMember = async (mem)=>{
-        let addMember = { processId: id, memberId: mem.id, memberType:mem.memberType, source:"Whatsapp" }
+    const addProcessMember = async (mem) => {
+        let addMember = { processId: id, memberId: mem.id, memberType: mem.memberType, source: "Whatsapp" }
         const whatsap = await post(`processMembers`, addMember);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Members added to process");
@@ -387,79 +452,79 @@ const ProcessDetails1 = () => {
         }
     }
 
-    const addInput_OutputWhatsapp = async (what,source)=>{
-        let addGroup = { processId: id, whatsappId: what.id, source:source }
+    const addInput_OutputWhatsapp = async (what, source) => {
+        let addGroup = { processId: id, whatsappId: what.id, source: source }
         const whatsap = await post(`whatsappProcesses`, addGroup);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Whatsapp added to process");
-            (source=='INPUT')?getAllInputWhatsapp():getAllOutputWhatsapp()
-            
+            (source == 'INPUT') ? getAllInputWhatsapp() : getAllOutputWhatsapp()
+
         } else {
             console.log('Failed to add process whatsapp')
         }
     }
 
 
-    const addInput_OutputDocument = async (doc,source)=>{
-        let addGroup = { processId: id, documentId: doc.id, source:source }
+    const addInput_OutputDocument = async (doc, source) => {
+        let addGroup = { processId: id, documentId: doc.id, source: source }
         const documents = await post(`documentProcesses`, addGroup);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
             console.log("Documents added to process");
-            (source=='INPUT')?getAllInputDocument():getAllOutputDocument()
-            
+            (source == 'INPUT') ? getAllInputDocument() : getAllOutputDocument()
+
         } else {
             console.log('Failed to add process Document')
         }
     }
 
-    const addInput_OutputPerson = async (mem,source)=>{
-        let addMember = { processId: id, memberId: mem.id, source:source }
+    const addInput_OutputPerson = async (mem, source) => {
+        let addMember = { processId: id, memberId: mem.id, source: source }
         const persons = await post(`personProcesses`, addMember);
         if (persons.statusCode >= 200 && persons.statusCode < 300) {
             console.log("Persons added to process");
-            (source=='INPUT')?getAllInputPerson():getAllOutputPerson()
-            
+            (source == 'INPUT') ? getAllInputPerson() : getAllOutputPerson()
+
         } else {
             console.log('Failed to add process Persons')
         }
     }
 
-    const postProcess = (type,mem)=>{
-        if(type=="processMember"){
+    const postProcess = (type, mem) => {
+        if (type == "processMember") {
             addProcessMember(mem);
         }
-        else if(type=='input-whatsapp'){
-            addInput_OutputWhatsapp(mem,'INPUT')
+        else if (type == 'input-whatsapp') {
+            addInput_OutputWhatsapp(mem, 'INPUT')
         }
-        else if(type=='output-whatsapp'){
-            addInput_OutputWhatsapp(mem,'OUTPUT')
+        else if (type == 'output-whatsapp') {
+            addInput_OutputWhatsapp(mem, 'OUTPUT')
         }
-        else if(type=='input-document'){
-            addInput_OutputDocument(mem,'INPUT')
+        else if (type == 'input-document') {
+            addInput_OutputDocument(mem, 'INPUT')
         }
-        else if(type=='output-document'){
-            addInput_OutputDocument(mem,'OUTPUT')
+        else if (type == 'output-document') {
+            addInput_OutputDocument(mem, 'OUTPUT')
         }
-        else if(type=='input-person'){
-            addInput_OutputPerson(mem,'INPUT')
+        else if (type == 'input-person') {
+            addInput_OutputPerson(mem, 'INPUT')
         }
-        else if(type=='output-person'){
-            addInput_OutputPerson(mem,'OUTPUT')
+        else if (type == 'output-person') {
+            addInput_OutputPerson(mem, 'OUTPUT')
         }
-        else if(type=='step'){
+        else if (type == 'step') {
             // console.log(mem)
             pushStepmember(mem)
         }
     }
 
 
-    const autoItem = (item,variable) => {
+    const autoItem = (item, variable) => {
         return (
-            <span key={item.children.name} onClick={() => {console.log('items', item.children,variable);postProcess(variable,item.children)}}>
+            <span key={item.children.name} onClick={() => { console.log('items', item.children, variable); postProcess(variable, item.children) }}>
                 <AvatarList
                     avatar={ImageURL}
                     name={item.children.name}
-                    description={item.children.designation||''}
+                    description={item.children.designation || ''}
                     action={false}
                     _item={item}
                 />
@@ -480,11 +545,12 @@ const ProcessDetails1 = () => {
                 onChange={changedItem => console.log(changedItem)}
                 items={myProps.datasource}
                 itemToString={(item) => { return item ? item : '' }}
-                renderItem={(item, index) => autoItem(item,myProps.variable)}
+                renderItem={(item, index) => autoItem(item, myProps.variable)}
                 itemSize={75}
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
-                onInputValueChange={changedItem => {console.log(changedItem)
-                    checkSuggest(myProps.variable,changedItem)
+                onInputValueChange={changedItem => {
+                    console.log(changedItem)
+                    checkSuggest(myProps.variable, changedItem)
                 }}
             >
                 {({
@@ -503,7 +569,7 @@ const ProcessDetails1 = () => {
                             height={50}
                             placeholder={myProps.placeholder}
                             onFocus={openMenu}
-                            onChange={(e) => {myProps.inputChange(e);checkSuggest(myProps.variable,e.target.value)}}
+                            onChange={(e) => { myProps.inputChange(e); checkSuggest(myProps.variable, e.target.value) }}
                             {...getInputProps()}
                         />
                     </Pane>
@@ -522,7 +588,7 @@ const ProcessDetails1 = () => {
                         <Heading size={500}>{index + 1}. {data.description}</Heading>
                         <div className='flex items-center'>
                             <IconButton icon={EditIcon} marginRight={2} />
-                            <IconButton icon={CrossIcon} marginRight={2} onClick={()=>removeMember('step',data)} />
+                            <IconButton icon={CrossIcon} marginRight={2} onClick={() => removeMember('step', data)} />
                         </div>
                     </div>
                     <div className='flex flex-wrap my-3'>
@@ -531,7 +597,7 @@ const ProcessDetails1 = () => {
                                 <div key={_index} className='mx-2 my-2'>
                                     <AvatarCard
                                         avatar={ImageURL}
-                                        sendDelete={e=>fetchRemovelist('step',index,member)}
+                                        sendDelete={e => fetchRemovelist('step', index, member)}
                                         name={member.name}
                                         description={`${member.code}, ${member.position}`}
                                         type={member.type}
@@ -545,54 +611,54 @@ const ProcessDetails1 = () => {
         );
     }
 
-    const removeMember = async (type,data)=>{
+    const removeMember = async (type, data) => {
         let deleteRecord;
-        if(type=="step-member"){
+        if (type == "step-member") {
             deleteRecord = await deleted(`stepsMembers/${data}`);
         }
-        else if(type=="step"){
+        else if (type == "step") {
             console.log(data)
-            for(let mem of data.member){
+            for (let mem of data.member) {
                 let deleteMember = await deleted(`stepsMembers/${mem.id}`);
-                if(deleteMember.statusCode>300){
+                if (deleteMember.statusCode > 300) {
                     console.log('failed to delete Member')
                 }
             }
-            deleteRecord= await deleted(`steps/${data.id}`);
+            deleteRecord = await deleted(`steps/${data.id}`);
 
         }
-        else if(type=="processMember"){
+        else if (type == "processMember") {
             deleteRecord = await deleted(`processMembers/${data}`);
         }
-        else if(type=="processPerson"){
+        else if (type == "processPerson") {
             deleteRecord = await deleted(`personProcesses/${data}`);
         }
-        else if(type=="whatsappProcess"){
+        else if (type == "whatsappProcess") {
             deleteRecord = await deleted(`whatsappProcesses/${data}`);
         }
-        else if(type=="documentProcess"){
+        else if (type == "documentProcess") {
             deleteRecord = await deleted(`documentProcesses/${data}`);
         }
 
-        if(deleteRecord?.statusCode>=200 && deleteRecord?.statusCode<300){
-            if(type=="step-member"){
+        if (deleteRecord?.statusCode >= 200 && deleteRecord?.statusCode < 300) {
+            if (type == "step-member") {
                 getAllSteps()
             }
-            else if(type=='step'){
+            else if (type == 'step') {
                 getAllSteps();
             }
-            else if(type=='processMember'){
+            else if (type == 'processMember') {
                 getAllProcessMembers()
             }
-            else if(type=='processPerson'){
+            else if (type == 'processPerson') {
                 getAllInputPerson();
                 getAllOutputPerson()
             }
-            else if(type=='whatsappProcess'){
+            else if (type == 'whatsappProcess') {
                 getAllOutputWhatsapp()
                 getAllInputWhatsapp()
             }
-            else if(type=='documentProcess'){
+            else if (type == 'documentProcess') {
                 getAllOutputDocument()
                 getAllOutputDocument()
             }
@@ -601,15 +667,42 @@ const ProcessDetails1 = () => {
     }
 
 
-    async function fetchRemovelist(type,ind,mem){
+    async function fetchRemovelist(type, ind, mem) {
         console.log(mem)
-        if(type=="suggestedStep"){
-        popStepmember(ind)
+        if (type == "suggestedStep") {
+            popStepmember(ind)
         }
-        else if(type=="step"){
-            removeMember("step-member",mem.id)
+        else if (type == "step") {
+            removeMember("step-member", mem.id)
         }
     }
+
+    const saveProcess = async (form) => {
+        let process = {};
+        for (let i in form) {
+            process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
+        }
+        if (process['inputProcess'] == "") {
+            delete process.inputProcess
+        }
+        process['duration'] = `${process['hours']}:${process['minutes']}`;
+        process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
+        console.log(process)
+        try {
+            const response = await patch("processes/" + params.id, process);
+            if (response.statusCode === 200) {
+                toaster.success('Process Updated successfully')
+                showUpdate(false)
+                getProcessDetails()
+            }
+            else toaster.danger('Failed to update the process!')
+        }
+        catch (err) {
+            console.log(err)
+            toaster.danger('Failed to update the process!')
+        }
+    }
+
 
     return (
         <div className="w-full h-full">
@@ -626,9 +719,9 @@ const ProcessDetails1 = () => {
                         </Heading>
                     </div>
                     <div>
-                        <Button color="red">Delete</Button>
+                        <Button color="red" onClick={() => showDelete(true)}>Delete</Button>
                         &nbsp;&nbsp;
-                        <Button appearance="primary">Edit</Button>
+                        <Button appearance="primary" onClick={() => showUpdate(true)}>Edit</Button>
                     </div>
                 </div>
                 <hr></hr>
@@ -646,18 +739,20 @@ const ProcessDetails1 = () => {
                             <Heading size={200}>Process Owner</Heading>
                         </div>
                     </div>
-                    <div>
-                        <Heading className="primary" fontWeight={500} size={500}>OPSMM012</Heading>
-                        <Text size={300}>Change the delivery status of students to whom the book has been delivered.</Text>
-                        <Heading size={200}>Input Process</Heading>
-                    </div>
+                    {processDetail.process ?
+                        <div>
+                            <Heading className="primary" fontWeight={500} size={500}>{processDetail.process.processNumber}</Heading>
+                            <Text size={300}>{processDetail.process.title}</Text>
+                            <Heading size={200}>Input Process</Heading>
+                        </div> : null
+                    }
                     <div>
                         <Heading size={400}>{processDetail?.frequency}, {processDetail?.hours} hrs {processDetail?.minutes} min</Heading>
                         <Text size={300}>Process Duration</Text>
                     </div>
                     <div>
-                        <Heading size={400} marginBottom={10}>In Progress</Heading>
-                        <progress id="file" value="32" max="100"> 32% </progress>
+                        <Heading size={400}>Status</Heading>
+                        <Text size={300}>{processDetail.status}</Text>
                     </div>
                 </div>
             </Pane>
@@ -666,18 +761,18 @@ const ProcessDetails1 = () => {
                 {/* MEMBERS */}
                 <div className='mr-4'>
                     <Heading size={800} marginBottom={10}>MEMBERS</Heading>
-                    {processMembers.map((item,index)=>{
-                        return(
+                    {processMembers.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        sendDelete={e=>removeMember('processMember',item.id)}
-                        name={item?.member?.name}
-                        description={item?.member?.designation}
-                        actionText={item?.member?.memberType}
-                    />
+                                avatar={ImageURL}
+                                sendDelete={e => removeMember('processMember', item.id)}
+                                name={item?.member?.name}
+                                description={item?.member?.designation}
+                                actionText={item?.member?.memberType}
+                            />
                         )
                     })}
-                    
+
                     <div className='py-3 w-full'>
                         <AutoTextInput
                             datasource={suggestProcessMembers}
@@ -694,20 +789,20 @@ const ProcessDetails1 = () => {
                     <Steps
                         datasource={allStep}
                     />
-                    {saveStepMember.map((item,index)=>{
-                        return(
+                    {saveStepMember.map((item, index) => {
+                        return (
                             <AvatarList
-                            sendDelete={e=>fetchRemovelist('suggestedStep',index)}
-                        avatar={ImageURL}
-                        name={item?.name}
-                        description={item?.designation}
-                        actionText={item?.memberType}
-                    />
+                                sendDelete={e => fetchRemovelist('suggestedStep', index)}
+                                avatar={ImageURL}
+                                name={item?.name}
+                                description={item?.designation}
+                                actionText={item?.memberType}
+                            />
                         )
                     })}
                     <div className='flex'>
                         <div className='w-1/2'>
-                            <TextInput className="w-full" height={50} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Enter step description here" />
+                            <TextInput className="w-full" height={50} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter step description here" />
                         </div>
                         &nbsp;&nbsp;&nbsp;
                         <div className='w-1/2'>
@@ -748,15 +843,15 @@ const ProcessDetails1 = () => {
                         description="Product Manager"
                         actionText="Employee"
                     /> */}
-                    {inputPerson.map((item,index)=>{
-                        return(
+                    {inputPerson.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        name={item?.member?.name}
-                        sendDelete={e=>removeMember('processPerson',item.id)}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                name={item?.member?.name}
+                                sendDelete={e => removeMember('processPerson', item.id)}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
                     <div className='py-3 w-full'>
@@ -778,18 +873,18 @@ const ProcessDetails1 = () => {
                         description="Product Manager"
                         actionText="Employee"
                     /> */}
-                    {inputWhatsapp.map((item,index)=>{
-                        return(
+                    {inputWhatsapp.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        name={item?.whatsappGroup?.name}
-                        sendDelete={e=>removeMember('whatsappProcess',item.id)}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                name={item?.whatsappGroup?.name}
+                                sendDelete={e => removeMember('whatsappProcess', item.id)}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
-                    
+
                     <div className='py-3 w-full'>
                         <AutoTextInput
                             datasource={suggestInputWhatsapp}
@@ -810,18 +905,18 @@ const ProcessDetails1 = () => {
                         actionText="Employee"
                     /> */}
 
-                    {inputDocument.map((item,index)=>{
-                        return(
+                    {inputDocument.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        name={item?.document?.name}
-                        sendDelete={e=>removeMember('documentProcess',item.id)}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                name={item?.document?.name}
+                                sendDelete={e => removeMember('documentProcess', item.id)}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
-                    
+
                     <div className='py-3 w-full'>
                         <AutoTextInput
                             datasource={suggestInputDocument}
@@ -847,15 +942,15 @@ const ProcessDetails1 = () => {
                         description="Product Manager"
                         actionText="Employee"
                     /> */}
-                    {outputPerson.map((item,index)=>{
-                        return(
+                    {outputPerson.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        name={item?.member?.name}
-                        sendDelete={e=>removeMember('processPerson',item.id)}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                name={item?.member?.name}
+                                sendDelete={e => removeMember('processPerson', item.id)}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
                     <div className='py-3 w-full'>
@@ -871,15 +966,15 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
-                    {outputWhatsapp.map((item,index)=>{
-                        return(
+                    {outputWhatsapp.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        sendDelete={e=>removeMember('whatsappProcess',item.id)}
-                        name={item?.whatsappGroup?.name}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                sendDelete={e => removeMember('whatsappProcess', item.id)}
+                                name={item?.whatsappGroup?.name}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
                     <div className='py-3 w-full'>
@@ -901,15 +996,15 @@ const ProcessDetails1 = () => {
                         description="Product Manager"
                         actionText="Employee"
                     /> */}
-                    {outputDocument.map((item,index)=>{
-                        return(
+                    {outputDocument.map((item, index) => {
+                        return (
                             <AvatarList
-                        avatar={ImageURL}
-                        name={item?.document?.name}
-                        sendDelete={e=>removeMember('documentProcess',item.id)}
-                        description={''}
-                        actionText={''}
-                    />
+                                avatar={ImageURL}
+                                name={item?.document?.name}
+                                sendDelete={e => removeMember('documentProcess', item.id)}
+                                description={''}
+                                actionText={''}
+                            />
                         )
                     })}
                     <div className='py-3 w-full'>
@@ -926,35 +1021,28 @@ const ProcessDetails1 = () => {
             <br></br>
             <br></br>
             <br></br>
+            {_showDelete ?
+                <PromptDialog
+                    open={_showDelete}
+                    title={`Delete Process!`}
+                    onClose={() => showDelete(false)}
+                    onConfirm={() => showDelete(false)}
+                    message={`Do you really want to delete this process?`}
+                /> : null
+            }
+            {_showUpdate ?
+                <AddProcess
+                    open={_showUpdate}
+                    data={{ types, members, departments, process }}
+                    onClose={(ev) => showUpdate(ev)}
+                    inject={processDetail}
+                    onSubmit={(form) => { saveProcess(form) }}
+                /> : null
+
+            }
         </div>
     );
 }
 
 
 export default ProcessDetails1;
-
-
-
-const datasource = [{ name: "hello" }, { name: "world" }, { name: "drek" }, { name: "john" }, { name: "oswald" }, { name: "honey" }]
-
-const steps = [
-    {
-        description: 'Uploading youtube videos', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Add cases via MIS panel', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    },
-    {
-        description: 'Send Payment Links', member: [
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' },
-            { name: "Rahul Kumar", code: '1025', position: 'Sales Manager', type: 'Employee' }
-        ]
-    }
-]
