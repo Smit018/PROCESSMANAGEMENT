@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { get, post } from '../../services/https.service';
+import { baseUrl, get, post } from '../../services/https.service';
 import { useNavigate, Outlet } from "react-router-dom";
 
-import { SearchInput, Table, Pagination, toaster } from 'evergreen-ui';
+import { SearchInput, Table, Pagination, toaster, Pane, Avatar } from 'evergreen-ui';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
 import { DateFormat } from '../../services/dateFormat';
 import { CSV } from '../../services/csv.service';
+import { AvatarList } from '../../components/AvatarList/AvatarList';
 
 
 let allData = []
@@ -347,16 +348,38 @@ const Process = () => {
 					<Table.Body height={allProcess?.length > 10 ? screenHeight - 300 : 'auto'}>
 						{!allProcess ? showSpinner() : allProcess?.length === 0 ? showEmpty() : allProcess.map((profile, index) => (
 							<Table.Row key={`"${index}"`} isSelectable onSelect={() => { navigate(`/admin/processes/${profile.id}`) }}>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile.processNumber}</Table.TextCell>
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile.processNumber}</Table.TextCell>
 								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile.title}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.type?.name}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.department?.name}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.processOwner?.name}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.personProcess?.length}</Table.TextCell>
-								<Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'input')}</Table.TextCell>
-								<Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'output')}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{profile?.status}</Table.TextCell>
-								<Table.TextCell minWidth={'8%'} maxWidth={'8%'} className="tb-c">{DateFormat(profile?.createdAt)}</Table.TextCell>
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile?.type?.name}</Table.TextCell>
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile?.department?.name}</Table.TextCell>
+								<Table.TextCell minWidth={'25%'} maxWidth={'25%'} className="tb-c">
+									<AvatarList
+										avatar={`${baseUrl}photos/${profile?.processOwner?.memberType?.toLowerCase()}/download/${profile?.processOwner?.profile}`}
+										name={profile?.processOwner?.name}
+										description={`${profile?.processOwner?.employeeCode}, ${profile?.processOwner?.designation}`}
+									/>
+								</Table.TextCell>
+								<Table.TextCell minWidth={'15%'} maxWidth={'10%'} className="tb-c">
+									<span className='flex items-center'>
+										{profile?.personProcess?.length === 0 ? '--' : [1, 2, 3].map((iter, index) => {
+											const member = profile?.personProcess[index]
+											return (<Avatar
+												zIndex={index + 2}
+												marginLeft={index > 0 ? (-((index * 2) + 20)) : 0}
+												size={40}
+												src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
+												name={member?.member?.name}
+											/>)
+										})}
+										<span className="primary">
+											{profile?.personProcess?.length < 3 ? null : `+ ${profile?.personProcess?.length - 3} more`}
+										</span>
+									</span>
+								</Table.TextCell>
+								{/* <Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'input')}</Table.TextCell>
+								<Table.TextCell minWidth={'16%'} maxWidth={'16%'} className="tb-c">{nestedTableBody(profile, 'output')}</Table.TextCell> */}
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{profile?.status}</Table.TextCell>
+								<Table.TextCell minWidth={'10%'} maxWidth={'10%'} className="tb-c">{DateFormat(profile?.createdAt)}</Table.TextCell>
 							</Table.Row>
 						))}
 					</Table.Body>
@@ -390,24 +413,24 @@ Process.defaultProps = {};
 export default Process;
 
 const columns = [
-	{ key: 'processNumber', value: 'Processess', width: '8%' },
+	{ key: 'processNumber', value: 'Processess', width: '10%' },
 	{ key: 'title', value: 'Process Title', width: '10%' },
-	{ key: 'type', value: 'Type', width: '8%' },
-	{ key: 'department', value: 'Department', width: '8%' },
-	{ key: 'processOwner', value: 'Owner', width: '8%' },
-	{ key: 'members', value: 'Members', width: '8%' },
-	{
-		key: 'inputSource', _value: 'Input Source', width: '16%', value: [
-			{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
-			{ key: 'documents', value: 'Documents', width: '50%' }
-		]
-	},
-	{
-		key: 'outputSource', _value: 'Output Source', width: '16%', value: [
-			{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
-			{ key: 'documents', value: 'Documents', width: '50%' }
-		]
-	},
-	{ key: 'status', value: 'Status', width: '8%' },
-	{ key: 'createdAt', value: 'Created At', width: '8%' }
+	{ key: 'type', value: 'Type', width: '10%' },
+	{ key: 'department', value: 'Department', width: '10%' },
+	{ key: 'processOwner', value: 'Owner', width: '25%' },
+	{ key: 'members', value: 'Members', width: '15%' },
+	// {
+	// 	key: 'inputSource', _value: 'Input Source', width: '16%', value: [
+	// 		{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
+	// 		{ key: 'documents', value: 'Documents', width: '50%' }
+	// 	]
+	// },
+	// {
+	// 	key: 'outputSource', _value: 'Output Source', width: '16%', value: [
+	// 		{ key: 'whatsapp', value: 'Whatsapp', width: '50%' },
+	// 		{ key: 'documents', value: 'Documents', width: '50%' }
+	// 	]
+	// },
+	{ key: 'status', value: 'Status', width: '10%' },
+	{ key: 'createdAt', value: 'Created At', width: '10%' }
 ]
