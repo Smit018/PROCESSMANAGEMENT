@@ -409,6 +409,7 @@ export default function VendorDetails() {
             }
             {_showUpdate ?
                 <AddMember
+                    type="vendor"
                     open={_showUpdate}
                     onClose={(ev) => showUpdate(ev)}
                     inject={employeeDetail}

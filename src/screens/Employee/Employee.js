@@ -333,6 +333,7 @@ const Employee = () => {
 				/>
 			</Table>
 			<AddMember
+				type="employee"
 				open={showForm}
 				title="Add Employee"
 				onSubmit={(formData) => { validateForm(formData) }}

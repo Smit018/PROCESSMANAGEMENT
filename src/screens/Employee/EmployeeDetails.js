@@ -456,6 +456,7 @@ export default function EmployeeDetails() {
             }
             {_showUpdate ?
                 <AddMember
+                    type="employee"
                     open={_showUpdate}
                     onClose={(ev) => showUpdate(ev)}
                     inject={employeeDetail}

@@ -340,6 +340,7 @@ const Vendors = () => {
 				/>
 			</Table>
 			<AddMember
+				type="vendor"
 				open={showForm}
 				title="Add Vendor"
 				onSubmit={(formData) => { validateForm(formData) }}

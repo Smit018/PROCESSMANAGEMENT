@@ -124,72 +124,62 @@ const AddMember = (props) => {
                         value={employee.name}
                         onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
                     />
-                    <div className='flex justify-center items-center'>
-                        <TextInputField
-                            size={100}
-                            required
-                            label="Email"
-                            name="email"
-                            value={employee.email}
-                            onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-                        />
-                        <div style={{ margin: "0 10px" }}></div>
-                        {props.inject ? null :
+                    <TextInputField
+                        size={100}
+                        required
+                        label="Email"
+                        name="email"
+                        value={employee.email}
+                        onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
+                    />
+                    {props.type === 'vendor' ? null :
+                        <div className='flex justify-center items-center'>
                             <TextInputField
                                 size={100}
                                 required
-                                label="Password"
-                                name="password"
-                                type="password"
-                                value={employee.password}
-                                onChange={(e) => setEmployee({ ...employee, password: e.target.value })}
+                                label="Designation"
+                                value={employee.designation}
+                                name="designation"
+                                onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
                             />
-                        }
-                    </div>
-                    <div className='flex justify-center items-center'>
-                        <TextInputField
-                            size={100}
-                            required
-                            label="Designation"
-                            value={employee.designation}
-                            name="designation"
-                            onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
-                        />
-                        <div style={{ margin: "0 10px" }}></div>
-                        <TextInputField
-                            size={100}
-                            required
-                            label="Employee Code"
-                            value={employee.employeeCode}
-                            name="employeeCode"
-                            onChange={(e) => setEmployee({ ...employee, employeeCode: e.target.value })}
-                        />
-                    </div>
-                    <div className='w-full flex justify-center items-center'>
-                        <div className='w-full'>
+                            <div style={{ margin: "0 10px" }}></div>
                             <TextInputField
                                 size={100}
-                                type="date"
                                 required
-                                label="Date of Joining"
-                                value={employee.doj}
-                                name="doj"
-                                onChange={(e) => setEmployee({ ...employee, doj: e.target.value })}
+                                label="Employee Code"
+                                value={employee.employeeCode}
+                                name="employeeCode"
+                                onChange={(e) => setEmployee({ ...employee, employeeCode: e.target.value })}
                             />
                         </div>
-                        <div style={{ margin: "0 10px" }}></div>
-                        <div className='w-full'>
-                            <TextInputField
-                                size={100}
-                                type="date"
-                                required
-                                label="Date of Exit"
-                                value={employee.doe}
-                                name="doe"
-                                onChange={(e) => setEmployee({ ...employee, doe: e.target.value })}
-                            />
+                    }
+                    {props.type === 'vendor' ? null :
+                        <div className='w-full flex justify-center items-center'>
+                            <div className='w-full'>
+                                <TextInputField
+                                    size={100}
+                                    type="date"
+                                    required
+                                    label="Date of Joining"
+                                    value={employee.doj}
+                                    name="doj"
+                                    onChange={(e) => setEmployee({ ...employee, doj: e.target.value })}
+                                />
+                            </div>
+                            <div style={{ margin: "0 10px" }}></div>
+                            <div className='w-full'>
+                                <TextInputField
+                                    size={100}
+                                    type="date"
+                                    required
+                                    label="Date of Exit"
+                                    value={employee.doe}
+                                    name="doe"
+                                    onChange={(e) => setEmployee({ ...employee, doe: e.target.value })}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    }
                     <div className='flex justify-center items-center'>
                         <TextInputField
                             size={100}
