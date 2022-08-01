@@ -152,17 +152,23 @@ const DocumentDetails = () => {
         const process = await get(`documentProcesses?filter={"include":{"relation":"process"},"where":{"documentId":"${id}","source":"INPUT"}}`);
         if(process.statusCode>=200 && process.statusCode<300){
             let processData = process.data;
+            processData = processData.filter(e=>!e.process.deleted)
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentInputSources(processData);
             setDocumentInputQuery(processData)
+        }else{
+            toaster.danger('Failed to fetch Input Process!')
         }
 
         const processout = await get(`documentProcesses?filter={"include":{"relation":"process"},"where":{"documentId":"${id}","source":"OUTPUT"}}`);
         if(processout.statusCode>=200 && processout.statusCode<300){
             let processData = processout.data;
+            processData = processData.filter(e=>!e.process.deleted)
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentOutputSources(processData);
             setDocumentOutputQuery(processData)
+        }else{
+            toaster.danger('Failed to fetch Output Process!')
         }
     }
 
@@ -173,7 +179,8 @@ const DocumentDetails = () => {
             initData = saveDoc.data
             setDocumentDetail(saveDoc.data);
         } else {
-            console.log('Fetch Document member')
+            // console.log('Fetch Document member')
+            toaster.danger('Failed to fetch Document detail!')
         }
     }
 
@@ -187,7 +194,8 @@ const DocumentDetails = () => {
             getSearchQueryMember('', memberData)
             setMemberQuery(memberData)
         } else {
-            console.log('Fetch Document member')
+            // console.log('Fetch Document member')
+            toaster.danger('Failed to fetch Document members!')
         }
     }
 
@@ -200,7 +208,8 @@ const DocumentDetails = () => {
             console.log("Members added to Document group");
             getDocumentMembers();
         } else {
-            console.log('Fetch Document member')
+            // console.log('Fetch Document member')
+            toaster.danger('Failed to fetch Document Members!')
         }
 
         setSuggestMember([]);
@@ -210,7 +219,7 @@ const DocumentDetails = () => {
 
     const getSearchQueryMember = async (text, memberList) => {
         let alreadyMember = memberList.map(e => e.member.id);
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const saveDoc = await get(filter);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log("Fetch suggested Members", saveDoc.data);
@@ -222,7 +231,7 @@ const DocumentDetails = () => {
             console.log('Fetch Document member')
             setSuggestMember(dataMember);
         } else {
-
+            toaster.danger('Failed to fetch Query Members!')
         }
     }
 
@@ -289,6 +298,8 @@ const DocumentDetails = () => {
         if (toggleAdmin.statusCode >= 200 && toggleAdmin.statusCode < 300) {
             console.log('Tog');
             getDocumentMembers();
+        }else{
+            toaster.danger('Failed to update Admins!')
         }
     }
 
@@ -308,7 +319,8 @@ const DocumentDetails = () => {
             console.log('Member Deleted');
             getDocumentMembers();
         } else {
-            console.log('Failed to remove Members')
+            // console.log('Failed to remove Members')
+            toaster.danger('Failed to remove Members!')
         }
     }
 

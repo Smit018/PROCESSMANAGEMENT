@@ -90,6 +90,8 @@ export default function VendorDetails() {
             console.log(arr)
             setWhatsapps(arr.length);
             setWhatsappQuery(arr)
+        }else{
+            toaster.danger('Failed to fetch Whatsapp details!')
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
@@ -100,6 +102,8 @@ export default function VendorDetails() {
             setDocuments(arr.length)
             setDocumentQuery(arr)
 
+        }else{
+            toaster.danger('Failed to fetch Document details!')
         }
 
     }
@@ -139,7 +143,7 @@ export default function VendorDetails() {
             console.log(getDetail.data)
             setEmployeeDetail(getDetail.data)
         } else {
-            console.log('failed to fetch Employee Data')
+            toaster.danger('Failed to fetch employee!')
         }
     }
 
