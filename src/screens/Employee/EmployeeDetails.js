@@ -66,8 +66,9 @@ export default function EmployeeDetails() {
                 (entryMap, e) => entryMap.set(e.processNumber, [...entryMap.get(e.processNumber) || [], e]),
                 new Map()
             );
+            console.log(groupedMap)
             for (let [key, value] of groupedMap) {
-                if (key.toLowerCase().includes(text.toLowerCase())) {
+                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.steps?.process?.deleted) {
                     let stepProcess = value.map(e => e.stepDescription);
                     arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle })
                 }
@@ -77,6 +78,8 @@ export default function EmployeeDetails() {
             setProcess(arr.length)
             setAllProcess(arr);
             setProcessQuery(arr)
+        }else{
+            toaster.danger(getProcessInfo.message)
         }
 
     }
@@ -133,6 +136,8 @@ export default function EmployeeDetails() {
             setWhatsapp(arr);
             setWhatsapps(arr.length);
             setWhatsappQuery(arr)
+        }else{
+            toaster.danger('Failed to fetch Whatsapp details!')
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
@@ -140,7 +145,9 @@ export default function EmployeeDetails() {
             let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member' } })
             setDocument(arr);
             setDocuments(arr.length)
-            setWhatsappQuery(arr)
+            setDocumentQuery(arr)
+        }else{
+            toaster.danger('Failed to fetch Document details!')
         }
 
     }
@@ -151,7 +158,7 @@ export default function EmployeeDetails() {
             console.log(getDetail.data)
             setEmployeeDetail(getDetail.data)
         } else {
-            console.log('failed to fetch Employee Data')
+            toaster.danger('Failed to fetch Employee Details')
         }
     }
 

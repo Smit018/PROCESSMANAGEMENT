@@ -136,17 +136,23 @@ const WhatsappDetails = () => {
         const process = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"INPUT"}}`);
         if(process.statusCode>=200 && process.statusCode<300){
             let processData = process.data;
+            processData = processData.filter(e=>!e.process.deleted)
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setWhatsappInputSources(processData);
             setWhatsappInputQuery(processData)
+        }else{
+            toaster.danger('Failed to fetch Input Sources!')
         }
 
         const processout = await get(`whatsappProcesses?filter={"include":{"relation":"process"},"where":{"whatsappId":"${id}","source":"OUTPUT"}}`);
         if(processout.statusCode>=200 && processout.statusCode<300){
             let processData = processout.data;
+            processData = processData.filter(e=>!e.process.deleted)
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setWhatsappOutputSources(processData);
             setWhatsappOutputQuery(processData)
+        }else{
+            toaster.danger('Failed to fetch Output Sources!')
         }
     }
 
@@ -157,7 +163,8 @@ const WhatsappDetails = () => {
             setWhatsappDetail(whatsap.data);
             initData = whatsap.data
         } else {
-            console.log('Fetch Whatsapp member')
+            // console.log('Fetch Whatsapp member')
+            toaster.danger('Failed to Fetch Whatsapp details!')
         }
     }
 
@@ -172,7 +179,8 @@ const WhatsappDetails = () => {
             getSearchQueryMember('', whatsap.data)
             setMemberQuery(whatsap.data)
         } else {
-            console.log('Fetch Whatsapp member')
+            // console.log('Fetch Whatsapp member')
+            toaster.danger('Failed to fetch Whatsapp Members!')
         }
     }
 
@@ -187,11 +195,9 @@ const WhatsappDetails = () => {
             console.log("Members added to Whatsapp group");
             getWhatsappMembers();
         } else {
-            console.log('Fetch Whatsapp member')
+            toaster.danger('Failed to add Whatsapp Members!')
         }
-        // setSuggestMember([]);
-        // setNewMembers([]);
-        console.log('Check')
+        
     }
 
     const ToggleAdmin = async (id, admin) => {
@@ -199,6 +205,8 @@ const WhatsappDetails = () => {
         if (toggleAdmin.statusCode >= 200 && toggleAdmin.statusCode < 300) {
             console.log('Tog');
             getWhatsappMembers();
+        }else{
+            toaster.danger('Failed to update Admins!')
         }
     }
 
@@ -206,7 +214,7 @@ const WhatsappDetails = () => {
         let alreadyMember = memberList.map(e => e.member.id);
 
         // let filter = `members?filter={"where":{"memberType":"EMPLOYEE","name":{"regexp":"/${text}/i"}}}`;
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -217,7 +225,9 @@ const WhatsappDetails = () => {
             console.log(dataMember)
             setSuggestMember(dataMember);
         } else {
-            console.log('Fetch Whatsapp member')
+            // console.log('Fetch Whatsapp member')
+            toaster.danger('Failed to fetch Members!')
+            
         }
     }
 
@@ -296,7 +306,7 @@ const WhatsappDetails = () => {
             console.log('Member Deleted');
             getWhatsappMembers();
         } else {
-            console.log('Failed to remove Members')
+            toaster.danger('Failed to remove Members!')
         }
     }
 

@@ -29,7 +29,7 @@ export const post = async (url, data) => {
     }
     catch (e) {
         console.log(e)
-        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+        return { statusCode: e?.response?.data?.error?.statusCode || 404, message: (e.response.data==undefined)?e?.message:e?.response?.data?.error?.message }
     }
 }
 
@@ -40,7 +40,7 @@ export const patch = async (url, data) => {
     }
     catch (e) {
         console.log(e)
-        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+        return { statusCode: e?.response?.data?.error?.statusCode || 404, message: (e.response.data==undefined)?e?.message:e?.response?.data?.error?.message }
     }
 }
 
@@ -51,7 +51,7 @@ export const deleted = async (url) => {
     }
     catch (e) {
         console.log(e)
-        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+        return { statusCode: e?.response?.data?.error?.statusCode || 404, message: (e.response.data==undefined)?e?.message:e?.response?.data?.error?.message }
     }
 }
 
@@ -63,7 +63,7 @@ export const get = async (url) => {
     }
     catch (e) {
         console.error(e)
-        return { statusCode: e.response.data.error.statusCode, message: e.response.data.error.message }
+        return { statusCode: e?.response?.data?.error?.statusCode || 404, message: (e.response.data==undefined)?e?.message:e?.response?.data?.error?.message }
     }
 }
 
