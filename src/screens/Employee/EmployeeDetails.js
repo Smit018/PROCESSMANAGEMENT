@@ -132,6 +132,7 @@ export default function EmployeeDetails() {
         const getWhatsapp = await get(`whatsappMembers?filter={"include":{"relation":"whatsappGroup"},"where":{"memberId":"${id}"}}`)
         // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
         if (getWhatsapp.statusCode >= 200 && getWhatsapp.statusCode < 300) {
+            getWhatsapp.data=getWhatsapp.data.filter(e=>!e.whatsappGroup.deleted)
             let arr = getWhatsapp.data.map(e => { return { name: e.whatsappGroup.name, role: e.admin ? 'Admin' : 'Member' } })
             setWhatsapp(arr);
             setWhatsapps(arr.length);
@@ -142,6 +143,7 @@ export default function EmployeeDetails() {
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
         if (getDocument.statusCode >= 200 && getDocument.statusCode < 300) {
+            getDocument.data = getDocument.data.filter(e=>!e.document.deleted)
             let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member' } })
             setDocument(arr);
             setDocuments(arr.length)
