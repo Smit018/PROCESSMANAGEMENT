@@ -42,10 +42,12 @@ const Employee = () => {
 
 	let imageHandler = useRef(null);
 
+
+
 	const createEmployee = async () => {
 		let imgToServer, saveEmp;
 		if (image) {
-			imgToServer = await UploadImage(saveImage);
+			imgToServer = await _uploadFile(saveImage);
 			if (imgToServer) {
 				saveEmp = { ...employee, profile: imgToServer }
 			}
@@ -62,6 +64,7 @@ const Employee = () => {
 		}
 
 	}
+
 
 	useEffect(() => {
 		setHeight(window.innerHeight)
@@ -145,24 +148,32 @@ const Employee = () => {
 	}
 
 	const handleImage = async (e) => {
-		// UploadImage(e.target.files[0]);
+		// _uploadFile(e.target.files[0]);
 		setSaveImage(e.target.files[0]);
 		setImage(URL.createObjectURL(e.target.files[0]))
 		setImgPresent(true);
 
 	}
 
-	const UploadImage = async (file) => {
-
-		let formData = new FormData();
-		formData.append('file', file)
-		const image = await post("photos/employee/upload", formData)
-		console.log(image)
-		if (image.data) {
-			return image.data.result.files.file[0].name
-		} else {
-			return null;
-		}
+	const _uploadFile = async (file) => {
+		// UPLOAD IMAGE
+		return new Promise(async (resolve, reject) => {
+			try {
+				const formData = new FormData();
+				formData.append('file', file)
+				const image = await post("photos/employee/upload", formData)
+				console.log(image)
+				if (image.data) {
+					resolve(image.data.result.files.file[0].name)
+				}
+				else {
+					reject(image);
+				}
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
 
 	}
 
@@ -202,7 +213,32 @@ const Employee = () => {
 
 	const validateForm = (_form) => {
 		console.log(_form)
-		setShowForm(false)
+		submitEmployee(_form)
+	}
+
+	const submitEmployee = async (_form) => {
+		try {
+			_form['password'] = _form.contactNo
+			_form['profile'] = await _uploadFile(_form['upload'])
+			_form['memberType'] = 'EMPLOYEE'
+			const response = await post('members', _form)
+			if (response.statusCode === 200) {
+				// EMPLOYEE ADDED SUCCESSFULLY!
+				toaster.success('Employee added successfully!')
+				fetchAllEmployees()
+				setShowForm(false)
+			}
+			else {
+				console.log(response)
+				toaster.danger('Failed to add employee')
+			}
+		}
+		catch (err) {
+			console.log(err)
+			toaster.danger('Failed to add employee')
+		}
+
+
 	}
 
 

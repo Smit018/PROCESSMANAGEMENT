@@ -6,11 +6,15 @@ import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
 import { post } from "../../services/https.service";
 import { TextInput, TextInputField, Button } from "evergreen-ui";
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
 const PWD_REGEX = /.{6,}/g
 
 const Login = () => {
+
+  const navigate = useNavigate()
   // DEFAULT VALUES FOR FORM
   const defaultValues = {
     email: {
@@ -63,6 +67,7 @@ const Login = () => {
             name: 'admin',
             userId: response.data.userId
           })
+          navigate('/admin/processes')
           setLoading(false)
           // LOGIN TO DASHBOARD
         }

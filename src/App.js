@@ -49,6 +49,7 @@ function App() {
 						<Route path='admin' exact element={<SideBar />}>
 							<Route path="" element={<Dashboard />} />
 							<Route path="dashboard" element={<Dashboard />} />
+							<Route path="" exact element={<Process />} />
 							<Route path="processes" exact element={<Process />} />
 							{/* <Route path="processes/:id" element={<ProcessDetails />} /> */}
 							<Route path="processes/:id" element={<ProcessDetails1 />} />

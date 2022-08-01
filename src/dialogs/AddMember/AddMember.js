@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, SmallPlusIcon, UserIcon, SmallCrossIcon } from "evergreen-ui";
-import { baseUrl, REGEX } from '../../services/https.service';
+import { baseUrl, get, REGEX } from '../../services/https.service';
 import { DateFormat } from '../../services/dateFormat';
 
 
@@ -13,13 +13,38 @@ const AddMember = (props) => {
     const [loading, setLoading] = React.useState(false);
     const [formValues, setFormValues] = useState()
     const [saveImage, setSaveImage] = useState();
+
+    const [departments, setDepartments] = useState([]);
+    const [type, setTypes] = useState([]);
+
     let imageHandler = useRef(null);
 
 
     useEffect(() => {
+        fetchTypes()
+        fetchDepartments()
         if (props.inject)
             setForm(props.inject)
     }, [])
+
+    const fetchTypes = async () => {
+        const response = await get('types')
+        if (response) {
+            if (response.statusCode == 200) {
+                setTypes(response.data)
+            }
+        }
+    }
+
+    const fetchDepartments = async () => {
+        const response = await get('departments')
+        if (response) {
+            if (response.statusCode == 200) {
+                setDepartments(response.data)
+            }
+        }
+    }
+
 
     const setForm = (data) => {
         console.log(data)
@@ -124,14 +149,57 @@ const AddMember = (props) => {
                         value={employee.name}
                         onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
                     />
-                    <TextInputField
-                        size={100}
-                        required
-                        label="Email"
-                        name="email"
-                        value={employee.email}
-                        onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
-                    />
+                    <div className='flex justify-center items-center'>
+                        <TextInputField
+                            size={100}
+                            required
+                            label="Email"
+                            name="email"
+                            value={employee.email}
+                            onChange={(e) => setEmployee({ ...employee, email: e.target.value })}
+                        />
+                        {props.type === 'vendor' ? <TextInputField
+                            size={100}
+                            required
+                            marginLeft={20}
+                            label="Contact Person Name"
+                            value={employee.designation}
+                            name="designation"
+                            onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                        /> : null}
+                    </div>
+                    {props.type === 'vendor' ? null :
+                        <div className='flex justify-center items-center'>
+                            <FormField className='w-full' isRequired label="Department">
+                                <SelectField
+                                    name="departmentId"
+                                    label=""
+                                    value={employee.departmentId}
+                                    onChange={e => setEmployee({ ...employee, departmentId: e.target.value })}>
+                                    <option value="">Select a department</option>
+                                    {departments.map(dept => {
+                                        return (
+                                            <option value={dept.id}>{dept.name}</option>
+                                        )
+                                    })}
+                                </SelectField>
+                            </FormField>
+                            <FormField className='w-full' isRequired label="Type">
+                                <SelectField
+                                    name="typeId"
+                                    label=""
+                                    value={employee.typeId}
+                                    onChange={e => setEmployee({ ...employee, typeId: e.target.value })}>
+                                    <option value="">Select a type</option>
+                                    {type.map(typ => {
+                                        return (
+                                            <option value={typ.id}>{typ.name}</option>
+                                        )
+                                    })}
+                                </SelectField>
+                            </FormField>
+                        </div>
+                    }
                     {props.type === 'vendor' ? null :
                         <div className='flex justify-center items-center'>
                             <TextInputField
@@ -193,10 +261,10 @@ const AddMember = (props) => {
                         <TextInputField
                             size={100}
                             required
-                            label="Bank Details"
-                            name="bankDetails"
-                            value={employee.bankDetails}
-                            onChange={(e) => setEmployee({ ...employee, bankDetails: e.target.value })}
+                            label={props.type == "vendor" ? "Address" : "Bank Details"}
+                            name={props.type == "vendor" ? "address" : 'bankDetails'}
+                            value={props.type == "vendor" ? employee.address : employee.bankDetails}
+                            onChange={(e) => setEmployee({ ...employee, address: props.type == "vendor" ? e.target.value : undefined, bankDetails: props.type == "vendor" ? undefined : e.target.value })}
                         />
                     </div>
                 </form>

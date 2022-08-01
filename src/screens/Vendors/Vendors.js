@@ -42,6 +42,9 @@ const Vendors = () => {
 	const [csv_data, set_csv_data] = useState([]);
 
 
+	const [filterDialog, setFilterDialog] = useState(false)
+	const [filterData, setFilterData] = useState({})
+
 
 
 	const createVendor = async () => {
@@ -136,8 +139,9 @@ const Vendors = () => {
 				let _formdata = new FormData()
 				_formdata.append('file', file)
 				const _img = await post(`photos/vendor/upload`, _formdata)
+				console.log(_img)
 				if (_img.data) {
-					resolve(image.data.result.files.file[0].name)
+					resolve(_img.data.result.files.file[0].name)
 				}
 				else reject({ err: 'Failed to upload image!' })
 			}
@@ -199,8 +203,8 @@ const Vendors = () => {
 		console.log(_form)
 		setShowForm(false)
 		let body = _form
-		body.profile = _form.image ? await _upload(_form.image) : ''
-		body = { ...body, memberType: "VENDOR", userName: _form.email }
+		body.profile = _form.upload ? await _upload(_form.upload) : ''
+		body = { ...body, memberType: "VENDOR", userName: _form.email, password: _form.email }
 		const response = await post('members', body);
 		if (response.statusCode >= 200 && response.statusCode < 300) {
 			toaster.success('Vendor added successfully!')
@@ -286,6 +290,14 @@ const Vendors = () => {
 		}, 3000);
 	}
 
+	const applyFilter = () => {
+		const all = false
+		const time = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}, `
+		const where = `"where": { ${time} "memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
+		setFilterDialog(false)
+		vendorUrl({ where })
+	}
+
 	return (
 		<div className='w-full h-full'>
 			<TopBar
@@ -298,6 +310,7 @@ const Vendors = () => {
 				onDownload={() => setDownLoad()}
 				filter="true"
 				search={search}
+				onFilter={() => { setFilterDialog(true) }}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
@@ -305,12 +318,10 @@ const Vendors = () => {
 				<Table.Head>
 					<Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Designation</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">vendor Code</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Date Joining</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Date Exit</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Contact Person</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Address</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Created Date</Table.TextHeaderCell>
 				</Table.Head>
 				<Table.Body height={employeeData?.length > 10 ? innerHeight - 300 : 'auto'}>
 					{!employeeData ? showSpinner() : employeeData?.length === 0 ? showEmpty() : employeeData.map((item, index) => {
@@ -319,12 +330,10 @@ const Vendors = () => {
 								<Table.Row key={index.toString()}>
 									<Table.TextCell className="tableB-Color">{showMemberImage(item?.profile)}</Table.TextCell>
 									<Table.TextCell className="tableB-Color">{item?.name}</Table.TextCell>
-									<Table.TextCell className="tableB-Color">{item?.vendorName}</Table.TextCell>
-									<Table.TextCell className="tableB-Color">{item?.employeeCode}</Table.TextCell>
-									<Table.TextCell className="tableB-Color">{(item.doe) ? DateFormat(item.doe) : "-"}</Table.TextCell>
-									<Table.TextCell className="tableB-Color">{item?.doe || "-"}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.designation}</Table.TextCell>
 									<Table.TextCell className="tableB-Color">{item?.contactNo}</Table.TextCell>
-									<Table.TextCell className="tableB-Color">{item?.bankDetails}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{item?.address}</Table.TextCell>
+									<Table.TextCell className="tableB-Color">{DateFormat(item?.createdAt)}</Table.TextCell>
 								</Table.Row>
 							</Link>
 						)
@@ -347,6 +356,24 @@ const Vendors = () => {
 				onClose={() => setShowForm(false)}
 			/>
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="vendors" /> : null}
+			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+				title="Filter Documents"
+				width={'50%'}
+				confirmLabel="Filter"
+				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				onConfirm={applyFilter}>
+				<form>
+					<div className='flex justify-center items-center w-full'>
+						<div className='w-full'>
+							<TextInputField required label="From" max={new Date()} type="date" value={filterData.from} onChange={(e) => setFilterData({ ...filterData, from: e.target.value })} />
+						</div>
+						<div style={{ margin: "0 10px" }}></div>
+						<div className='w-full'>
+							<TextInputField required label="To" type="date" min={filterData.from} value={filterData.to} onChange={(e) => setFilterData({ ...filterData, to: e.target.value })} />
+						</div>
+					</div>
+				</form>
+			</Dialog>
 		</div>
 	)
 }

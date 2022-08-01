@@ -110,6 +110,11 @@ export const ImageURL = (container, filename) => {
 }
 
 
+export const logout = async () => {
+    const res = await axios.post(baseUrl + 'admins/logout/')
+    return res;
+}
+
 export const REGEX =  {
     EMAIL: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
     PWD: /.{6,}/g,

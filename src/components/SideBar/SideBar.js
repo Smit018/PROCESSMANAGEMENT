@@ -1,22 +1,22 @@
 import './SideBar.css';
 import * as React from 'react';
 
-import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Outlet, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 // ICONS
 import { userAuthState } from '../../services/recoil.service';
-import { updateLocalStorage } from '../../services/https.service';
+import { logout, updateLocalStorage } from '../../services/https.service';
 
 
-import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon } from "evergreen-ui";
+import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
+import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 
 
 const drawerWidth = 300;
 
 
 const menu = [
-	{ title: 'Dashboard', path: '', icon: HomeIcon },
 	{ title: 'Processes', path: 'processes', icon: RandomIcon },
 	{ title: 'Employees', path: 'employees', icon: PeopleIcon },
 	{ title: 'Vendors', path: 'vendors', icon: MugshotIcon },
@@ -28,20 +28,34 @@ const menu = [
 ]
 
 const SideBar = () => {
+	const [showLogout, setShowLogout] = React.useState(false)
 	const _storage = useRecoilValue(userAuthState);
 
+	const navigate = useNavigate()
 
 
 	React.useEffect(() => {
-		updateLocalStorage(_storage)
+		if (_storage.token)
+			updateLocalStorage(_storage)
+		else navigate('/')
 	}, [])
+
+
+	const logMeOut = () => {
+		logout().then(res => {
+			console.log(res)
+			localStorage.removeItem('process-management');
+			toaster.success('Logged out succussfully!')
+			navigate('/')
+		})
+
+	}
 
 	return (
 		<div className='w-full h-full flex'>
 			<div className='sidenav'>
 				{/* DEFINE ROUTES  AND ADMIN INFO */}
 				<div style={{ height: 200 }}>
-
 				</div>
 				<hr></hr>
 				<Menu>
@@ -57,7 +71,7 @@ const SideBar = () => {
 					</Menu.Group>
 					<Menu.Divider />
 					<Menu.Group>
-						<Menu.Item intent="danger">
+						<Menu.Item intent="danger" onClick={() => setShowLogout(true)}>
 							Logout
 						</Menu.Item>
 					</Menu.Group>
@@ -69,6 +83,13 @@ const SideBar = () => {
 					<Outlet />
 				</div>
 			</div>
+			<PromptDialog
+				open={showLogout}
+				title="Logout?"
+				message="Do you really want to logout?"
+				onConfirm={() => logMeOut()}
+				onClose={() => setShowLogout(false)}
+			/>
 		</div>
 	);
 }
