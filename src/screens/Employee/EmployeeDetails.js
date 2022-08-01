@@ -133,7 +133,7 @@ export default function EmployeeDetails() {
         // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
         if (getWhatsapp.statusCode >= 200 && getWhatsapp.statusCode < 300) {
             getWhatsapp.data=getWhatsapp.data.filter(e=>!e.whatsappGroup.deleted)
-            let arr = getWhatsapp.data.map(e => { return { name: e.whatsappGroup.name, role: e.admin ? 'Admin' : 'Member' } })
+            let arr = getWhatsapp.data.map(e => { return { name: e.whatsappGroup.name, role: e.admin ? 'Admin' : 'Member', id:e.whatsappGroup.id } })
             setWhatsapp(arr);
             setWhatsapps(arr.length);
             setWhatsappQuery(arr)
@@ -144,7 +144,7 @@ export default function EmployeeDetails() {
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
         if (getDocument.statusCode >= 200 && getDocument.statusCode < 300) {
             getDocument.data = getDocument.data.filter(e=>!e.document.deleted)
-            let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member' } })
+            let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member', id:e.document.id } })
             setDocument(arr);
             setDocuments(arr.length)
             setDocumentQuery(arr)
@@ -380,6 +380,7 @@ export default function EmployeeDetails() {
                 </div>
                 {whatsappQuery?.map((item, index) => {
                     return (
+                        <Link to={`/admin/whatsapp-groups/${item.id}/${item.name}`}>
                         <div className='pointer-Mouse' onClick={() => showAccordian(index, item)}>
                             <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{ borderBottom: "1px solid #66788A" }}>
                                 <div className='flex flex-col'>
@@ -404,9 +405,11 @@ export default function EmployeeDetails() {
                             })}
                         </>:null} */}
                         </div>
+                        </Link>
                     )
                 })}
             </div>
+            
 
             <div className='py-10'>
 
@@ -425,6 +428,7 @@ export default function EmployeeDetails() {
                 </div>
                 {documentQuery?.map((item, index) => {
                     return (
+                        <Link to={`/admin/documents/${item.id}/${item.name}`}>
                         <div className='pointer-Mouse' onClick={() => showAccordian(index, item)}>
                             <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{ borderBottom: "1px solid #66788A" }}>
                                 <div className='flex flex-col'>
@@ -449,6 +453,7 @@ export default function EmployeeDetails() {
                             })}
                         </>:null} */}
                         </div>
+                        </Link>
                     )
                 })}
             </div>
