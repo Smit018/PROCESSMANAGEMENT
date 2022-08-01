@@ -32,7 +32,7 @@ const Employee = () => {
 	const [url, setUrl] = useState('');
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(3);
+	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
 
 	// FOR CSV

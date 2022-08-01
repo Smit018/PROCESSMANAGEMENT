@@ -6,7 +6,7 @@ import AddProcess from '../../dialogs/AddProcess/AddProcess';
 import { baseUrl, get, post } from '../../services/https.service';
 import { useNavigate, Outlet } from "react-router-dom";
 
-import { SearchInput, Table, Pagination, toaster, Pane, Avatar } from 'evergreen-ui';
+import { SearchInput, Table, Pagination, toaster, Pane, Avatar, Dialog, TextInputField, SelectField } from 'evergreen-ui';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
 import { DateFormat } from '../../services/dateFormat';
@@ -35,6 +35,9 @@ const Process = () => {
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
+
+	const [filterDialog, setFilterDialog] = useState(false)
+	const [filterData, setFilterData] = useState({})
 
 	useEffect(() => {
 		setScreenHeight(window.innerHeight)
@@ -321,6 +324,19 @@ const Process = () => {
 		}, 3000);
 	}
 
+	const applyFilter = () => {
+		console.log(filterData)
+		const _filter = {
+			typeId: filterData.type ? `"typeId": "${filterData.type}",` : '',
+			departmentId: filterData.department ? `"departmentId": "${filterData.department}",` : '',
+			processOwner: filterData.owner ? `"processOwner": "${filterData.owner}",` : '',
+			status: filterData.status ? `"stauts": "${filterData.status}",` : '',
+		}
+		const where = `"where": { ${_filter.typeId + _filter.departmentId + _filter.processOwner + _filter.status} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		setFilterDialog(false)
+		processUrl({ where })
+	}
+
 	const ProcessPage = () => {
 		return (
 			<div className="w-full h-full">
@@ -335,6 +351,7 @@ const Process = () => {
 					addEv={() => _setShowForm(true)}
 					search={search}
 					onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
+					onFilter={() => setFilterDialog(true)}
 				/>
 				<br></br>
 				<Table>
@@ -365,6 +382,7 @@ const Process = () => {
 											const member = profile?.personProcess[index]
 											return (<Avatar
 												zIndex={index + 2}
+												key={index}
 												marginLeft={index > 0 ? (-((index * 2) + 20)) : 0}
 												size={40}
 												src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
@@ -398,6 +416,81 @@ const Process = () => {
 					</div>
 				}
 				{_csvDwn ? <CSV body={csv_data} headers={headers} filename="process.csv" /> : null}
+
+				<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+					title="Filter Processes"
+					width={'50%'}
+					confirmLabel="Filter"
+					onConfirm={applyFilter}>
+					<form>
+						<div className='flex justify-center items-center w-full'>
+							<div className='w-full'>
+								<SelectField
+									label="Choose type"
+									required
+									value={filterData.type}
+									onChange={(e) => setFilterData({ ...filterData, type: e.target.value })}>
+									<option value="">Choose a type</option>
+									{types.map(_type => {
+										return (
+											<option key={_type.id} value={_type.id}>
+												{_type.name} ({_type.typeCode})
+											</option>
+										)
+									})}
+								</SelectField>
+							</div>
+							<div style={{ margin: "0 10px" }}></div>
+							<div className='w-full'>
+								<SelectField
+									label="Choose department"
+									required
+									value={filterData.department}
+									onChange={(e) => setFilterData({ ...filterData, department: e.target.value })}>
+									<option value="">Choose a department</option>
+									{departments.map(__dept => {
+										return (
+											<option key={__dept.id} value={__dept.id}>
+												{__dept.name} ({__dept.typeCode})
+											</option>
+										)
+									})}
+								</SelectField>
+							</div>
+						</div>
+						<div className='flex justify-center items-center w-full'>
+							<div className='w-full'>
+								<SelectField
+									label="Choose Owner"
+									required
+									value={filterData.owner}
+									onChange={(e) => setFilterData({ ...filterData, owner: e.target.value })}>
+									<option value="">Choose an owner</option>
+									{members.map(__mem => {
+										return (
+											<option key={__mem.id} value={__mem.id}>
+												{__mem.name} ({__mem.employeeCode})
+											</option>
+										)
+									})}
+								</SelectField>
+							</div>
+							<div style={{ margin: "0 10px" }}></div>
+							<div className='w-full'>
+								<SelectField
+									label="Choose status"
+									required
+									value={filterData.status}
+									onChange={(e) => setFilterData({ ...filterData, status: e.target.value })}>
+									<option value="">Choose a status</option>
+									<option value="Not Implemented">Not Implemented</option>
+									<option value="Partially Implemented">Partially Implemented</option>
+									<option value="Implemented">Implemented</option>
+								</SelectField>
+							</div>
+						</div>
+					</form>
+				</Dialog>
 			</div>
 		)
 	}
