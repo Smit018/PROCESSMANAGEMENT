@@ -22,7 +22,7 @@ const ProcessDetails1 = () => {
     const [newMember, setNewMember] = useState('')
     const [newWaGroup, setNewWaGroup] = useState('')
     const [newDocument, setNewDocument] = useState('')
-    const [processOwner, setProcessOwner] = useState('');
+    const [processOwner, setProcessOwner] = useState(false);
     const [_showDelete, showDelete] = useState(false);
     const [_showUpdate, showUpdate] = useState(false);
 
@@ -147,6 +147,7 @@ const ProcessDetails1 = () => {
         const getDetaills = await get(`processes/${id}?filter={"include":["processOwner", "process"]}`);
         if (getDetaills.statusCode >= 200 && getDetaills.statusCode < 300) {
             setProcessDetail(getDetaills.data);
+            setProcessOwner(getDetaills.data.inputSourceSelf)
         }
         else {
             console.log('Process Detail Not FOund')
@@ -178,6 +179,16 @@ const ProcessDetails1 = () => {
         }
         else {
             console.log('Process Members Not FOund')
+        }
+    }
+
+    async function patchProcessOwner(self){
+        const changeProcessOwner = await patch(`processes/${id}`,{inputSourceSelf:self});
+        if(changeProcessOwner.statusCode>=200 && changeProcessOwner.statusCode<300){
+            console.log('Process Owner')
+            getProcessDetails()
+        }else{
+            console.log('failed to update processOwner')
         }
     }
 
@@ -842,7 +853,7 @@ const ProcessDetails1 = () => {
                 <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
                 <div className='flex items-center'>
                     <Text size={400}>Process Owner &nbsp; &nbsp;</Text>
-                    <Switch checked={processOwner} onChange={(e) => setProcessOwner(e.target.checked)} />
+                    <Switch checked={processOwner} onChange={(e) => {setProcessOwner(e.target.checked);patchProcessOwner(e.target.checked);console.log(e)}} />
                 </div>
             </div>
             <div className='flex flex-wrap justify-between'>
