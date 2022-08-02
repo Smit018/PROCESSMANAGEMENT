@@ -2,7 +2,7 @@ import './SideBar.css';
 import * as React from 'react';
 
 import { BrowserRouter as Router, Routes, Route, Link, Outlet, useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 // ICONS
 import { userAuthState } from '../../services/recoil.service';
@@ -30,6 +30,7 @@ const menu = [
 const SideBar = () => {
 	const [showLogout, setShowLogout] = React.useState(false)
 	const _storage = useRecoilValue(userAuthState);
+	const [admin, setMyAdmin] = useRecoilState(userAuthState)
 
 	const navigate = useNavigate()
 
@@ -42,20 +43,24 @@ const SideBar = () => {
 
 
 	const logMeOut = () => {
+		localStorage.removeItem('process-management');
 		logout().then(res => {
-			console.log(res)
-			localStorage.removeItem('process-management');
+			setMyAdmin({
+				token: null,
+				name: null,
+				userId: null
+			})
 			toaster.success('Logged out succussfully!')
 			navigate('/')
 		})
-
 	}
 
 	return (
 		<div className='w-full h-full flex'>
 			<div className='sidenav'>
 				{/* DEFINE ROUTES  AND ADMIN INFO */}
-				<div style={{ height: 200 }}>
+				<div className='flex items-center justify-center' style={{ height: 200 }}>
+					<h1>PROCESS MANAGEMENT</h1>
 				</div>
 				<hr></hr>
 				<Menu>

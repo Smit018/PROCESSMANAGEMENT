@@ -31,7 +31,7 @@ const WhatsappGroup = () => {
 
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(10);
+	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
 
 	// FOR CSV
@@ -40,7 +40,7 @@ const WhatsappGroup = () => {
 
 
 	const paths = [
-		{ path: 'whatsapp-groups', title: 'Whatsapp Groups' }
+		{ path: '/admin/whatsapp-groups', title: 'Whatsapp Groups' }
 	]
 
 
@@ -50,10 +50,11 @@ const WhatsappGroup = () => {
 	}, []);
 
 
-	const fetchCount = () => {
+	const fetchCount = (where) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = `whatsappGroups/count?where={"deleted": {"neq": true}}`
+				where = where || `where={"deleted": {"neq": true}}`
+				const url = `whatsappGroups/count?${where}`
 				const count = await get(url)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
@@ -78,11 +79,16 @@ const WhatsappGroup = () => {
 		else return _url
 	}
 
-	const onSearchType = (value) => {
-		const _data = allData.filter(_grp => {
-			return _grp.name.toLowerCase().includes(value?.toLowerCase())
-		})
-		setWhatsappData(_data)
+	const onSearchType = async (value) => {
+		if (value) {
+			const whereCount = `where={"name":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount)
+			setTotalData(count)
+			// SEARCH THROUGH THE DB
+			const where = `"where": {"name":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			whatsappUrl({ where })
+		}
+		else fetchWhatsappGroups()
 	}
 
 	const fetchWhatsappGroups = async (filter) => {
@@ -139,22 +145,23 @@ const WhatsappGroup = () => {
 	}
 
 	const changePage = (type) => {
+		const _search = search ? `"name":{"regexp":"/${search}/i"},` : ''
 		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			whatsappUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			whatsappUrl(filter)
 		}
 		else {
 			setPage(type)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
 			whatsappUrl(filter)
 		}
 	}

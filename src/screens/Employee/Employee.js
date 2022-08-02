@@ -32,7 +32,7 @@ const Employee = () => {
 	const [url, setUrl] = useState('');
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(10);
+	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
 
 	// FOR CSV
@@ -74,10 +74,11 @@ const Employee = () => {
 		fetchForCsv()
 	}, [0]);
 
-	const fetchCount = () => {
+	const fetchCount = (where) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = `members/count?where={"memberType":"EMPLOYEE", "deleted": {"neq": true}}`
+				where = where || `where={"memberType":"EMPLOYEE", "deleted": {"neq": true}}`
+				const url = `members/count?${where}`
 				const count = await get(url)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
@@ -128,11 +129,17 @@ const Employee = () => {
 		else return _url
 	}
 
-	const onSearchType = (value) => {
-		const _data = allData.filter(employee => {
-			return employee.name.toLowerCase().includes(value?.toLowerCase())
-		})
-		setEmployeeData(_data)
+	const onSearchType = async (value) => {
+		console.log(value)
+		if (value) {
+			const whereCount = `where={"name":{"regexp":"/${value}/i"}, "memberType":"EMPLOYEE", "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount)
+			setTotalData(count)
+			// SEARCH THROUGH THE DB
+			const where = `"where": {"name":{"regexp":"/${value}/i"}, "memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			employeeUrl({ where })
+		}
+		else fetchAllEmployees()
 	}
 
 	const handleClose = () => {
@@ -213,14 +220,26 @@ const Employee = () => {
 	]
 
 	const validateForm = (_form) => {
-		console.log(_form)
-		submitEmployee(_form)
+		return new Promise(resolve => {
+			let err = ''
+			for (let index = 0; index < employeForm.length; index++) {
+				const key = employeForm[index];
+				if (!_form[key.key] && key.required) {
+					err = `${key.label} is required`
+					resolve({ err })
+					break;
+				}
+				if ((index === employeForm.length - 1) && !err) resolve(_form)
+			}
+		})
 	}
 
 	const submitEmployee = async (_form) => {
 		try {
+			console.log('form', _form)
 			_form['password'] = _form.contactNo
-			_form['profile'] = await _uploadFile(_form['upload'])
+			if (_form['profile'])
+				_form['profile'] = await _uploadFile(_form['upload'])
 			_form['memberType'] = 'EMPLOYEE'
 			const response = await post('members', _form)
 			if (response.statusCode === 200) {
@@ -231,12 +250,16 @@ const Employee = () => {
 			}
 			else {
 				console.log(response)
-				toaster.danger('Failed to add employee')
+				toaster.danger('Failed to add employee', {
+					description: response.message
+				})
 			}
 		}
 		catch (err) {
 			console.log(err)
-			toaster.danger('Failed to add employee')
+			toaster.danger('Failed to add employee', {
+				description: err.message
+			})
 		}
 
 
@@ -244,22 +267,23 @@ const Employee = () => {
 
 
 	const changePage = (type) => {
+		const _search = search ? `"name":{"regexp":"/${search}/i"},` : ''
 		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `"where": {"memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "memberType":"EMPLOYEE", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			employeeUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "memberType":"EMPLOYEE","deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			employeeUrl(filter)
 		}
 		else {
 			setPage(type)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "memberType":"EMPLOYEE","deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
 			employeeUrl(filter)
 		}
 	}
@@ -314,6 +338,10 @@ const Employee = () => {
 		setTimeout(() => {
 			setCSVDwn(false)
 		}, 3000);
+	}
+
+	const applyFilter = (e) => {
+		console.log(e.targte.value)
 	}
 
 	return (
@@ -374,7 +402,7 @@ const Employee = () => {
 				type="employee"
 				open={showForm}
 				title="Add Employee"
-				onSubmit={(formData) => { validateForm(formData) }}
+				onSubmit={(formData) => { submitEmployee(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
 
@@ -404,3 +432,17 @@ const Employee = () => {
 Employee.propTypes = {};
 Employee.defaultProps = {};
 export default Employee;
+
+
+
+const employeForm = [
+	{ key: 'name', label: 'Name', required: true },
+	{ key: 'email', label: 'Email', required: true },
+	{ key: 'departmentId', label: 'Department', required: true },
+	{ key: 'typeId', label: 'Type', required: true },
+	{ key: 'doe', label: 'D.O.E', required: false },
+	{ key: 'doj', label: 'D.O.L', required: true },
+	{ key: 'contactNo', label: 'Conact Number', required: true },
+	{ key: 'bankDetails', label: 'Bank Details', required: false },
+	{ key: 'upload', label: 'profile', required: false }
+]

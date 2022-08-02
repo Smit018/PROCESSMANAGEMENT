@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { atom, RecoilRoot, useRecoilState } from 'recoil'
+import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 
 import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
@@ -35,6 +35,19 @@ const Login = () => {
   const [admin, setMyAdmin] = useRecoilState(userAuthState)
   const [loading, setLoading] = React.useState(false);
   const [dummy, setDummy] = React.useState('');
+  
+  const myadmin = useRecoilValue(userAuthState)
+
+  useEffect(() => {
+    if(myadmin) {
+      if(myadmin.token && myadmin.name && myadmin.userId) {
+        navigate('/admin')
+      }
+      else {
+        // DO NOTHING
+      }
+    }
+  }, [])
 
   const handleInputChange = (e) => {
     // HANDLE INPUT CHANGE
@@ -113,40 +126,35 @@ const Login = () => {
           </div>
           <br></br>
           <div>
-            <div style={{ marginBottom: 10 }}>
-              <TextInputField
-                required
-                error={formValues.email.error.toString()}
-                id="email"
-                name="email"
-                label="Email"
-                type="email"
-                placeholder="Enter your email..."
-                value={formValues.email.value}
-                onChange={handleInputChange}
-                isInvalid={formValues.email.error}
-                validationMessage={formValues.email.error ? "Email is invalid!" : null}
-              />
-            </div>
-            <div style={{ marginBottom: 10 }}>
-              <TextInputField
-                required
-                error={formValues.password.error.toString()}
-                id="password"
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="Enter your password..."
-                value={formValues.password.value}
-                onChange={handleInputChange}
-                isInvalid={formValues.password.error}
-                validationMessage={formValues.password.error ? "Password is invalid!" : null}
-              />
-            </div>
+            <TextInputField
+              required
+              error={formValues.email.error.toString()}
+              id="email"
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="Enter your email..."
+              value={formValues.email.value}
+              onChange={handleInputChange}
+              isInvalid={formValues.email.error}
+              validationMessage={formValues.email.error ? "Email is invalid!" : null}
+            />
+            <TextInputField
+              required
+              error={formValues.password.error.toString()}
+              id="password"
+              name="password"
+              label="Password"
+              type="password"
+              placeholder="Enter your password..."
+              value={formValues.password.value}
+              onChange={handleInputChange}
+              isInvalid={formValues.password.error}
+              validationMessage={formValues.password.error ? "Password is invalid!" : null}
+            />
           </div>
-          <br></br>
           <div className='w-full flex justify-center items-center'>
-            <Button className="w-36" isLoading={loading} appearance="primary">
+            <Button className="w-40" isLoading={loading} appearance="primary">
               Login
             </Button>
           </div>

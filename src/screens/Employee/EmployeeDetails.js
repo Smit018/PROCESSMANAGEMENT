@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { post, get, patch } from '../../services/https.service';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon, toaster } from "evergreen-ui";
+import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon, toaster, Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
@@ -24,6 +24,7 @@ import {
 // Demo styles, see 'Styles' section below for some notes on use.
 import 'react-accessible-accordion/dist/fancy-example.css';
 import TopBar from '../../components/TopBar/TopBar';
+import { ProcessList } from '../../components/AvatarList/AvatarList';
 
 export default function EmployeeDetails() {
     const navigate = useNavigate()
@@ -78,7 +79,7 @@ export default function EmployeeDetails() {
             setProcess(arr.length)
             setAllProcess(arr);
             setProcessQuery(arr)
-        }else{
+        } else {
             toaster.danger(getProcessInfo.message)
         }
 
@@ -132,23 +133,23 @@ export default function EmployeeDetails() {
         const getWhatsapp = await get(`whatsappMembers?filter={"include":{"relation":"whatsappGroup"},"where":{"memberId":"${id}"}}`)
         // getWhatsapp = await get(`member/${id}/whatsappMembers?filter={"where":}`)
         if (getWhatsapp.statusCode >= 200 && getWhatsapp.statusCode < 300) {
-            getWhatsapp.data=getWhatsapp.data.filter(e=>!e.whatsappGroup.deleted)
-            let arr = getWhatsapp.data.map(e => { return { name: e.whatsappGroup.name, role: e.admin ? 'Admin' : 'Member', id:e.whatsappGroup.id } })
+            getWhatsapp.data = getWhatsapp.data.filter(e => !e.whatsappGroup.deleted)
+            let arr = getWhatsapp.data.map(e => { return { name: e.whatsappGroup.name, role: e.admin ? 'Admin' : 'Member', id: e.whatsappGroup.id } })
             setWhatsapp(arr);
             setWhatsapps(arr.length);
             setWhatsappQuery(arr)
-        }else{
+        } else {
             toaster.danger('Failed to fetch Whatsapp details!')
         }
 
         const getDocument = await get(`documentMembers?filter={"where":{"memberId":"${id}"},"include":"document"}`)
         if (getDocument.statusCode >= 200 && getDocument.statusCode < 300) {
-            getDocument.data = getDocument.data.filter(e=>!e.document.deleted)
-            let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member', id:e.document.id } })
+            getDocument.data = getDocument.data.filter(e => !e.document.deleted)
+            let arr = getDocument.data.map(e => { return { name: e.document.name, role: e.admin ? 'Admin' : 'Member', id: e.document.id } })
             setDocument(arr);
             setDocuments(arr.length)
             setDocumentQuery(arr)
-        }else{
+        } else {
             toaster.danger('Failed to fetch Document details!')
         }
 
@@ -200,7 +201,7 @@ export default function EmployeeDetails() {
                 toaster.success('Employee updated successfully!')
             }
             else {
-                toaster.danger('Failed to update employee!')
+                toaster.danger('Failed to update employee!', { description: response.message })
             }
         }
     }
@@ -226,8 +227,7 @@ export default function EmployeeDetails() {
                 title="Whatsapp Groups"
                 breadscrubs={paths}
             />
-            <Pane width="100%" height="30vh" className='my-7 backCol-WH p-9' elevation={2}>
-
+            <Pane width="100%" className='l-blue px-4 py-5' elevation={2}>
                 <div className='flex justify-end items-center pb-5'>
                     <Button marginRight={16} color="#ED342D" onClick={() => showDelete(true)}>Delete</Button>
                     <Button marginRight={16} appearance="primary" onClick={() => showUpdate(true)}>Edit</Button>
@@ -274,13 +274,9 @@ export default function EmployeeDetails() {
                             Documents
                         </div>
                     </div>
-
                 </div>
-
             </Pane>
-
             <div className='py-10'>
-
                 <div className='flex justify-between items-center mb-6'>
                     <div className='text-xl'>PROCESSES</div>
                     <div className='search-bar flex mr-4'>
@@ -328,35 +324,26 @@ export default function EmployeeDetails() {
                     {processQuery?.map((item, index) => (
                         <AccordionItem key={item.id}>
                             <AccordionItemHeading>
-                                <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-slate-100'>
+                                <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-white shadow'>
                                     <div className='flex flex-col'>
-                                        <div className='text-xl pb-1'>{item?.processNumber}</div>
+                                        <Heading size={500}>{item?.processNumber}</Heading>
                                         <div className='text-pri-col text-sm pb-1'>{item?.processTitle}</div>
-                                        <div className='text-pri-col text-sm'>{item?.role}</div>
                                     </div>
                                     <div className='text-lg text-pri-col'>
                                         <ChevronRightIcon />
                                     </div>
                                 </AccordionItemButton>
                             </AccordionItemHeading>
-                            <AccordionItemPanel>
+                            <AccordionItemPanel className="bg-white p-5">
                                 <div className='flex items-center justify-between'>
                                     <div className='flex flex-col px-4'>
-
-
                                         {item?.process.map((item1, index1) => {
                                             return (
-                                                <div className='flex' >
-
-                                                    {/* <div className='text-lg pr-4'>{item1?.name} :</div> */}
-                                                    <div className=' text-lg'>{index1 + 1} : {item1}</div>
-
-
+                                                <div className='flex items-end'>
+                                                    <Text size={300}>{index1 + 1}. &nbsp;</Text>
+                                                    <Heading size={400}> {item1}</Heading>
                                                 </div>)
                                         })}
-                                    </div>
-                                    <div>
-                                        <ChevronUpIcon />
                                     </div>
                                 </div>
                             </AccordionItemPanel>
@@ -381,35 +368,15 @@ export default function EmployeeDetails() {
                 {whatsappQuery?.map((item, index) => {
                     return (
                         <Link to={`/admin/whatsapp-groups/${item.id}/${item.name}`}>
-                        <div className='pointer-Mouse' onClick={() => showAccordian(index, item)}>
-                            <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{ borderBottom: "1px solid #66788A" }}>
-                                <div className='flex flex-col'>
-                                    <div className='text-xl pb-2'>{item?.name}</div>
-                                    <div className='text-pri-col text-sm'>{item?.role}</div>
-                                </div>
-                                <div className='text-lg text-pri-col'>
-                                    <ChevronRightIcon />
-                                </div>
-                            </Pane>
-                            {/* {(item?.accordian)==true?<>
-                            {item?.process.map((item1,index1)=>{
-                                <Pane className='flex justify-between  px-10 py-4 bg-slate-100 bg-slate-300' >
-                                    <div>
-                                        <div className='text-lg pr-2'>{item1?.name}:</div>
-                                        <div className=' text-lg'>{item1?.description}</div>
-                                    </div>
-                                    <div>
-                                        <ChevronUpIcon/>
-                                    </div>
-                            </Pane>
-                            })}
-                        </>:null} */}
-                        </div>
+                            <ProcessList
+                                title={item?.name}
+                                description={item?.role}
+                            />
                         </Link>
                     )
                 })}
             </div>
-            
+
 
             <div className='py-10'>
 
@@ -429,30 +396,10 @@ export default function EmployeeDetails() {
                 {documentQuery?.map((item, index) => {
                     return (
                         <Link to={`/admin/documents/${item.id}/${item.name}`}>
-                        <div className='pointer-Mouse' onClick={() => showAccordian(index, item)}>
-                            <Pane className='flex justify-between items-center px-10 py-3 bg-slate-100' style={{ borderBottom: "1px solid #66788A" }}>
-                                <div className='flex flex-col'>
-                                    <div className='text-xl pb-2'>{item?.name}</div>
-                                    <div className='text-pri-col text-sm'>{item?.role}</div>
-                                </div>
-                                <div className='text-lg text-pri-col'>
-                                    <ChevronRightIcon />
-                                </div>
-                            </Pane>
-                            {/* {(item?.accordian)==true?<>
-                            {item?.process.map((item1,index1)=>{
-                                <Pane className='flex justify-between  px-10 py-4 bg-slate-100 bg-slate-300' >
-                                    <div>
-                                        <div className='text-lg pr-2'>{item1?.name}:</div>
-                                        <div className=' text-lg'>{item1?.description}</div>
-                                    </div>
-                                    <div>
-                                        <ChevronUpIcon/>
-                                    </div>
-                            </Pane>
-                            })}
-                        </>:null} */}
-                        </div>
+                            <ProcessList
+                                title={item?.name}
+                                description={item?.role}
+                            />
                         </Link>
                     )
                 })}

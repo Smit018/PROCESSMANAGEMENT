@@ -35,7 +35,7 @@ const Documents = () => {
 
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(10);
+	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
 
 	// FOR CSV
@@ -54,10 +54,11 @@ const Documents = () => {
 
 
 
-	const fetchCount = () => {
+	const fetchCount = (where) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = `documents/count?where={"deleted": {"neq": true}}`
+				where = where || `where={"deleted": {"neq": true}}`
+				const url = `documents/count?${where}`
 				const count = await get(url)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
@@ -165,30 +166,37 @@ const Documents = () => {
 		)
 	}
 
-	const onSearchType = (value) => {
-		const _data = allDocuments.filter(doc => {
-			return doc.name.toLowerCase().includes(value?.toLowerCase())
-		})
-		setDocumentData(_data)
+	const onSearchType = async (value) => {
+		if (value) {
+			const whereCount = `where={"name":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount)
+			setTotalData(count)
+			// SEARCH THROUGH THE DB
+			const where = `"where": {"name":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			documentUrl({ where })
+		}
+		else fetchDocuments()
 	}
 
 	const changePage = (type) => {
+		const _search = search ? `"name":{"regexp":"/${search}/i"},` : ''
+
 		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			documentUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			documentUrl(filter)
 		}
 		else {
 			setPage(type)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
 			documentUrl(filter)
 		}
 	}

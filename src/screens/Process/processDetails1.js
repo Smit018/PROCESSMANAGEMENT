@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon, toaster } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog'
+import { showWaitToast } from '../../components/GlobalComponent';
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
@@ -387,7 +388,7 @@ const ProcessDetails1 = () => {
             let dataMember = [...members.data];
             console.log(alreadyGroup)
             dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
-            console.log(dataMember)
+            console.log(dataMember, alreadyGroup)
             setSuggestStepMember(dataMember);
         } else {
             console.log('Failed fetching Output Person')
@@ -563,7 +564,7 @@ const ProcessDetails1 = () => {
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
                 onInputValueChange={changedItem => {
                     console.log(changedItem)
-                    checkSuggest(myProps.variable, changedItem)
+                    // checkSuggest(myProps.variable, changedItem)
                 }}
             >
                 {({
@@ -823,7 +824,7 @@ const ProcessDetails1 = () => {
                             />
                         )
                     })}
-                    <div className='flex'>
+                    <div className='flex py-3'>
                         <div className='w-1/2'>
                             <TextInput className="w-full" height={50} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter step description here" />
                         </div>

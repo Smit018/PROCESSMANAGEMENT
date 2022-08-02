@@ -1,4 +1,4 @@
-import { Text, Spinner } from "evergreen-ui";
+import { Text, Spinner, toaster } from "evergreen-ui";
 
 
 
@@ -14,5 +14,12 @@ const showEmpty = () => (
     </div>
 )
 
+const showWaitToast = (msg, show, id) => {
+    toaster.notify(msg, {
+        isShown: show,
+        id: id
+    })
+}
 
-export { showSpinner, showEmpty }
+
+export { showSpinner, showEmpty, showWaitToast }

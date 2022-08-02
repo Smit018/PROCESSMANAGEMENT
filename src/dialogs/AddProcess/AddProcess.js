@@ -19,7 +19,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 // import Autocomplete from '@mui/material/Autocomplete';
 import { get, post } from '../../services/https.service';
 
-import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, Text } from "evergreen-ui";
+import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, Text, toaster } from "evergreen-ui";
 import { CollectionsBookmarkOutlined } from '@mui/icons-material';
 
 const myForm = {
@@ -88,6 +88,7 @@ const AddProcess = (props) => {
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [processNoPrefix, setProcessNoPrefix] = useState('');
 	const [processFound, setProcessFound] = useState(false);
+	const [showErrors, setShowErrors] = useState(false);
 
 	const [selectedDept, setSelectedDept] = useState(null);
 	const [selectedInpProcess, setSelectedInpProcess] = useState(null);
@@ -110,9 +111,9 @@ const AddProcess = (props) => {
 	}, []);
 
 	const cleanUpForm = () => {
-		for(let key in _formDefault) {
-			if(key !== 'frequency' && key !== 'status')
-			_formDefault[key]['value'] = ""
+		for (let key in _formDefault) {
+			if (key !== 'frequency' && key !== 'status')
+				_formDefault[key]['value'] = ""
 		}
 	}
 
@@ -174,7 +175,6 @@ const AddProcess = (props) => {
 		const { name, value } = e.target;
 		const _formValues = { ...formValues }
 		_formValues[name]['value'] = value;
-		console.log(_formValues)
 		// if (name == "typeId") {
 		// 	let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
 		// 	setpTypeCode(processTypeCode);
@@ -191,7 +191,7 @@ const AddProcess = (props) => {
 		const _code = processNoPrefix
 		if (name === 'typeId') {
 			const processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
-			if (formValues.departmentId.value) {
+			if (formValues?.departmentId?.value) {
 				// ALREADY DEPT OPTED
 				if (processNoPrefix && processNoPrefix.length == 5) {
 					// ALREADY TYPE ADDED -- REPLACE TYPE WITH CURRENT
@@ -207,7 +207,7 @@ const AddProcess = (props) => {
 		else {
 			// THIS WILL BE TRIGGERED FOR DEPT
 			let processDeptCode = e['typeCode']
-			if (formValues.typeId.value) {
+			if (formValues?.typeId?.value) {
 				// TYPE CODE ALREADY OPTED
 				if (processNoPrefix && processNoPrefix.length === 5) {
 					const currDeptCode = _code.substring(2, 5)
@@ -231,8 +231,34 @@ const AddProcess = (props) => {
 	const submit = async () => {
 		setLoading(true)
 		const _form = await validateForm(formValues)
-		props.onSubmit({ ..._form, processNoPrefix })
-		setFormValues(null)
+		if (_form && _form.error) {
+			toaster.danger('Invalid form values, please check the form values and try again')
+			setShowErrors(true)
+		}
+		else {
+			props.onSubmit({ ..._form.form, processNoPrefix })
+			setFormValues(null)
+
+		}
+	}
+
+	const validateForm = (_form) => {
+		// VALIDATES THE DATA IN FORM
+		let error = false
+		return new Promise(resolve => {
+			const _formKeys = Object.keys(_form)
+			for (let index = 0; index < _formKeys.length; index++) {
+				const _key = _formKeys[index];
+				let pattern = _form[_key]['regex']
+				// if(_key == 'processNumber') {
+				// 	// CONCATENATION -- PROCESS NUMBER WITH TYPE AND DEPT
+				// 	_form[_key]['value'] = processNoPrefix + _form[_key]['value']
+				// }
+				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
+				if (_form[_key]['error']) error = true
+				if (index === _formKeys.length - 1) resolve({ form: _form, error })
+			}
+		})
 	}
 
 	const setDuration = () => {
@@ -252,22 +278,6 @@ const AddProcess = (props) => {
 		}
 	}
 
-	const validateForm = (_form) => {
-		// VALIDATES THE DATA IN FORM
-		return new Promise(resolve => {
-			const _formKeys = Object.keys(_form)
-			for (let index = 0; index < _formKeys.length; index++) {
-				const _key = _formKeys[index];
-				let pattern = _form[_key]['regex']
-				// if(_key == 'processNumber') {
-				// 	// CONCATENATION -- PROCESS NUMBER WITH TYPE AND DEPT
-				// 	_form[_key]['value'] = processNoPrefix + _form[_key]['value']
-				// }
-				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
-				if (index === _formKeys.length - 1) resolve(_form)
-			}
-		})
-	}
 
 	return (
 		<Pane>
@@ -287,9 +297,9 @@ const AddProcess = (props) => {
 							<SelectField
 								name="typeId"
 								label=""
-								isInvalid={formValues.typeId.error}
-								value={formValues.typeId.value || ""}
-								validationMessage={formValues.typeId.error ? "Type is mandatory!" : null}
+								isInvalid={formValues?.typeId?.error}
+								value={formValues?.typeId?.value || ""}
+								validationMessage={formValues?.typeId?.error ? "Type is mandatory!" : null}
 								onChange={e => { handleInputChange(e); setProcessNumberPrefix(e) }}>
 								<option disabled>Select Process Type</option>
 								{props.data.types.map(_type => {
@@ -302,7 +312,7 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues.departmentId.error ? "Process department is required!" : null}>
+						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => { setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
@@ -322,8 +332,8 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="departmentId"
-											isInvalid={formValues.departmentId.error}
-											value={formValues.departmentId.value}
+											isInvalid={formValues?.departmentId?.error}
+											value={formValues?.departmentId?.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -335,7 +345,7 @@ const AddProcess = (props) => {
 					</div>
 					<br></br>
 					<div className="flex">
-						<FormField position="relative" className='w-full' isRequired label="Process No." validationMessage={formValues.processNumber.error ? "Process Number is required!" : null}>
+						<FormField position="relative" className='w-full' isRequired label="Process No." validationMessage={formValues?.processNumber?.error ? "Process Number is required!" : null}>
 							<span className='flex items-center relative'>
 								<TextInputField
 									label=""
@@ -349,8 +359,8 @@ const AddProcess = (props) => {
 									className='border-l-0 rounded-l-none'
 									name="processNumber"
 									label=""
-									isInvalid={formValues.processNumber.error}
-									value={formValues.processNumber.value}
+									isInvalid={formValues?.processNumber?.error}
+									value={formValues?.processNumber?.value}
 									onChange={e => { handleInputChange(e); verifyProcessNumber(e.target.value) }}
 								/>
 								{processFound ? <Text className="absolute" color="danger" bottom={0}>{processFound} exists!</Text> : null}
@@ -361,16 +371,16 @@ const AddProcess = (props) => {
 							<TextInputField
 								name="title"
 								label=""
-								isInvalid={formValues.title.error}
-								value={formValues.title.value}
-								validationMessage={formValues.title.error ? "Process title is required!" : null}
+								isInvalid={formValues?.title?.error}
+								value={formValues?.title?.value}
+								validationMessage={formValues?.title?.error ? "Process title is required!" : null}
 								onChange={e => handleInputChange(e)}
 							/>
 						</FormField>
 					</div>
 					<br></br>
 					<div className="flex">
-						<FormField className='w-full' label="Input Process" validationMessage={formValues.inputProcess.error ? "Format is invalid!" : null}>
+						<FormField className='w-full' label="Input Process" validationMessage={formValues?.inputProcess?.error ? "Format is invalid!" : null}>
 							<Autocomplete
 								onChange={changedItem => handleInputChange({ target: { name: "inputProcess", value: changedItem.id } })}
 								items={props.data.process}
@@ -390,8 +400,8 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="inputProcess"
-											// isInvalid={formValues.inputProcess.error}
-											value={formValues.inputProcess.value}
+											// isInvalid={formValues?.inputProcess?.error}
+											value={formValues?.inputProcess?.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -401,7 +411,7 @@ const AddProcess = (props) => {
 							</Autocomplete>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues.processOwner.error ? "Process owner is required!" : null}>
+						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues?.processOwner?.error ? "Process owner is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => { departmentChange(changedItem, 'owner') }}
 								items={props.data.members}
@@ -421,8 +431,8 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="processOwner"
-											isInvalid={formValues.processOwner.error}
-											value={formValues.processOwner.value}
+											isInvalid={formValues?.processOwner?.error}
+											value={formValues?.processOwner?.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
@@ -438,9 +448,9 @@ const AddProcess = (props) => {
 							<SelectField
 								name="frequency"
 								label=""
-								isInvalid={formValues.frequency.error}
-								value={formValues.frequency.value}
-								validationMessage={formValues.frequency.error ? "Frequency is mandatory!" : null}
+								isInvalid={formValues?.frequency?.error}
+								value={formValues?.frequency?.value}
+								validationMessage={formValues?.frequency?.error ? "Frequency is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
 								<option disabled>Select Frequency</option>
 								<option value="Daily">Daily</option>
@@ -450,7 +460,7 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Duration" validationMessage={formValues.hours.error || formValues.minutes.error ? "Duration is required!" : null}>
+						<FormField className='w-full' isRequired label="Duration" validationMessage={formValues?.hours?.error || formValues?.minutes?.error ? "Duration is required!" : null}>
 							<div className='flex justify-center items-center'>
 								<TextInput
 									style={{ marginTop: 8, width: '100%' }}
@@ -459,8 +469,8 @@ const AddProcess = (props) => {
 									type="number"
 									max={72}
 									min={0}
-									isInvalid={formValues.hours.error}
-									value={formValues.hours.value}
+									isInvalid={formValues?.hours?.error}
+									value={formValues?.hours?.value}
 									onChange={(e) => handleInputChange(e)}
 								/>
 								<span>&nbsp;&nbsp;</span>
@@ -471,8 +481,8 @@ const AddProcess = (props) => {
 									type="number"
 									max={60}
 									min={0}
-									isInvalid={formValues.minutes.error}
-									value={formValues.minutes.value}
+									isInvalid={formValues?.minutes?.error}
+									value={formValues?.minutes?.value}
 									onChange={(e) => handleInputChange(e)}
 								/>
 							</div>
@@ -482,9 +492,9 @@ const AddProcess = (props) => {
 							<SelectField
 								name="status"
 								label=""
-								isInvalid={formValues.status.error}
-								value={formValues.status.value}
-								validationMessage={formValues.status.error ? "Status is mandatory!" : null}
+								isInvalid={formValues?.status?.error}
+								value={formValues?.status?.value}
+								validationMessage={formValues?.status?.error ? "Status is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
 								<option disabled>Select Status</option>
 								<option value="Not Implemented">Not Implemented</option>

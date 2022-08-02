@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, SmallPlusIcon, UserIcon, SmallCrossIcon } from "evergreen-ui";
+import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, TextInputField, SmallPlusIcon, UserIcon, SmallCrossIcon, toaster } from "evergreen-ui";
 import { baseUrl, get, REGEX } from '../../services/https.service';
 import { DateFormat } from '../../services/dateFormat';
 
@@ -48,7 +48,12 @@ const AddMember = (props) => {
 
     const setForm = (data) => {
         console.log(data)
-        setEmployee({ ...data, doe: DateFormat(data.doe, 'picker'), doj: DateFormat(data.doj, 'picker') })
+        if (props.type == "vendor") {
+            setEmployee({ ...data })
+        }
+        else {
+            setEmployee({ ...data, doe: DateFormat(data.doe, 'picker'), doj: DateFormat(data.doj, 'picker') })
+        }
         if (data.profile) {
             setImgPresent(true)
             const url = `${baseUrl}photos/${data?.memberType?.toLowerCase()}/download/${data?.profile}`
@@ -68,13 +73,6 @@ const AddMember = (props) => {
         setSaveImage(e.target.files[0])
         setImage(URL.createObjectURL(e.target.files[0]))
         setImgPresent(true)
-    }
-
-    const submit = async () => {
-        setLoading(true)
-        props.onSubmit({ ...employee, ...{ upload: saveImage } })
-        // const _form = await validateForm(formValues)
-        // props.onSubmit(_form)
     }
 
     const removeImage = () => {
@@ -115,18 +113,32 @@ const AddMember = (props) => {
         )
     }
 
-    const validateForm = (_form) => {
-        // VALIDATES THE DATA IN FORM
+    const validateForm = (_form, structure) => {
         return new Promise(resolve => {
-            const _formKeys = Object.keys(_form)
-            for (let index = 0; index < _formKeys.length; index++) {
-                const _key = _formKeys[index];
-                let pattern = _form[_key]['regex']
-                _form[_key]['error'] = !(pattern.test(_form[_key]['value']))
-                console.log('Key -->', _key, ' | Value -->', _form[_key]['value'], ' | Test --> ', pattern.test(_form[_key]['value']))
-                if (index === _formKeys.length - 1) resolve(_form)
+            let err = ''
+            for (let index = 0; index < structure.length; index++) {
+                const key = structure[index];
+                if (!_form[key.key] && key.required) {
+                    err = `${key.label} is required`
+                    resolve({ err })
+                    break;
+                }
+                if ((index === structure.length - 1) && !err) resolve(_form)
             }
         })
+    }
+
+
+
+    const submit = async () => {
+        setLoading(true)
+        const _form = { ...employee, ...{ upload: saveImage } }
+        const formStructure = props.type === 'vendor' ? vendorForm : employeForm
+        const form_valid = await validateForm(_form, formStructure)
+        if (form_valid.err) {
+            toaster.danger(form_valid.err)
+        }
+        else props.onSubmit(_form)
     }
 
     return (
@@ -170,7 +182,7 @@ const AddMember = (props) => {
                     </div>
                     {props.type === 'vendor' ? null :
                         <div className='flex justify-center items-center'>
-                            <FormField className='w-full' isRequired label="Department">
+                            <FormField marginRight={20} className='w-full' isRequired label="Department">
                                 <SelectField
                                     name="departmentId"
                                     label=""
@@ -179,7 +191,7 @@ const AddMember = (props) => {
                                     <option value="">Select a department</option>
                                     {departments.map(dept => {
                                         return (
-                                            <option value={dept.id}>{dept.name}</option>
+                                            <option key={dept.id} value={dept.id}>{dept.name}</option>
                                         )
                                     })}
                                 </SelectField>
@@ -193,7 +205,7 @@ const AddMember = (props) => {
                                     <option value="">Select a type</option>
                                     {type.map(typ => {
                                         return (
-                                            <option value={typ.id}>{typ.name}</option>
+                                            <option key={typ.id} value={typ.id}>{typ.name}</option>
                                         )
                                     })}
                                 </SelectField>
@@ -239,7 +251,6 @@ const AddMember = (props) => {
                                 <TextInputField
                                     size={100}
                                     type="date"
-                                    required
                                     label="Date of Exit"
                                     value={employee.doe}
                                     name="doe"
@@ -260,7 +271,6 @@ const AddMember = (props) => {
                         <div style={{ margin: "0 10px" }}></div>
                         <TextInputField
                             size={100}
-                            required
                             label={props.type == "vendor" ? "Address" : "Bank Details"}
                             name={props.type == "vendor" ? "address" : 'bankDetails'}
                             value={props.type == "vendor" ? employee.address : employee.bankDetails}
@@ -324,3 +334,28 @@ const _formDefault = {
         regex: REGEX.ALL
     }
 }
+
+
+
+const employeForm = [
+    { key: 'name', label: 'Name', required: true },
+    { key: 'email', label: 'Email', required: true },
+    { key: 'departmentId', label: 'Department', required: true },
+    { key: 'typeId', label: 'Type', required: true },
+    { key: 'designation', label: 'Designation', required: true },
+    { key: 'doe', label: 'D.O.E', required: false },
+    { key: 'doj', label: 'D.O.L', required: true },
+    { key: 'contactNo', label: 'Conact Number', required: true },
+    { key: 'bankDetails', label: 'Bank Details', required: false },
+    { key: 'upload', label: 'profile', required: false }
+]
+
+const vendorForm = [
+    { key: 'name', label: 'Name', required: true },
+    { key: 'email', label: 'Email', required: true },
+    { key: 'designation', label: 'Contact Person Name', required: true },
+    { key: 'contactNo', label: 'Conact Number', required: true },
+    { key: 'address', label: 'Address', required: false },
+    { key: 'upload', label: 'profile', required: false }
+]
+

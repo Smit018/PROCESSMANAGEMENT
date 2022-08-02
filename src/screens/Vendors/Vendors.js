@@ -32,7 +32,7 @@ const Vendors = () => {
 	const [url, setUrl] = useState('');
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(10);
+	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
 
 	let imageHandler = useRef(null);
@@ -71,10 +71,11 @@ const Vendors = () => {
 		fetchForCsv()
 	}, []);
 
-	const fetchCount = () => {
+	const fetchCount = (where) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = `members/count?where={"memberType":"VENDOR", "deleted": {"neq": true}}`
+				where = where || `where={"memberType":"VENDOR", "deleted": {"neq": true}}`
+				const url = `members/count?${where}`
 				const count = await get(url)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
@@ -103,7 +104,7 @@ const Vendors = () => {
 	const fetchVendors = async (filter) => {
 		setEmployeeData(null)
 		try {
-			if (filter) {
+			if (!filter) {
 				const count = await fetchCount()
 				setTotalData(count)
 			}
@@ -126,11 +127,17 @@ const Vendors = () => {
 	}
 
 
-	const onSearchType = (value) => {
-		const _data = allData.filter(vendor => {
-			return vendor.name.toLowerCase().includes(value?.toLowerCase())
-		})
-		setEmployeeData(_data)
+	const onSearchType = async (value) => {
+		console.log(value)
+		if (value) {
+			const whereCount = `where={"name":{"regexp":"/${value}/i"}, "memberType":"VENDOR", "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount)
+			setTotalData(count)
+			// SEARCH THROUGH THE DB
+			const where = `"where": {"name":{"regexp":"/${value}/i"}, "memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			vendorUrl({ where })
+		}
+		else fetchVendors()
 	}
 
 	const _upload = async (file) => {
@@ -217,23 +224,54 @@ const Vendors = () => {
 
 	}
 
+
+	const submitVendor = async (_form) => {
+		try {
+			_form['password'] = _form.contactNo
+			if (_form['profile'])
+				_form['profile'] = await _upload(_form['upload'])
+			_form['memberType'] = 'VENDOR'
+			const response = await post('members', _form)
+			if (response.statusCode === 200) {
+				// EMPLOYEE ADDED SUCCESSFULLY!
+				toaster.success('Vendor added successfully!')
+				fetchVendors()
+				setShowForm(false)
+			}
+			else {
+				console.log(response)
+				toaster.danger('Failed to add Vendor', {
+					description: response.message
+				})
+			}
+		}
+		catch (err) {
+			console.log(err)
+			toaster.danger('Failed to add Vendor', {
+				description: err.message
+			})
+		}
+	}
+
 	const changePage = (type) => {
+		const _search = search ? `"name":{"regexp":"/${search}/i"},` : ''
+
 		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			vendorUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			vendorUrl(filter)
 		}
 		else {
 			setPage(type)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "memberType":"VENDOR", "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
 			vendorUrl(filter)
 		}
 	}
@@ -352,7 +390,7 @@ const Vendors = () => {
 				type="vendor"
 				open={showForm}
 				title="Add Vendor"
-				onSubmit={(formData) => { validateForm(formData) }}
+				onSubmit={(formData) => { submitVendor(formData) }}
 				onClose={() => setShowForm(false)}
 			/>
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="vendors" /> : null}

@@ -33,11 +33,12 @@ const Process = () => {
 	const [url, setUrl] = useState('');
 
 	const [page, setPage] = useState(1);
-	const [pageLimit, setPageLimit] = useState(10);
+	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
 
 	const [filterDialog, setFilterDialog] = useState(false)
 	const [filterData, setFilterData] = useState({})
+	const [filterApplied, setFilterApplied] = useState(false)
 
 	useEffect(() => {
 		setScreenHeight(window.innerHeight)
@@ -83,10 +84,11 @@ const Process = () => {
 		}
 	}
 
-	const fetchCount = () => {
+	const fetchCount = (where) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = `processes/count?where={"deleted": {"neq": true}}`
+				where = where || `where={"deleted": {"neq": true}}`
+				const url = `processes/count?${where}`
 				const count = await get(url)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
@@ -104,6 +106,7 @@ const Process = () => {
 			if (!filter) {
 				const count = await fetchCount()
 				setTotalData(count)
+				isFilterApplied = false
 			}
 			const _url = filter || processUrl()
 			const response = await get(_url)
@@ -111,6 +114,7 @@ const Process = () => {
 				if (response.statusCode == 200) {
 					setAllProcess(response.data)
 					allData = response.data
+					setFilterApplied(isFilterApplied)
 					if (response.data.length) {
 						const csv = await createCSVData(response.data)
 						set_csv_data(csv)
@@ -126,11 +130,17 @@ const Process = () => {
 		}
 	}
 
-	const onSearchType = (value) => {
-		const _data = allData.filter(process => {
-			return process.title.toLowerCase().includes(value?.toLowerCase())
-		})
-		setAllProcess(_data)
+	const onSearchType = async (value) => {
+		console.log(value)
+		if (value) {
+			const whereCount = `where={"title":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount)
+			setTotalData(count)
+			// SEARCH THROUGH THE DB
+			const where = `"where": {"title":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			processUrl({ where })
+		}
+		else fetchProccesses()
 	}
 
 	const fetchDepartments = async () => {
@@ -188,22 +198,23 @@ const Process = () => {
 	}
 
 	const changePage = (type) => {
+		const _search = search ? `"title":{"regexp":"/${search}/i"},` : ''
 		const filter = { where: '', include: '', order: '' }
 		if (type === 'next') {
 			const _page = page + 1
 			setPage(_page)
-			filter.where = `"where": { "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": { ${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			processUrl(filter)
 		}
 		else if (type === 'prev') {
 			const _page = page - 1
 			setPage(_page)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(_page - 1) * pageLimit}`
 			processUrl(filter)
 		}
 		else {
 			setPage(type)
-			filter.where = `"where": {"deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
+			filter.where = `"where": {${_search} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(type - 1) * pageLimit}`
 			processUrl(filter)
 		}
 	}
@@ -324,8 +335,9 @@ const Process = () => {
 		}, 3000);
 	}
 
+	let isFilterApplied = false
 	const applyFilter = () => {
-		console.log(filterData)
+		isFilterApplied = true
 		const _filter = {
 			typeId: filterData.type ? `"typeId": "${filterData.type}",` : '',
 			departmentId: filterData.department ? `"departmentId": "${filterData.department}",` : '',
@@ -337,11 +349,19 @@ const Process = () => {
 		processUrl({ where })
 	}
 
+	const onFilterClose = () => {
+		setFilterDialog(false)
+		isFilterApplied = false
+		setFilterApplied(false)
+		fetchProccesses();
+	}
+
 	const ProcessPage = () => {
 		return (
 			<div className="w-full h-full">
 				<TopBar
 					filter="true"
+					filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
 					csv="true"
 					onDownload={() => setDownLoad()}
 					title="Processes"
@@ -374,6 +394,7 @@ const Process = () => {
 										avatar={`${baseUrl}photos/${profile?.processOwner?.memberType?.toLowerCase()}/download/${profile?.processOwner?.profile}`}
 										name={profile?.processOwner?.name}
 										description={`${profile?.processOwner?.employeeCode}, ${profile?.processOwner?.designation}`}
+										action={false}
 									/>
 								</Table.TextCell>
 								<Table.TextCell minWidth={'15%'} maxWidth={'10%'} className="tb-c">
@@ -390,7 +411,7 @@ const Process = () => {
 											/>)
 										})}
 										<span className="primary">
-											{profile?.personProcess?.length < 3 ? null : `+ ${profile?.personProcess?.length - 3} more`}
+											{profile?.personProcess?.length <= 3 ? null : `+ ${profile?.personProcess?.length - 3} more`}
 										</span>
 									</span>
 								</Table.TextCell>
@@ -417,10 +438,11 @@ const Process = () => {
 				}
 				{_csvDwn ? <CSV body={csv_data} headers={headers} filename="process.csv" /> : null}
 
-				<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+				<Dialog isShown={filterDialog} onCancel={onFilterClose}
 					title="Filter Processes"
 					width={'50%'}
 					confirmLabel="Filter"
+					cancelLabel={filterApplied ? 'Clear filter' : 'Close'}
 					onConfirm={applyFilter}>
 					<form>
 						<div className='flex justify-center items-center w-full'>
