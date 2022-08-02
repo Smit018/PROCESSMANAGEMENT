@@ -38,7 +38,8 @@ const Employee = () => {
 	// FOR CSV
 	const [_csvDwn, setCSVDwn] = useState(false);
 	const [csv_data, set_csv_data] = useState([]);
-
+	const [filterDialog, setFilterDialog] = useState(false)
+	const [filterData, setFilterData] = useState({})
 
 	let imageHandler = useRef(null);
 
@@ -327,6 +328,7 @@ const Employee = () => {
 				csv="true"
 				filter="true"
 				search={search}
+				onFilter={() => { setFilterDialog(true) }}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
@@ -377,6 +379,24 @@ const Employee = () => {
 			/>
 
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="employee" /> : null}
+			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+				title="Filter Documents"
+				width={'50%'}
+				confirmLabel="Filter"
+				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				onConfirm={applyFilter}>
+				<form>
+					<div className='flex justify-center items-center w-full'>
+						<div className='w-full'>
+							<TextInputField required label="From" max={new Date()} type="date" value={filterData.from} onChange={(e) => setFilterData({ ...filterData, from: e.target.value })} />
+						</div>
+						<div style={{ margin: "0 10px" }}></div>
+						<div className='w-full'>
+							<TextInputField required label="To" type="date" min={filterData.from} value={filterData.to} onChange={(e) => setFilterData({ ...filterData, to: e.target.value })} />
+						</div>
+					</div>
+				</form>
+			</Dialog>
 		</div>
 	)
 };
