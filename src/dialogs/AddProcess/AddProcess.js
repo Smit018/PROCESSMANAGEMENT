@@ -236,9 +236,11 @@ const AddProcess = (props) => {
 			setShowErrors(true)
 		}
 		else {
+			if(!selectedInpProcess) {
+				_form.form.inputProcess.value = null
+			}
 			props.onSubmit({ ..._form.form, processNoPrefix })
 			setFormValues(null)
-
 		}
 	}
 

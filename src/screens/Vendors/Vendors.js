@@ -227,8 +227,9 @@ const Vendors = () => {
 
 	const submitVendor = async (_form) => {
 		try {
+			console.log(_form)
 			_form['password'] = _form.contactNo
-			if (_form['profile'])
+			if (_form['upload'])
 				_form['profile'] = await _upload(_form['upload'])
 			_form['memberType'] = 'VENDOR'
 			const response = await post('members', _form)
@@ -386,13 +387,15 @@ const Vendors = () => {
 					pageChange={(e) => changePage(e)}
 				/>
 			</Table>
-			<AddMember
-				type="vendor"
-				open={showForm}
-				title="Add Vendor"
-				onSubmit={(formData) => { submitVendor(formData) }}
-				onClose={() => setShowForm(false)}
-			/>
+			{!showForm ? null :
+				<AddMember
+					type="vendor"
+					open={showForm}
+					title="Add Vendor"
+					onSubmit={(formData) => { submitVendor(formData) }}
+					onClose={() => setShowForm(false)}
+				/>
+			}
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="vendors" /> : null}
 			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
 				title="Filter Documents"

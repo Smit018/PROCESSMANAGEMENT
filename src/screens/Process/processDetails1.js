@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { deleted, get, patch, post } from '../../services/https.service';
+import { deleted, get, patch, post, baseUrl } from '../../services/https.service';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon, toaster } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog'
 import { showWaitToast } from '../../components/GlobalComponent';
+
+import waImg from '../../assets/images/wa.png'
+import docImg from '../../assets/images/doc.png'
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
@@ -26,6 +29,7 @@ const ProcessDetails1 = () => {
     const [processOwner, setProcessOwner] = useState(false);
     const [_showDelete, showDelete] = useState(false);
     const [_showUpdate, showUpdate] = useState(false);
+    const [_updateStep, setUpdateStep] = useState(false);
 
     // FOR DIALOG
     const [types, setTypes] = useState([])
@@ -357,7 +361,7 @@ const ProcessDetails1 = () => {
     }
 
     const getAllSteps = async () => {
-        const getSteps = await get(`steps?filter={"where":{"processId":"${id}"},"order":"createdAt ASC"}`);
+        const getSteps = await get(`steps?filter={"where":{"processId":"${id}"},"order":"createdAt ASC", "include": "stepMember"}`);
         if (getSteps.statusCode >= 200 && getSteps.statusCode < 300) {
             let step = [...getSteps.data];
             for (let i = 0; i < step.length; i++) {
@@ -366,7 +370,7 @@ const ProcessDetails1 = () => {
                     let memStep = memberStep.data.map(e => {
                         return {
                             name: e.member.name, code: e.member.employeeCode, position: e.member.designation,
-                            type: e.member.memberType, memberid: e.member.id, id: e.id, stepId: step[i].id
+                            type: e.member.memberType, memberid: e.member.id, id: e.id, stepId: step[i].id, profile: e.member.profile 
                         }
                     })
                     step[i]['member'] = memStep;
@@ -533,10 +537,11 @@ const ProcessDetails1 = () => {
 
 
     const autoItem = (item, variable) => {
+        const Img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
         return (
             <span key={item.children.name} onClick={() => { console.log('items', item.children, variable); postProcess(variable, item.children) }}>
                 <AvatarList
-                    avatar={ImageURL}
+                    avatar={Img}
                     name={item.children.name}
                     description={item.children.designation || ''}
                     action={false}
@@ -592,6 +597,11 @@ const ProcessDetails1 = () => {
         )
     }
 
+const updateStep = (step) => {
+    console.log(step)
+    setUpdateStep(true)
+    setDescription(step.description)
+}
 
     const Steps = (myProps) => {
         // console.log(myProps.datasource)
@@ -601,16 +611,16 @@ const ProcessDetails1 = () => {
                     <div className='flex justify-between items-center'>
                         <Heading size={500}>{index + 1}. {data.description}</Heading>
                         <div className='flex items-center'>
-                            <IconButton icon={EditIcon} marginRight={2} />
+                            <IconButton icon={EditIcon} marginRight={2} onClick={() => updateStep(data)} />
                             <IconButton icon={CrossIcon} marginRight={2} onClick={() => removeMember('step', data)} />
                         </div>
                     </div>
                     <div className='flex flex-wrap my-3'>
-                        {data.member.map((member, _index) => {
+                        {data.member?.map((member, _index) => {
                             return (
                                 <div key={_index} className='mx-2 my-2'>
                                     <AvatarCard
-                                        avatar={ImageURL}
+                                        avatar={`${baseUrl}photos/${member?.type?.toLowerCase()}/download/${member?.profile}`}
                                         sendDelete={e => fetchRemovelist('step', index, member)}
                                         name={member.name}
                                         description={`${member.code}, ${member.position}`}
@@ -697,7 +707,7 @@ const ProcessDetails1 = () => {
             process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
         }
         if (process['inputProcess'] == "") {
-            delete process.inputProcess
+            process.inputProcess = null
         }
         process['duration'] = `${process['hours']}:${process['minutes']}`;
         process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
@@ -752,7 +762,7 @@ const ProcessDetails1 = () => {
                 <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                     <div className='flex items-center'>
                         <Avatar
-                            src={ImageURL}
+                            src={`${baseUrl}photos/${processDetail?.processOwner?.memberType?.toLowerCase()}/download/${processDetail?.processOwner?.profile}`}
                             name="Alan Turing"
                             size={50}
                             marginRight={10}
@@ -788,7 +798,7 @@ const ProcessDetails1 = () => {
                     {processMembers.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={`${baseUrl}photos/${item?.member?.memberType?.toLowerCase()}/download/${item?.member?.profile}`}
                                 sendDelete={e => removeMember('processMember', item.id)}
                                 name={item?.member?.name}
                                 description={item?.member?.designation}
@@ -817,7 +827,7 @@ const ProcessDetails1 = () => {
                         return (
                             <AvatarList
                                 sendDelete={e => fetchRemovelist('suggestedStep', index)}
-                                avatar={ImageURL}
+                                avatar={`${baseUrl}photos/${item.memberType?.toLowerCase()}/download/${item.profile}`}
                                 name={item?.name}
                                 description={item?.designation}
                                 actionText={item?.memberType}
@@ -861,16 +871,10 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
-                    {/* <AvatarList
-                        avatar={ImageURL}
-                        name="Rajiv Ranjan"
-                        description="Product Manager"
-                        actionText="Employee"
-                    /> */}
                     {inputPerson.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={`${baseUrl}photos/${item.member?.memberType?.toLowerCase()}/download/${item.member?.profile}`}
                                 name={item?.member?.name}
                                 sendDelete={e => removeMember('processPerson', item.id)}
                                 description={''}
@@ -891,16 +895,10 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Whatsapp Groups</Text>
                     <br></br>
-                    {/* <AvatarList
-                        avatar={ImageURL}
-                        name="Rajiv Ranjan"
-                        description="Product Manager"
-                        actionText="Employee"
-                    /> */}
                     {inputWhatsapp.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={waImg}
                                 name={item?.whatsappGroup?.name}
                                 sendDelete={e => removeMember('whatsappProcess', item.id)}
                                 description={''}
@@ -922,17 +920,10 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Documents</Text>
                     <br></br>
-                    {/* <AvatarList
-                        avatar={ImageURL}
-                        name="Rajiv Ranjan"
-                        description="Product Manager"
-                        actionText="Employee"
-                    /> */}
-
                     {inputDocument.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={docImg}
                                 name={item?.document?.name}
                                 sendDelete={e => removeMember('documentProcess', item.id)}
                                 description={''}
@@ -960,16 +951,10 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Employees & Vendors</Text>
                     <br></br>
-                    {/* <AvatarList
-                        avatar={ImageURL}
-                        name="Rajiv Ranjan"
-                        description="Product Manager"
-                        actionText="Employee"
-                    /> */}
                     {outputPerson.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                            avatar={`${baseUrl}photos/${item.member?.memberType?.toLowerCase()}/download/${item.member?.profile}`}
                                 name={item?.member?.name}
                                 sendDelete={e => removeMember('processPerson', item.id)}
                                 description={''}
@@ -993,7 +978,7 @@ const ProcessDetails1 = () => {
                     {outputWhatsapp.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={waImg}
                                 sendDelete={e => removeMember('whatsappProcess', item.id)}
                                 name={item?.whatsappGroup?.name}
                                 description={''}
@@ -1014,16 +999,10 @@ const ProcessDetails1 = () => {
                 <div>
                     <Text size={400}>Documents</Text>
                     <br></br>
-                    {/* <AvatarList
-                        avatar={ImageURL}
-                        name="Rajiv Ranjan"
-                        description="Product Manager"
-                        actionText="Employee"
-                    /> */}
                     {outputDocument.map((item, index) => {
                         return (
                             <AvatarList
-                                avatar={ImageURL}
+                                avatar={docImg}
                                 name={item?.document?.name}
                                 sendDelete={e => removeMember('documentProcess', item.id)}
                                 description={''}

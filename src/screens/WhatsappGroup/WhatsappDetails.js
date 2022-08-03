@@ -348,13 +348,14 @@ const WhatsappDetails = () => {
 
 
     const autoItem = (item) => {
+        const img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
         return (
             <span key={item.children.name} onClick={() => {
                 // setCurrMember(item.children); addMemeber(item.children) 
                 addMembersToWhatsapp(item.children)
             }}>
                 <AvatarList
-                    avatar={ImageURL}
+                    avatar={img}
                     name={item.children.name}
                     description={item.children.designation || item.children.memberType}
                     action={false}

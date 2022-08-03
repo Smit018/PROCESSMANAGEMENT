@@ -11,7 +11,7 @@ const AvatarList = (props) => {
     return (
         <div className='hover:bg-slate-100 hover:cursor-pointer flex items-center px-4 py-3 shadow rounded'>
             <div className='mr-4'>
-                <Avatar size={40} src={props.avatar} />
+                <Avatar size={40} src={props.avatar} name={props.name}/>
             </div>
             <div className='flex justify-between items-center w-full'>
                 <div>

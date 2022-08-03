@@ -169,6 +169,7 @@ const Employee = () => {
 			try {
 				const formData = new FormData();
 				formData.append('file', file)
+				console.log(formData)
 				const image = await post("photos/employee/upload", formData)
 				console.log(image)
 				if (image.data) {
@@ -238,7 +239,7 @@ const Employee = () => {
 		try {
 			console.log('form', _form)
 			_form['password'] = _form.contactNo
-			if (_form['profile'])
+			if (_form['upload'])
 				_form['profile'] = await _uploadFile(_form['upload'])
 			_form['memberType'] = 'EMPLOYEE'
 			const response = await post('members', _form)

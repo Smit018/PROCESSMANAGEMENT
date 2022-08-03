@@ -178,7 +178,7 @@ const Process = () => {
 			process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
 		}
 		if (process['inputProcess'] == "") {
-			delete process.inputProcess
+			process.inputProcess = null
 		}
 		process['duration'] = `${process['hours']}:${process['minutes']}`;
 		process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;

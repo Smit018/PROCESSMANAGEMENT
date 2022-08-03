@@ -139,6 +139,7 @@ const AddMember = (props) => {
             toaster.danger(form_valid.err)
         }
         else props.onSubmit(_form)
+        console.log(_form)
     }
 
     return (
