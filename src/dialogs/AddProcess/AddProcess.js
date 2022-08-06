@@ -93,6 +93,7 @@ const AddProcess = (props) => {
 	const [selectedDept, setSelectedDept] = useState(null);
 	const [selectedInpProcess, setSelectedInpProcess] = useState(null);
 	const [selectedProcessOwner, setSelectedProcessOwner] = useState(null);
+	const [inProcessSel, setInProcessSel] = useState(null);
 
 
 	useEffect(() => {
@@ -172,9 +173,14 @@ const AddProcess = (props) => {
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
+		console.log()
 		const { name, value } = e.target;
 		const _formValues = { ...formValues }
 		_formValues[name]['value'] = value;
+		if (e.target.name == 'inputProcess') {
+			if (value) setInProcessSel(true)
+			else setInProcessSel(false)
+		}
 		// if (name == "typeId") {
 		// 	let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
 		// 	setpTypeCode(processTypeCode);
@@ -229,6 +235,7 @@ const AddProcess = (props) => {
 	}
 
 	const submit = async () => {
+		console.log(selectedInpProcess)
 		setLoading(true)
 		const _form = await validateForm(formValues)
 		if (_form && _form.error) {
@@ -236,7 +243,7 @@ const AddProcess = (props) => {
 			setShowErrors(true)
 		}
 		else {
-			if(!selectedInpProcess) {
+			if (!selectedInpProcess && !inProcessSel) {
 				_form.form.inputProcess.value = null
 			}
 			props.onSubmit({ ..._form.form, processNoPrefix })
