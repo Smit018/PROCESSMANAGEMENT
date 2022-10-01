@@ -11,6 +11,7 @@ import { logout, updateLocalStorage } from '../../services/https.service';
 
 import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
+import { useXarrow , Xwrapper} from 'react-xarrows';
 
 
 const drawerWidth = 300;
@@ -40,6 +41,8 @@ const SideBar = () => {
 			updateLocalStorage(_storage)
 		else navigate('/')
 	}, [])
+    
+	const updateXarrow=useXarrow()
 
 
 	const logMeOut = () => {
@@ -84,9 +87,16 @@ const SideBar = () => {
 			</div>
 			<div className='side-main'>
 				<div className='app-bar'></div>
+				<Xwrapper>
+				<div onScroll={updateXarrow}>
 				<div className='routes px-5 py-4'>
 					<Outlet />
 				</div>
+				</div>
+				</Xwrapper>
+				
+
+				
 			</div>
 			<PromptDialog
 				open={showLogout}

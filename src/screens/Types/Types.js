@@ -1,42 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import styles from './Types.module.css';
-
-import { get, post } from '../../services/https.service';
-import Box from '@mui/material/Box';
+import { get, patch, post,deleted } from '../../services/https.service';
 import { Table, toaster } from 'evergreen-ui'
 import { TextInputField } from 'evergreen-ui'
-import { Pane, Dialog, Button, Pagination } from 'evergreen-ui'
+import { Pane, Dialog, Button,IconButton,Pagination,EditIcon,CrossIcon } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import { SettingsBackupRestoreRounded } from '@mui/icons-material';
+
 
 const page = { limit: 2, page: 0 }
 
 const Types = () => {
-
+	
 	const [name, setName] = useState('');
 	const [typeCode, setTypeCode] = useState('');
 	const [typeData, setTypeData] = useState(null);
 	const [open, setOpen] = useState(false);
 	// const [search, setSearch] = useState('');
 	const [innerHeight, setInnerHeight] = useState();
-
+	
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
-
-
-
+	
+	const [openEdit,setOpenEdit]=useState(false);
+	const [openDelete,setOpenDelete]=useState(false);
+	const [processCount, setProcessCount]=useState(0);
+	const [currTypeId, setCurrTypeId]=useState('');
+	let currentTypeId=''
+	let setCurrentTypeId=(str)=>{
+		currentTypeId=str;
+	}
+	
+	
+	
+	let currentTprCount=0;
+	
+	
+	
 	const paths = [
 		{ path: '/admin/types', title: 'Types' }
 	]
-
+	
 	useEffect(() => {
 		fetchTypes()
 	}, []);
-
-
+	
+	
 	const fetchCount = () => {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -50,7 +61,7 @@ const Types = () => {
 			}
 		})
 	}
-
+	
 	const fetchTypes = async (filter) => {
 		// FETCH ALL TYPES FROM THE SERVER
 		try {
@@ -71,7 +82,7 @@ const Types = () => {
 			toaster.danger('Failed to fetch Types')
 		}
 	}
-
+	
 	const createType = async () => {
 		// SAVE TYPE TO DB
 		try {
@@ -88,24 +99,91 @@ const Types = () => {
 			}
 			else {
 				console.log(saveType.message)
-				toaster.danger('Failed to add type')
+				toaster.danger(saveType.statusCode==422?"Type and code should be unique":"failed to add")
 			}
 		}
 		catch (err) {
-			console.log(err)
 			toaster.danger('Failed to add type')
+			console.log(err)
+		
 		}
 	}
-
+	
 	const handleClose = () => {
 		setOpen(false);
+		setOpenDelete(false)
+		setOpenEdit(false)
 	}
-
-	const _validateForm = () => {
-		if (name.trim().length > 3 && typeCode.trim().length == 2) return false;
+	
+	const deleteType= async()=>{
+		try{
+			console.log(currentTypeId);
+			let res= await deleted(`types/${currTypeId}`);
+			if(res.statusCode==200){
+				fetchTypes();
+				toaster.success(`${name} Type is deleted`);
+				setCurrentTypeId('');
+				currentTprCount=0;
+				setName('');
+			}
+		}
+		catch(err){
+			toaster.danger(err)
+		}
+		setOpenDelete(false);
+		console.log(currentTypeId)
+	}
+	
+	const editType=async()=>{
+		try{
+			console.log(currentTypeId,name);
+			if(name){
+				let res=await patch(`types/${currentTypeId}`,{name})
+				if(res.statusCode==200){
+					toaster.success('Type edited successfully');
+					fetchTypes()
+					setName('');
+					setCurrentTypeId('');
+					setOpenEdit(false);
+				}
+				
+				
+				
+			}
+		}
+		catch(err){
+			toaster.danger(err.message);
+		}
+		
+	}
+	
+	const validateDelete=async(typeId)=>{
+		console.log('clicked validatedelete')
+		try{
+			let processes=await get(`processes?filter={"where":{"typeId":"${typeId}"}}`);
+			console.log(typeId);
+			if(processes.statusCode==200){
+				setOpenDelete(true);
+				setProcessCount(processes.data.length)
+				currentTprCount=processes.data.length;
+				console.log(currentTprCount);
+				setCurrTypeId(typeId)
+			}
+			else{
+				currentTprCount=0;
+			}
+		}
+		catch(err){	
+			console.log("Error is here "+err);
+		}	
+	}
+	
+	const _validateForm = () => { 
+		
+		if (name.trim().length > 3) return false;
 		else return true;
 	}
-
+	
 	const changePage = (type) => {
 		if (type === 'next') {
 			const _page = page + 1
@@ -125,62 +203,101 @@ const Types = () => {
 			fetchTypes(filter)
 		}
 	}
-
+	
 	return (
 		<div className='h-full w-full'>
-			<TopBar
-				title="Type"
-				breadscrubs={paths}
-				add={true}
-				addTitle="Add Type"
-				addEv={() => setOpen(true)}
+		<TopBar
+		title="Type"
+		breadscrubs={paths}
+		add={true}
+		addTitle="Add Type"
+		addEv={() => setOpen(true)}
+		/>
+		<br></br>
+		<br></br>
+		<Table aria-label="simple table">
+		<Table.Head>
+		<Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
+		<Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
+		<Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
+		<Table.TextHeaderCell className="th-c">edit/delete</Table.TextHeaderCell>
+		</Table.Head>
+		<Table.Body height={typeData?.length > 8 ? innerHeight - 350 : 'auto'}>
+		{!typeData ? showSpinner() : typeData.length === 0 ? showEmpty() : typeData.map((item, index) => {
+			return (
+				<Table.Row key={index}>
+				<Table.TextCell className="tb-c">{(index + 1) + (page > 1 ? (page > 2 ? (pageLimit * (page - 1)) : pageLimit) : 0)}</Table.TextCell>
+				<Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+				<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
+				<Table.TextCell className="tb-c">
+				<IconButton icon={EditIcon} margin={2} onClick={(event) =>{setOpenEdit(true);setCurrentTypeId(item.id);
+					setName(item.name)
+				}} />
+				<IconButton icon={CrossIcon} margin={2} onClick={(event) =>{
+					setCurrentTypeId(item.id);
+					console.log(currentTypeId);
+					setName(item.name);
+					validateDelete(item.id)
+				}} />
+				</Table.TextCell>
+				</Table.Row>
+				)
+			})}
+			</Table.Body>
+			<Paginator
+			page={page}
+			total={totalData}
+			limit={pageLimit}
+			prev={(e) => changePage('prev')}
+			next={(e) => changePage('next')}
+			pageChange={(e) => changePage(e)}
 			/>
-			<br></br>
-			<br></br>
-			<Table aria-label="simple table">
-				<Table.Head>
-					<Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
-				</Table.Head>
-				<Table.Body height={typeData?.length > 8 ? innerHeight - 350 : 'auto'}>
-					{!typeData ? showSpinner() : typeData.length === 0 ? showEmpty() : typeData.map((item, index) => {
-						return (
-							<Table.Row key={index}>
-								<Table.TextCell className="tb-c">{(index + 1) + (page > 1 ? (page > 2 ? (pageLimit * (page - 1)) : pageLimit) : 0)}</Table.TextCell>
-								<Table.TextCell className="tb-c">{item.name}</Table.TextCell>
-								<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
-							</Table.Row>
-						)
-					})}
-				</Table.Body>
-				<Paginator
-					page={page}
-					total={totalData}
-					limit={pageLimit}
-					prev={(e) => changePage('prev')}
-					next={(e) => changePage('next')}
-					pageChange={(e) => changePage(e)}
-				/>
 			</Table>
 			<Dialog isShown={open} onCloseComplete={handleClose}
-				title="Add Type"
-				confirmLabel="Save Type"
-				isConfirmDisabled={_validateForm()}
-				onConfirm={createType}
+			title="Add Type"
+			confirmLabel="Save Type"
+			isConfirmDisabled={
+				_validateForm()
+			}
+			onConfirm={createType}
 			>
+			<form>
+			<TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+			<TextInputField required label="Code" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
+			</form>
+			</Dialog>
+			
+			{/* dialog to edit Types  */}
+			
+			<Dialog isShown={openEdit} title="Edit Types" onCloseComplete={handleClose} confirmLabel="Edit Department"
+			isConfirmDisabled={_validateForm()}
+			onConfirm={()=>{editType()}}>
+			<form onSubmit={(event)=>{event.preventDefault();editType()}}>
+			<TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+			</form>
+			</Dialog>
+			
+			{/* dialog to delete Types*/}
+			
+			<Dialog 
+				isShown={openDelete} 
+				title="Delete Types" 
+				onCloseComplete={handleClose} 
+				confirmLabel="Delete Department"
+				onConfirm={()=>{deleteType()}}   
+				isConfirmDisabled={processCount?true:false}>
 				<form>
-					<TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
-					<TextInputField required label="Code" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
+				<p>{processCount} {processCount < 2 ? ' process is' : ' processes are'} involved in {name}</p>
 				</form>
 			</Dialog>
 			<br></br>
-		</div>
-	)
-};
-
-Types.propTypes = {};
-
-Types.defaultProps = {};
-
-export default Types;
+			</div>
+			)
+		};
+		
+		Types.propTypes = {};
+		
+		Types.defaultProps = {};
+		
+		export default Types;
+		

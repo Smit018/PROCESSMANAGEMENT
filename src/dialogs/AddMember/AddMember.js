@@ -8,7 +8,9 @@ import { DateFormat } from '../../services/dateFormat';
 const AddMember = (props) => {
 
     const [image, setImage] = useState();
-    const [employee, setEmployee] = useState({});
+    const [employee, setEmployee] = useState({name:'',email:''
+    ,designation:'',employeeCode:'',
+    address:'',contactNo:'',doe:'',doj:'',bankDetails:''});
     const [imgPresent, setImgPresent] = useState(false);
     const [loading, setLoading] = React.useState(false);
     const [formValues, setFormValues] = useState()

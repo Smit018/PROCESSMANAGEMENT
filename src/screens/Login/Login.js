@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+
 import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 
 import styles from './Login.module.css';
@@ -41,10 +42,12 @@ const Login = () => {
   useEffect(() => {
     if(myadmin) {
       if(myadmin.token && myadmin.name && myadmin.userId) {
+        console.log(myadmin)
         navigate('/admin')
       }
       else {
-        // DO NOTHING
+        // navigate('/')
+        
       }
     }
   }, [])
@@ -63,7 +66,7 @@ const Login = () => {
     setLoading(true)
     event.preventDefault();
     const _form = await validateForm(formValues)
-    console.log(_form)
+    // console.log(_form)
     setFormValues(_form)
     setSubmitted(true)
     login(_form.email.value, _form.password.value)

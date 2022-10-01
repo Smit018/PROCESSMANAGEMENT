@@ -194,7 +194,8 @@ const WhatsappGroup = () => {
 								title={item.name}
 								subTitle={DateFormat(item.createdAt, "date-time")}
 								icon={<PeopleIcon size={20} color={'#262626'} />}
-								actionText={`${item?.whatsappMember?.length} ${item?.whatsappMember?.length > 1 ? 'Members' : 'Member'}`}
+								actionText={`${item?.whatsappMember?.length}
+								 ${item?.whatsappMember?.length > 1 ? 'Members' : 'Member'}`}
 							/>
 						</Link>
 					)

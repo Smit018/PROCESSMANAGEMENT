@@ -32,6 +32,7 @@ const Documents = () => {
 	const [addMembers, setAddMembers] = useState([])
 	const [filterDialog, setFilterDialog] = useState(false)
 	const [filterData, setFilterData] = useState({})
+	const [subSheetName,setSubsheetName]=useState('')
 
 
 	const [page, setPage] = useState(1);
@@ -111,7 +112,7 @@ const Documents = () => {
 
 	const createDocument = async () => {
 		try {
-			let newDoc = { name: name.trim(), link: link.trim() };
+			let newDoc = { name: name.trim(), link: link.trim(),subSheetName:subSheetName.trim()};
 			let saveDoc = await post('documents', newDoc);
 			if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
 				toaster.success('Document added successfully!')
@@ -295,6 +296,10 @@ const Documents = () => {
 					<div className='flex justify-center items-center'>
 						<TextInputField size={100} required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
 						<div style={{ margin: "0 10px" }}></div>
+						<TextInputField size={100} required label="Sub Sheet Name" value={name} onChange={(e) => setSubsheetName(e.target.value)} />
+						
+						<div style={{ margin: "0 10px" }}></div>
+
 						<TextInputField size={100} required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
 					</div>
 				</form>

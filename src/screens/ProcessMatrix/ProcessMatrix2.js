@@ -18,7 +18,7 @@ import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 let allProcess = [
 
 ]
-const ProcessMatrix = () => {
+const ProcessMatrix2 = () => {
 	const path = [{ path: '/admin/process-matrix', title: 'Process Matrix' }]
 
 	const [process, setProcess] = useState([])
@@ -159,7 +159,9 @@ const ProcessMatrix = () => {
 		setUpdate([true])
 	}
 
+
 	const nextTree = async (_process, parent, current) => {
+			console.log(currentProcesses)
 		try {
 			if (currentProcesses.includes(_process.id)) {
 				// PROCESS ALREADY INCLUDES IN THE EXPANDED TREE - CLOSE ALL PREVIOUS TREES
@@ -318,8 +320,8 @@ const ProcessMatrix = () => {
 	)
 }
 
-ProcessMatrix.propTypes = {};
+ProcessMatrix2.propTypes = {};
 
-ProcessMatrix.defaultProps = {};
+ProcessMatrix2.defaultProps = {};
 
-export default ProcessMatrix;
+export default ProcessMatrix2;

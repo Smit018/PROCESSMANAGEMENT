@@ -54,7 +54,7 @@ const myForm = {
 		regex: /.*/
 	},
 	"frequency": {
-		value: 'Daily',
+		value: '',
 		error: false,
 		regex: REGEX.ALL
 	},
@@ -69,7 +69,7 @@ const myForm = {
 		regex: REGEX.ALL
 	},
 	"status": {
-		value: 'Not Implemented',
+		value: '',
 		error: false,
 		regex: REGEX.ALL
 	}
@@ -310,7 +310,7 @@ const AddProcess = (props) => {
 								value={formValues?.typeId?.value || ""}
 								validationMessage={formValues?.typeId?.error ? "Type is mandatory!" : null}
 								onChange={e => { handleInputChange(e); setProcessNumberPrefix(e) }}>
-								<option disabled>Select Process Type</option>
+								<option value="" disabled selected>Select Process Type</option>
 								{props.data.types.map(_type => {
 									return (
 										<option key={_type.id} value={_type.id}>
@@ -458,10 +458,10 @@ const AddProcess = (props) => {
 								name="frequency"
 								label=""
 								isInvalid={formValues?.frequency?.error}
-								value={formValues?.frequency?.value}
 								validationMessage={formValues?.frequency?.error ? "Frequency is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option disabled>Select Frequency</option>
+								value={formValues?.frequency?.value}
+								<option selected  value="" disabled >Select Frequency</option>
 								<option value="Daily">Daily</option>
 								<option value="Weekly">Weekly</option>
 								<option value="Monthly">Monthly</option>
@@ -505,10 +505,10 @@ const AddProcess = (props) => {
 								value={formValues?.status?.value}
 								validationMessage={formValues?.status?.error ? "Status is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option disabled>Select Status</option>
-								<option value="Not Implemented">Not Implemented</option>
 								<option value="Partially Implemented">Partially Implemented</option>
+								<option value="" selected>Select Status</option>
 								<option value="Implemented">Implemented</option>
+								<option value="Not Implemented">Not Implemented</option>
 							</SelectField>
 						</FormField>
 					</div>

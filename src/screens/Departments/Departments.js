@@ -1,36 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import styles from './Departments.module.css';
-import { get, post } from '../../services/https.service';
-import { Table } from 'evergreen-ui'
+import { get, patch, post,deleted } from '../../services/https.service';
+import {Table, IconButton, CrossIcon, EditIcon, Code } from 'evergreen-ui';
 import { TextInputField } from 'evergreen-ui'
 import { Pane, Dialog, Button, Pagination, toaster } from 'evergreen-ui'
 import TopBar from '../../components/TopBar/TopBar';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
+import {useNavigate} from 'react-router-dom'
 
 let allData = [];
 
 const Departments = () => {
+	const navigate = useNavigate();
 
 
 	const [name, setName] = useState('');
 	const [typeCode, setTypeCode] = useState('');
 	const [departmentData, setDepartmentData] = useState(null);
 	const [open, setOpen] = useState(false);
+	const [openEdit,setOpenEdit]=useState(false);
+	const [openDelete,setOpenDelete]=useState(false);
 	const [search, setSearch] = useState('');
 	const [innerHeight, setInnerHeight] = useState();
-
+	const [currentDPcount,setCurrentDPcount]=useState(0);
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
-
+	let currentDeparmentId=''
+	let setCurrentDepartmentId=(str)=>{currentDeparmentId=str}
 	useEffect(() => {
 		fetchDepartment()
 	}, []);
 
 	const handleClose = () => {
 		setOpen(false);
+		setOpenEdit(false)
+		setOpenDelete(false);
+		setCurrentDPcount(0);
+
 	}
 
 	const fetchDepartment = async (filter) => {
@@ -70,12 +77,76 @@ const Departments = () => {
 	}
 
 	const formValidation = () => {
-		if (name.trim().length > 3 && typeCode.trim().length == 3) {
+		if (name.trim().length > 3) {
 			return false;
 		}
 		else {
 			return true;
 		}
+	}
+
+		// checking for number of process involved in a departement
+		const validateDelete=async()=>{
+			console.log('clicked validatedelete')
+		
+			try{
+
+			let processes=await get(`processes?filter={"where":{"departmentId":"${currentDeparmentId}"}}`);
+			if(processes.statusCode==200 && processes.data.length>0){
+			setCurrentDPcount(processes.data.length);
+			}
+		else{
+			setCurrentDPcount(0)
+		}
+		}
+		catch(err){
+
+			console.log("Error is here "+err);
+		}
+	
+		
+	}
+
+	const editDepartment = async () => {
+		try{
+		console.log(currentDeparmentId)
+		console.log(name)
+		if(name){
+			const response = await patch(`departments/${currentDeparmentId}`, { name })
+			if(response.statusCode==200){
+				setOpenEdit(false);
+				setName('');
+				setCurrentDepartmentId('');
+				fetchDepartment()
+				toaster.success('Departement edited succuessfully');
+		
+			}
+		}
+		}
+		catch(err){
+			toaster.danger(err.message)
+		}
+	}
+
+
+
+	const deleteDepartment = async () => {
+		
+		try{
+		  let res= await deleted(`/departments/${currentDeparmentId}`);
+		  if(res.statusCode==200){
+			fetchDepartment();
+
+			toaster.success(`${name} department is deleted`);
+			setCurrentDepartmentId('');
+			setCurrentDPcount(0);
+			setName('');
+		  }
+		}
+		catch(err){
+			toaster.danger(err)
+		}
+		setOpenDelete(false)
 	}
 
 	const createDepartment = async () => {
@@ -84,7 +155,7 @@ const Departments = () => {
 			let department = { name: name.trim(), typeCode: typeCode.trim() };
 			let saveDepartment = await post('departments', department);
 			if (saveDepartment.statusCode >= 200 && saveDepartment.statusCode < 300) {
-				toaster.success('Type added succuessfully')
+				toaster.success('Department added succuessfully')
 				setName('');
 				setTypeCode('')
 				setOpen(false)
@@ -92,7 +163,7 @@ const Departments = () => {
 			}
 			else {
 				console.log(saveDepartment.message)
-				toaster.danger('Failed to add type')
+				toaster.danger(saveDepartment.statusCode==422?"department name and code should be unique":'faild to fetch')
 			}
 		}
 		catch (err) {
@@ -132,7 +203,7 @@ const Departments = () => {
 
 
 	const paths = [
-		{ path: '/admin/departments', title: 'Departments' }
+		{ path: '/admin/department', title: 'Departments' }
 	]
 
 
@@ -156,14 +227,36 @@ const Departments = () => {
 					<Table.TextHeaderCell className="th-c">SL No.</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="th-c">Name</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="th-c">Code</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="th-c">Edit/delete</Table.TextHeaderCell>
 				</Table.Head>
 				<Table.Body height={departmentData?.length > 10 ? innerHeight - 350 : 'auto'}>
 					{!departmentData ? showSpinner() : departmentData.length === 0 ? showEmpty() : departmentData.map((item, index) => {
 						return (
 							<Table.Row key={index}>
 								<Table.TextCell className="tb-c">{(index + 1) + (page > 1 ? (page > 2 ? (pageLimit * (page - 1)) : pageLimit) : 0)}</Table.TextCell>
-								<Table.TextCell className="tb-c">{item.name}</Table.TextCell>
+								<Table.TextCell className="tb-c cursor-pointer hover:underline"
+								 onClick={()=>{navigate(`../department-details/${item.id}/${item.name}`);console.log('clicked')}}>
+									{item.name}
+									</Table.TextCell>
 								<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
+								<Table.TextCell className="tb-c">
+									<IconButton icon={EditIcon} margin={2} onClick={(event) =>{
+										setOpenEdit(true);
+										setCurrentDepartmentId(item.id);
+										setName(item.name)
+										
+
+										
+										}} />
+									<IconButton icon={CrossIcon} margin={2} onClick={()=>{
+										setOpenDelete(true);
+										 setCurrentDepartmentId(item.id);
+										 setName(item.name);
+										 validateDelete();
+										 }} />
+
+								</Table.TextCell>
+								
 							</Table.Row>
 						)
 					})}
@@ -177,6 +270,8 @@ const Departments = () => {
 					pageChange={(e) => changePage(e)}
 				/>
 			</Table>
+
+			{/* dialog for add department */}
 			<Dialog isShown={open} onCloseComplete={handleClose}
 				title="Add Type"
 				confirmLabel="Save Type"
@@ -188,6 +283,33 @@ const Departments = () => {
 					<TextInputField required label="Code" value={typeCode} onChange={(e) => setTypeCode(e.target.value)} />
 				</form>
 			</Dialog>
+
+			{/* dialog to edit department  */}
+
+			<Dialog isShown={openEdit} title="Edit Department" onCloseComplete={handleClose} confirmLabel="Edit Department"
+				isConfirmDisabled={formValidation()}
+				onConfirm={editDepartment}>
+				<form onSubmit={(event)=>{event.preventDefault();editDepartment()}}>
+					<TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+
+				</form>
+			</Dialog>
+			 
+			 {/* dialog to delete department  */}
+			
+			<Dialog isShown={openDelete} title="Delete Department"
+			 onCloseComplete={()=>{handleClose();setCurrentDPcount(0)}} confirmLabel="Delete Department"
+				isConfirmDisabled={currentDPcount>0?true:false}
+				onConfirm={deleteDepartment} >
+				
+						<p>
+							{currentDPcount} processes involved in {name} Department
+						</p>
+			</Dialog>
+
+
+
+
 			<br></br>
 		</div>
 	)

@@ -15,7 +15,7 @@ const ProcessDetails = () => {
     const id = pathArray[3]
     const params = useParams();
     const [processId, setProcessId] = useState('');
-    const [processDetail,setProcessDetail] = useState({})
+    const [processDetail, setProcessDetail] = useState({})
     const [newMember, setNewMember] = useState('')
     const [newWaGroup, setNewWaGroup] = useState('')
     const [newDocument, setNewDocument] = useState('')
@@ -30,12 +30,12 @@ const ProcessDetails = () => {
         getProcessDetails()
     }, [])
 
-    const  getProcessDetails= async ()=>{
+    const getProcessDetails = async () => {
         const getDetaills = await get(`processes/${id}?filter={"include":["processOwner"]}`);
-        if(getDetaills.statusCode>=200 && getDetaills.statusCode<300){
+        if (getDetaills.statusCode >= 200 && getDetaills.statusCode < 300) {
             setProcessDetail(getDetaills.data);
         }
-        else{
+        else {
             console.log('Process Detail Not FOund')
         }
     }

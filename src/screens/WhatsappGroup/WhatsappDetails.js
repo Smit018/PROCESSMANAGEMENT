@@ -42,12 +42,12 @@ const WhatsappDetails = () => {
     const [memberQuery, setMemberQuery] = useState([]);
     const [whatsappInputQuery, setWhatsappInputQuery] = useState([]);
     const [whatsappOutputQuery, setWhatsappOutputQuery] = useState([]);
-
+    
     const paths = [
         { path: '/admin/whatsapp-groups', title: 'Whatsapp Groups' },
         { path: `/admin/whatsapp-groups/${params.id}/${params.name}`, title: params?.name }
     ]
-
+  
 
     useEffect(() => {
         // fetchMembers()

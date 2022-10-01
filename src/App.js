@@ -21,6 +21,7 @@ import { theme } from './components/Theme';
 import Dashboard from './screens/Dashboard/Dashboard';
 import Process from './screens/Process/Process';
 import Departments from './screens/Departments/Departments';
+import DepartmentDetails from './screens/Departments/DepartmentDetails';
 import Documents from './screens/Documents/Documents';
 import DocumentDetails from './screens/Documents/DocumentDetails';
 import Employee from './screens/Employee/Employee';
@@ -34,10 +35,18 @@ import WhatsappDetails from './screens/WhatsappGroup/WhatsappDetails';
 import EmployeeDetails from './screens/Employee/EmployeeDetails';
 import VendorDetails from './screens/Vendors/VendorDetails';
 import ProcessDetails1 from './screens/Process/processDetails1';
+import ProcessMatrix2 from './screens/ProcessMatrix/ProcessMatrix2';
+import { useXarrow } from 'react-xarrows';
 
 
 function App() {
 	const [state, setState] = useState(userAuthState);
+	let updateXarrow=useXarrow()
+
+
+	
+	
+	
 
 
 	return (
@@ -61,8 +70,12 @@ function App() {
 							<Route path="documents" element={<Documents />} />
 							<Route path="documents/:id/:name" element={<DocumentDetails />} />
 							<Route path="department" element={<Departments />} />
+							<Route path="department-details/:id/:name"  element={<DepartmentDetails/>} />
 							<Route path="type" element={<Types />} />
-							<Route path="process-matrix" element={<ProcessMatrix />} />
+							
+							<Route path="process-matrix" element={<ProcessMatrix/>} />
+
+						
 						</Route>
 					</Routes>
 				</RecoilRoot>

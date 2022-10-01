@@ -112,6 +112,7 @@ const Process = () => {
 			const response = await get(_url)
 			if (response) {
 				if (response.statusCode == 200) {
+					
 					setAllProcess(response.data)
 					allData = response.data
 					setFilterApplied(isFilterApplied)
@@ -133,12 +134,14 @@ const Process = () => {
 	const onSearchType = async (value) => {
 		console.log(value)
 		if (value) {
-			const whereCount = `where={"title":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}`
-			const count = await fetchCount(whereCount)
+			const whereCount = `where={"or":[{"title":{"regexp":"/${value}/i"}},{"processNumber":{"regexp":"/${value}/i"}}], "deleted": {"neq": true}}`
+			const count = await fetchCount(whereCount);
 			setTotalData(count)
+			console.log(count)
 			// SEARCH THROUGH THE DB
-			const where = `"where": {"title":{"regexp":"/${value}/i"}, "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			const where = `"where": {"or":[{"title":{"regexp":"/${value}/i"}},{"processNumber":{"regexp":"/${value}/i"}}], "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
 			processUrl({ where })
+		
 		}
 		else fetchProccesses()
 	}
@@ -337,16 +340,17 @@ const Process = () => {
 
 	let isFilterApplied = false
 	const applyFilter = () => {
-		isFilterApplied = true
+		isFilterApplied = true;
+		console.log(filterData);
 		const _filter = {
 			typeId: filterData.type ? `"typeId": "${filterData.type}",` : '',
 			departmentId: filterData.department ? `"departmentId": "${filterData.department}",` : '',
 			processOwner: filterData.owner ? `"processOwner": "${filterData.owner}",` : '',
-			status: filterData.status ? `"stauts": "${filterData.status}",` : '',
+			status: filterData.status ? `"status": "${filterData.status}",` : '',
 		}
 		const where = `"where": { ${_filter.typeId + _filter.departmentId + _filter.processOwner + _filter.status} "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
 		setFilterDialog(false)
-		processUrl({ where })
+		processUrl({ where })	
 	}
 
 	const onFilterClose = () => {
@@ -372,6 +376,7 @@ const Process = () => {
 					search={search}
 					onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 					onFilter={() => setFilterDialog(true)}
+					placeholder="Search by title or process number"
 				/>
 				<br></br>
 				<Table>

@@ -75,11 +75,14 @@ const Employee = () => {
 	}, [0]);
 
 	const fetchCount = (where) => {
+		console.log('fetch count got called here......................')
 		return new Promise(async (resolve, reject) => {
 			try {
 				where = where || `where={"memberType":"EMPLOYEE", "deleted": {"neq": true}}`
+				console.log(where+"is here............")
 				const url = `members/count?${where}`
 				const count = await get(url)
+				console.log(count)
 				if (count.statusCode >= 200 && count.statusCode < 300) {
 					resolve(count.data.count)
 				}
@@ -95,6 +98,7 @@ const Employee = () => {
 		try {
 			if (!filter) {
 				const count = await fetchCount()
+				console.log(count)
 				setTotalData(count)
 			}
 			const _url = filter || employeeUrl()

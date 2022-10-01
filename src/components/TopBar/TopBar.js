@@ -35,7 +35,7 @@ const TopBar = (props) => {
 		return (
 			<div className='search-bar flex mr-4'>
 				<div>
-					<TextInput height={36} placeholder="Search..." onChange={(e) => props.onSearch(e)} value={props.search} className='l-blue' />
+					<TextInput height={36} placeholder={props.placeholder || 'Search..'} onChange={(e) => props.onSearch(e)} value={props.search} className='l-blue' />
 				</div>
 				<div className='h-9 rounded flex items-center justify-center px-2 bg-white right'>
 					<SearchIcon size={18} className='primary'/>
