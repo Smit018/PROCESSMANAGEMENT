@@ -269,6 +269,10 @@ const AddMember = (props) => {
                             label="Contact Number"
                             value={employee.contactNo}
                             name="contactNo"
+                            maxLength="10"
+                            minLength="10"
+
+                            type="number"
                             onChange={(e) => setEmployee({ ...employee, contactNo: e.target.value })}
                         />
                         <div style={{ margin: "0 10px" }}></div>

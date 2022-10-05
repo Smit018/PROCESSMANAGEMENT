@@ -120,15 +120,27 @@ const WhatsappGroup = () => {
 	}
 
 	const createWhatsapp = async () => {
-		let newDoc = { name: name.trim(), link: link.trim() };
-		let saveDoc = await post('whatsappGroups', newDoc);
-		if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
-			clearForm()
-			fetchWhatsappGroups()
-			toaster.success('Whatsapp group created successfully!')
-			setOpen(false)
+		try{
+			const pattern= /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+			if(pattern.test(link.trim())){
+			let newDoc = { name: name.trim(), link: link.trim() };
+			let saveDoc = await post('whatsappGroups', newDoc);
+					if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
+						clearForm()
+						fetchWhatsappGroups()
+						toaster.success('Whatsapp group created successfully!')
+						setOpen(false)
+					}
+					else toaster.danger('Failed to whatsapp group!')
 		}
-		else toaster.danger('Failed to whatsapp group!')
+		else{
+			toaster.danger('invalid Link');
+		}
+		}
+		catch(err){
+			toaster.danger(err)
+		}
+		
 	}
 
 	const handleClose = () => {
@@ -168,7 +180,9 @@ const WhatsappGroup = () => {
 
 	const _filterGroups = () => {
 		const filter = { where: '', include: '', order: '' }
-		const _dateFilter = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}`
+		console.log(new Date(filterData.from).toISOString(),new Date('1970'))
+
+		const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970') }", "${filterData.to || new Date().toISOString()}"]}`
 		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
 		whatsappUrl(filter)
 		setTotalData(1)
@@ -257,6 +271,12 @@ const WhatsappGroup = () => {
 		}, 3000);
 	}
 
+	const handleCancel=()=>{
+		setFilterData({});
+		fetchWhatsappGroups();
+		setFilterDialog(false)
+	}
+
 	return (
 		<div className='w-full h-full'>
 			<TopBar
@@ -295,7 +315,9 @@ const WhatsappGroup = () => {
 				title="Filter Documents"
 				width={'50%'}
 				confirmLabel="Filter"
-				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleCancel}
+				cancelLabel={!filterData?.to && !filterData?.from?'close':'clear'}
+				isConfirmDisabled={!filterData?.to && !filterData?.from}
 				onConfirm={_filterGroups}>
 				<form>
 					<div className='flex justify-center items-center w-full'>

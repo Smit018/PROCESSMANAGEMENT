@@ -356,7 +356,11 @@ const Process = () => {
 	const onFilterClose = () => {
 		setFilterDialog(false)
 		isFilterApplied = false
-		setFilterApplied(false)
+		setFilterApplied(false);
+		filterData.department=''
+		filterData.status=''
+		filterData.type=''
+		filterData.owner=''
 		fetchProccesses();
 	}
 

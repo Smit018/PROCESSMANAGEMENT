@@ -273,8 +273,8 @@ const Departments = () => {
 
 			{/* dialog for add department */}
 			<Dialog isShown={open} onCloseComplete={handleClose}
-				title="Add Type"
-				confirmLabel="Save Type"
+				title="Add Department"
+				confirmLabel="Save Department"
 				isConfirmDisabled={formValidation()}
 				onConfirm={createDepartment}
 			>

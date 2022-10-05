@@ -14,6 +14,7 @@ import AddMember from '../../dialogs/AddMember/AddMember';
 import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
 import { CSV } from '../../services/csv.service';
+import { constSelector } from 'recoil';
 
 
 let allData = []
@@ -171,23 +172,41 @@ const Employee = () => {
 		// UPLOAD IMAGE
 		return new Promise(async (resolve, reject) => {
 			try {
+				const body = JSON.stringify({"name":"employee"})
+				const options = {
+					method:'POST',
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body
+				}
+				const container = await fetch('http://192.168.1.12:3200/api/photos/', options)
+				
+			  const res=await container.json()
+			   if(res.error.message.includes('EEXIST') && res.error.statusCode==500){
+				if(container.statusCode==500 && container.message==''){}
 				const formData = new FormData();
+				console.log(file)
 				formData.append('file', file)
 				console.log(formData)
 				const image = await post("photos/employee/upload", formData)
 				console.log(image)
 				if (image.data) {
-					resolve(image.data.result.files.file[0].name)
+				resolve(image.data.result.files.file[0].name)
 				}
 				else {
-					reject(image);
+				reject(image);
 				}
-			}
+			
+			   }
+				
+				
+				}
 			catch (err) {
+				console.log(err)
 				reject(err)
 			}
 		})
-
 	}
 
 	const getImage = async (img) => {
@@ -240,9 +259,18 @@ const Employee = () => {
 	}
 
 	const submitEmployee = async (_form) => {
+		console.log(_form)
 		try {
 			console.log('form', _form)
-			_form['password'] = _form.contactNo
+			console.log(_form.contactNo.length)
+			if(_form.contactNo.length!=10){
+				throw new Error('contact number should have 10 digits')
+			}
+			if(!_form.employeeCode){
+				throw new Error('employee code is required')
+			}
+			_form['password'] = _form.contactNo;
+			console.log(_form['upload'])
 			if (_form['upload'])
 				_form['profile'] = await _uploadFile(_form['upload'])
 			_form['memberType'] = 'EMPLOYEE'
@@ -345,8 +373,55 @@ const Employee = () => {
 		}, 3000);
 	}
 
-	const applyFilter = (e) => {
-		console.log(e.targte.value)
+	const applyFilter = () => {
+		try{
+			console.log(new Date(), new Date(filterData.to));
+			const dateFilter=`"and": [
+				{
+					"doj": {
+						"gte": "${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}"
+					}
+				},
+				{
+					"doj": {
+						"lte": "${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"
+					}
+				}
+			]`
+
+			console.log(dateFilter)
+			
+			// const _dateFilter = `"doj": {"between": ["${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}","${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"]}`
+
+
+		// const where = `"where": { ${_filter.doj } "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+		const where=`  "where": {
+			"memberType": "EMPLOYEE",
+			"deleted": {
+				"neq": false
+			},
+			${dateFilter}
+		}`
+			
+		
+		const _url = `members?filter={${where}}`
+
+		fetchAllEmployees(_url);
+		setFilterDialog(false);
+
+
+
+		}
+		catch(err){
+			console.log(err)
+		}
+	}
+
+	const handleClear=()=>{
+		setFilterData({})
+		fetchAllEmployees()
+		setFilterDialog(false);
+
 	}
 
 	return (
@@ -412,11 +487,15 @@ const Employee = () => {
 			/>
 
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="employee" /> : null}
-			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
-				title="Filter Documents"
+			<Dialog isShown={filterDialog} onCloseComplete={()=>{
+				setFilterDialog(false);
+			}}
+				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleClear}
+				title="Filter Employs"
 				width={'50%'}
 				confirmLabel="Filter"
-				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				cancelLabel={!filterData?.to && !filterData?.from?'close':'clear'}
+				isConfirmDisabled={!filterData?.to && !filterData?.from}
 				onConfirm={applyFilter}>
 				<form>
 					<div className='flex justify-center items-center w-full'>

@@ -227,7 +227,10 @@ const Vendors = () => {
 
 	const submitVendor = async (_form) => {
 		try {
-			console.log(_form)
+			if(_form.contactNo.length==10){
+				console.log(_form)
+			delete _form.doj
+			delete _form.doe
 			_form['password'] = _form.contactNo
 			if (_form['upload'])
 				_form['profile'] = await _upload(_form['upload'])
@@ -245,6 +248,11 @@ const Vendors = () => {
 					description: response.message
 				})
 			}
+			}
+			else{
+				toaster.danger('contact number should have 10 digits')
+			}
+			
 		}
 		catch (err) {
 			console.log(err)
@@ -331,10 +339,20 @@ const Vendors = () => {
 
 	const applyFilter = () => {
 		const all = false
-		const time = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}, `
+		console.log(filterData.to,filterData.from,new Date('1970').toISOString())
+		const time = `"createdAt": {"between": ["${filterData.from || new Date('1997').toISOString()}", "${filterData.to || new Date().toISOString()}"]}, `
 		const where = `"where": { ${time} "memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		setFilterDialog(false)
-		vendorUrl({ where })
+		vendorUrl({ where })	
+	}
+
+	const handleCancel=()=>{
+		!filterData?.to && !filterData?.from?setFilterDialog(false):
+		setFilterData({});
+		fetchVendors();
+		setFilterDialog(false);
+
+		
 	}
 
 	return (
@@ -398,10 +416,12 @@ const Vendors = () => {
 			}
 			{_csvDwn ? <CSV body={csv_data} headers={headers} filename="vendors" /> : null}
 			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
+				onCancel={handleCancel}
 				title="Filter Documents"
 				width={'50%'}
 				confirmLabel="Filter"
-				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				cancelLabel={!filterData?.to && !filterData?.from?"close":'clear'}
+				isConfirmDisabled={!filterData?.to && !filterData?.from}
 				onConfirm={applyFilter}>
 				<form>
 					<div className='flex justify-center items-center w-full'>

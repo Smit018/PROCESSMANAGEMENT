@@ -112,7 +112,9 @@ const Documents = () => {
 
 	const createDocument = async () => {
 		try {
-			let newDoc = { name: name.trim(), link: link.trim(),subSheetName:subSheetName.trim()};
+			const pattern= /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+			if(pattern.test(link.trim())){
+				let newDoc = { name: name.trim(), link: link.trim(),subSheetName:subSheetName.trim()};
 			let saveDoc = await post('documents', newDoc);
 			if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
 				toaster.success('Document added successfully!')
@@ -124,10 +126,14 @@ const Documents = () => {
 				console.log(saveDoc.message)
 				toaster.danger('Failed to add document!')
 			}
+			}
+			else{
+				toaster.danger('link is not valid')
+			}
 		}
 		catch (err) {
 			console.log(err)
-			toaster.danger('Failed to add document!')
+			toaster.danger(err)
 		}
 	}
 
@@ -136,8 +142,13 @@ const Documents = () => {
 	}
 
 	const formValidation = () => {
-		if (name.trim().length > 3 && link.trim().length > 1) return false;
-		else return true;
+		// const pattern= /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+		if( name.trim().length > 3 && link.trim().length > 1) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 	const showContent = () => {
@@ -204,7 +215,7 @@ const Documents = () => {
 
 	const _filterDocuments = () => {
 		const filter = { where: '', include: '', order: '' }
-		const _dateFilter = `"createdAt": {"between": ["${new Date(filterData.from)}", "${new Date(filterData.to)}"]}`
+		const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970')}", "${filterData.to || new Date()}"]}`
 		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
 		documentUrl(filter)
 		setTotalData(1)
@@ -257,7 +268,11 @@ const Documents = () => {
 		})
 	}
 
-
+    const handleClear=()=>{
+		 fetchDocuments()
+		 setFilterData({})
+		 setFilterDialog(false);
+	}
 	const setDownLoad = () => {
 		setCSVDwn(true)
 		setTimeout(() => {
@@ -296,11 +311,11 @@ const Documents = () => {
 					<div className='flex justify-center items-center'>
 						<TextInputField size={100} required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
 						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Sub Sheet Name" value={name} onChange={(e) => setSubsheetName(e.target.value)} />
+						<TextInputField size={100} required label="Sub Sheet Name" value={subSheetName} onChange={(e) => setSubsheetName(e.target.value)} />
 						
 						<div style={{ margin: "0 10px" }}></div>
 
-						<TextInputField size={100} required label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
+						<TextInputField size={100} required  label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
 					</div>
 				</form>
 			</Dialog>
@@ -308,8 +323,10 @@ const Documents = () => {
 			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
 				title="Filter Documents"
 				width={'50%'}
+				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleClear}
 				confirmLabel="Filter"
-				isConfirmDisabled={!filterData?.to || !filterData?.from}
+				cancelLabel={!filterData?.to && !filterData?.from?'close':'clear'}
+				isConfirmDisabled={!filterData?.to && !filterData?.from}
 				onConfirm={_filterDocuments}>
 				<form>
 					<div className='flex justify-center items-center w-full'>

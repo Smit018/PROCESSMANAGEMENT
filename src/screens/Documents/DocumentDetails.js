@@ -429,7 +429,7 @@ const DocumentDetails = () => {
                             {documentDetail.name}
                         </Heading>
                         <Heading size={400} marginTop={8}>
-                            {documentDetail.link}
+                           <a href={documentDetail.link} target="_blank">{documentDetail.link}</a>
                         </Heading>
                     </div>
                     <div>

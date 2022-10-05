@@ -9,9 +9,9 @@ export default function ProcessCard(props) {
 
   return (
     <div>
-            <p>{props.p.title}</p>
+          <p>{props.p.title}</p>
          
-            <p>{props.p.processNumber}</p>
+          <p>{props.p.processNumber}</p>
     </div>
   )
 }
