@@ -36,6 +36,7 @@ import EmployeeDetails from './screens/Employee/EmployeeDetails';
 import VendorDetails from './screens/Vendors/VendorDetails';
 import ProcessDetails1 from './screens/Process/processDetails1';
 import ProcessMatrix2 from './screens/ProcessMatrix/ProcessMatrix2';
+import Main from './screens/Main/Main';
 import { useXarrow } from 'react-xarrows';
 
 
@@ -55,6 +56,7 @@ function App() {
 				<RecoilRoot value={state}>
 					<Routes>
 						<Route path='' exact element={<Login />} />
+						<Route path="process-matrix" element={<ProcessMatrix className="overflow-scroll"/>} />
 						<Route path='admin' exact element={<SideBar />}>
 							<Route path="dashboard" element={<Dashboard />} />
 							<Route path="" exact element={<Process />} />
@@ -72,16 +74,16 @@ function App() {
 							<Route path="department" element={<Departments />} />
 							<Route path="department-details/:id/:name"  element={<DepartmentDetails/>} />
 							<Route path="type" element={<Types />} />
-							
-							<Route path="process-matrix" element={<ProcessMatrix/>} />
-
-						
 						</Route>
+							
 					</Routes>
 				</RecoilRoot>
 			</Router>
 		</ThemeProvider>
-	);
-}
+		);
+	}
+							
+		
+
 
 export default App;

@@ -25,7 +25,7 @@ const menu = [
 	{ title: 'Documents', path: 'documents', icon: DocumentIcon },
 	{ title: 'Departments', path: 'department', icon: DocumentIcon },
 	{ title: 'Types', path: 'type', icon: DocumentIcon },
-	{ title: 'Process Matrix', path: 'process-matrix', icon: RandomIcon },
+	{ title: 'Process Matrix', path: '../process-matrix', icon: RandomIcon },
 ]
 
 const SideBar = () => {
