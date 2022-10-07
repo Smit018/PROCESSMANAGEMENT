@@ -5,7 +5,7 @@ import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 
 import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
-import { post } from "../../services/https.service";
+import { get, post } from "../../services/https.service";
 import { TextInput, TextInputField, Button } from "evergreen-ui";
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -42,12 +42,14 @@ const Login = () => {
   useEffect(() => {
     if(myadmin) {
       if(myadmin.token && myadmin.name && myadmin.userId) {
-        console.log(myadmin)
-        navigate('/admin')
+        const res = get('processes')
+        if(res.statusCode === 200) {
+          console.log(myadmin)
+          navigate('/admin')
+        }
       }
       else {
         // navigate('/')
-        
       }
     }
   }, [])

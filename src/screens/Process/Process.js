@@ -110,6 +110,7 @@ const Process = () => {
 			}
 			const _url = filter || processUrl()
 			const response = await get(_url)
+			console.log(response)
 			if (response) {
 				if (response.statusCode == 200) {
 					
@@ -123,6 +124,9 @@ const Process = () => {
 					else set_csv_data([])
 				}
 				else setAllProcess([])
+				if(response.statusCode === 401) {
+					alert('Unauth')
+				}
 			}
 		}
 		catch (err) {
