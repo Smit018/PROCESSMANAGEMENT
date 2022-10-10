@@ -339,6 +339,7 @@ const Process = () => {
 	}
 
 	let isFilterApplied = false
+	
 	const applyFilter = () => {
 		isFilterApplied = true;
 		console.log(filterData);

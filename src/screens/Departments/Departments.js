@@ -26,8 +26,10 @@ const Departments = () => {
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(10);
 	const [totalData, setTotalData] = useState(0);
-	let currentDeparmentId=''
-	let setCurrentDepartmentId=(str)=>{currentDeparmentId=str}
+	// let currentDeparmentId=''
+	// let setCurrentDepartmentId=(str)=>{currentDeparmentId=str}
+    const [currentDeparmentId,setCurrentDepartmentId]=useState('');
+
 	useEffect(() => {
 		fetchDepartment()
 	}, []);
@@ -113,6 +115,7 @@ const Departments = () => {
 		console.log(name)
 		if(name){
 			const response = await patch(`departments/${currentDeparmentId}`, { name })
+			console.log(response)
 			if(response.statusCode==200){
 				setOpenEdit(false);
 				setName('');

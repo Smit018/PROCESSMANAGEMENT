@@ -37,6 +37,9 @@ const WhatsappGroup = () => {
 	// FOR CSV
 	const [_csvDwn, setCSVDwn] = useState(false);
 	const [csv_data, set_csv_data] = useState([]);
+	const [filterApplied, setFilterApplied] = useState(false)
+	let isFilterApplied=false;
+    
 
 
 	const paths = [
@@ -101,6 +104,7 @@ const WhatsappGroup = () => {
 			const _url = filter || whatsappUrl()
 			const response = await get(_url);
 			if (response.statusCode >= 200 && response.statusCode < 300) {
+				setFilterApplied(isFilterApplied)
 				allData = response.data
 				setWhatsappData(allData)
 			}
@@ -144,6 +148,7 @@ const WhatsappGroup = () => {
 	}
 
 	const handleClose = () => {
+		isFilterApplied=false;
 		setOpen(false);
 	}
 
@@ -179,6 +184,7 @@ const WhatsappGroup = () => {
 	}
 
 	const _filterGroups = () => {
+		isFilterApplied=true;
 		const filter = { where: '', include: '', order: '' }
 		console.log(new Date(filterData.from).toISOString(),new Date('1970'))
 
@@ -290,6 +296,8 @@ const WhatsappGroup = () => {
 				onFilter={() => openFilterDialog(true)}
 				filter="true"
 				search={search}
+				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
@@ -312,7 +320,7 @@ const WhatsappGroup = () => {
 			</Dialog>
 
 			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
-				title="Filter Documents"
+				title="Filter Whatsaap Group"
 				width={'50%'}
 				confirmLabel="Filter"
 				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleCancel}

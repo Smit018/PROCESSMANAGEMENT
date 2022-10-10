@@ -33,11 +33,14 @@ const Documents = () => {
 	const [filterDialog, setFilterDialog] = useState(false)
 	const [filterData, setFilterData] = useState({})
 	const [subSheetName,setSubsheetName]=useState('')
-
-
 	const [page, setPage] = useState(1);
 	const [pageLimit, setPageLimit] = useState(25);
 	const [totalData, setTotalData] = useState(0);
+	const [filterApplied, setFilterApplied] = useState(false)
+	let isFilterApplied=false;
+	
+
+
 
 	// FOR CSV
 	const [_csvDwn, setCSVDwn] = useState(false);
@@ -72,7 +75,7 @@ const Documents = () => {
 	}
 
 	const documentUrl = (filters, all) => {
-		console.log(filters)
+		// console.log(filters)
 		const where = (filters && filters.where) ? filters.where : `"where": {"deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id", "name"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
@@ -92,9 +95,11 @@ const Documents = () => {
 				setTotalData(count)
 			}
 			const _url = filter || documentUrl()
-			console.log(_url)
+			// console.log(_url)
 			const response = await get(_url)
 			if (response.statusCode >= 200 && response.statusCode < 300) {
+				setFilterApplied(isFilterApplied);
+				console.log(response)
 				setDocumentData(response.data)
 				allDocuments = [...response.data]
 			}
@@ -138,6 +143,7 @@ const Documents = () => {
 	}
 
 	const handleClose = () => {
+		isFilterApplied=false;
 		setOpen(false);
 	}
 
@@ -214,12 +220,40 @@ const Documents = () => {
 	}
 
 	const _filterDocuments = () => {
-		const filter = { where: '', include: '', order: '' }
-		const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970')}", "${filterData.to || new Date()}"]}`
-		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
-		documentUrl(filter)
-		setTotalData(1)
-		setFilterDialog(false)
+		isFilterApplied=true;
+		try{
+			const filter = { where: '', include: '', order: '' }
+			// let dummyfromdate= new Date(filterData.from)
+			// dummyfromdate.setHours(23,59,59,500);
+			// const fromDate=new Date(dummyfromdate)
+			console.log(filter.from,filter.to);
+
+			//  const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970')}", "${filterData.from || new Date()}"]}`
+
+			const _dateFilter=` "and": [
+				{
+					"createdAt": {
+						"gte": "${filterData.from?new Date(filterData.from):new Date('1970')}"
+					}
+				},
+				{
+					"createdAt": {
+						"lte": " ${filterData.to?new Date(filterData.to):new Date()}"
+					}
+				}
+			]`
+
+	
+			
+	
+			filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+			documentUrl(filter)
+			setTotalData(1)
+			setFilterDialog(false)
+		}
+		catch(err){
+             toaster.danger(err)
+		}
 	}
 
 	const openFilterDialog = (value) => {
@@ -294,6 +328,8 @@ const Documents = () => {
 				onFilter={() => openFilterDialog(true)}
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
+				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+
 			/>
 			<br></br>
 			<br></br>

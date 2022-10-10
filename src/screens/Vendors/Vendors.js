@@ -21,10 +21,10 @@ let allData = []
 const Vendors = () => {
 
 	const [showForm, setShowForm] = useState(false)
-	const [innerHeight, setHeight] = useState()
+	const [innerHeight, setHeight] = useState('')
 	const [vendor, setVendor] = useState({});
 	const [imgPresent, setImgPresent] = useState(false);
-	const [image, setImage] = useState();
+	const [image, setImage] = useState('');
 	const [saveImage, setSaveImage] = useState();
 	const [employeeData, setEmployeeData] = useState([]);
 	const [open, setOpen] = useState(false);
@@ -44,6 +44,10 @@ const Vendors = () => {
 
 	const [filterDialog, setFilterDialog] = useState(false)
 	const [filterData, setFilterData] = useState({})
+	
+	const [filterApplied, setFilterApplied] = useState(false)
+	let isFilterApplied=false;
+    
 
 
 
@@ -88,7 +92,7 @@ const Vendors = () => {
 	}
 
 	const vendorUrl = (filters, all) => {
-		console.log(filters)
+		// console.log(filters)
 		const where = (filters && filters.where) ? filters.where : `"where": {"memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		const include = (filters && filters.include) ? filters.include : `"include": [{"relation": "documentMember", "scope": {"fields": ["id"]}}]`
 		const order = (filters && filters.order) ? filters.order : `"order": "createdAt DESC"`
@@ -110,8 +114,9 @@ const Vendors = () => {
 			}
 			const _url = filter || vendorUrl()
 			const employ = await get(_url);
-			console.log(employ)
+			// console.log(employ)
 			if (employ.statusCode >= 200 && employ.statusCode < 300) {
+				setFilterApplied(isFilterApplied)
 				setEmployeeData(employ.data);
 				allData = employ.data
 			}
@@ -128,7 +133,7 @@ const Vendors = () => {
 
 
 	const onSearchType = async (value) => {
-		console.log(value)
+		// console.log(value)
 		if (value) {
 			const whereCount = `where={"name":{"regexp":"/${value}/i"}, "memberType":"VENDOR", "deleted": {"neq": true}}`
 			const count = await fetchCount(whereCount)
@@ -146,7 +151,7 @@ const Vendors = () => {
 				let _formdata = new FormData()
 				_formdata.append('file', file)
 				const _img = await post(`photos/vendor/upload`, _formdata)
-				console.log(_img)
+				// console.log(_img)
 				if (_img.data) {
 					resolve(_img.data.result.files.file[0].name)
 				}
@@ -163,7 +168,7 @@ const Vendors = () => {
 		let formData = new FormData();
 		formData.append('file', file)
 		const image = await post("photos/vendor/upload", formData)
-		console.log(image)
+		// console.log(image)
 		if (image.data) {
 			return image.data.result.files.file[0].name
 		} else {
@@ -207,7 +212,7 @@ const Vendors = () => {
 	]
 
 	const validateForm = async (_form) => {
-		console.log(_form)
+		// console.log(_form)
 		setShowForm(false)
 		let body = _form
 		body.profile = _form.upload ? await _upload(_form.upload) : ''
@@ -228,7 +233,7 @@ const Vendors = () => {
 	const submitVendor = async (_form) => {
 		try {
 			if(_form.contactNo.length==10){
-				console.log(_form)
+				// console.log(_form)
 			delete _form.doj
 			delete _form.doe
 			_form['password'] = _form.contactNo
@@ -243,7 +248,7 @@ const Vendors = () => {
 				setShowForm(false)
 			}
 			else {
-				console.log(response)
+				// console.log(response)
 				toaster.danger('Failed to add Vendor', {
 					description: response.message
 				})
@@ -338,8 +343,9 @@ const Vendors = () => {
 	}
 
 	const applyFilter = () => {
+		isFilterApplied=true;
 		const all = false
-		console.log(filterData.to,filterData.from,new Date('1970').toISOString())
+		// console.log(filterData.to,filterData.from,new Date('1970').toISOString())
 		const time = `"createdAt": {"between": ["${filterData.from || new Date('1997').toISOString()}", "${filterData.to || new Date().toISOString()}"]}, `
 		const where = `"where": { ${time} "memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		setFilterDialog(false)
@@ -347,7 +353,9 @@ const Vendors = () => {
 	}
 
 	const handleCancel=()=>{
+		isFilterApplied=false;
 		!filterData?.to && !filterData?.from?setFilterDialog(false):
+
 		setFilterData({});
 		fetchVendors();
 		setFilterDialog(false);
@@ -368,6 +376,8 @@ const Vendors = () => {
 				filter="true"
 				search={search}
 				onFilter={() => { setFilterDialog(true) }}
+				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
