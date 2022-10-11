@@ -59,8 +59,8 @@ const SideBar = () => {
 	}
 
 	return (
-		<div className='w-full h-full flex'>
-			<div className='sidenav'>
+		<div className='w-full overflow-scroll h-screen flex'>
+			<div className='sidenav sticky top-0'>
 				{/* DEFINE ROUTES  AND ADMIN INFO */}
 				<div className='flex items-center justify-center' style={{ height: 200 }}>
 					<h1>PROCESS MANAGEMENT</h1>
@@ -87,13 +87,13 @@ const SideBar = () => {
 			</div>
 			<div className='side-main'>
 				<div className='app-bar'></div>
-				<Xwrapper>
+				{/* <Xwrapper> */}
 				<div onScroll={updateXarrow}>
-				<div className='routes px-5 py-4'>
+				<div className='routes px-5 py-4 '>
 					<Outlet />
 				</div>
 				</div>
-				</Xwrapper>
+				{/* </Xwrapper> */}
 				
 
 				

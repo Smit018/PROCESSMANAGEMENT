@@ -21,6 +21,6 @@
 .routes {
     flex: 1;
     background-color: #fafafa;
-    overflow: auto !important;
     margin: 1px;
+    
 }

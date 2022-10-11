@@ -193,9 +193,14 @@ export default function EmployeeDetails() {
     }
 
     const saveEmployee = async (form) => {
+      try{
         if (form) {
+            if(form.contactNo.length!=10){
+                console.log(form.contactNo)
+                throw('contact number should have 10 digits')
+            }
             const response = await patch('members/' + id, form)
-            if (response.statusCode === 200) {
+            if (response.statusCode === 200 && form.contactNo.length==10) {
                 showUpdate(false)
                 employeeDet();
                 toaster.success('Employee updated successfully!')
@@ -204,6 +209,10 @@ export default function EmployeeDetails() {
                 toaster.danger('Failed to update employee!', { description: response.message })
             }
         }
+      }
+      catch(err){
+        toaster.danger(err)
+      }
     }
 
     const deleteMe = async () => {

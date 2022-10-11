@@ -809,9 +809,9 @@ const ProcessDetails1 = () => {
                         }
                         
                         return (
-                            <div className="w-full h-full">
+                            <div className="w-full">
                             <TopBar title="Processes" breadscrubs={paths} />
-                            <Pane className="w-full l-blue" elevation={1}>
+                            <Pane className="w-full l-blue" elevation={1} >
                             <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                             <div>
                             <Heading size={600}>
@@ -935,7 +935,9 @@ const ProcessDetails1 = () => {
                                     <br></br>
                                     <br></br>
                                     {/* INPUT SOURCES */}
-                                    <div className='flex flex-wrap justify-between items-center'>
+
+                            <div>
+                <div className='flex flex-wrap justify-between items-center'>
                                     <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
                                     <div className='flex items-center'>
                                     <Text size={400}>Process Owner &nbsp; &nbsp;</Text>
@@ -1018,8 +1020,6 @@ const ProcessDetails1 = () => {
                                                 </div>
                                                 </div>
                                                 </div>
-                                                <br></br>
-                                                <br></br>
                                                 <br></br>
                                                 <Heading size={800} marginBottom={10}>OUTPUT SOURCES</Heading>
                                                 <div className='flex flex-wrap justify-between'>
@@ -1118,6 +1118,10 @@ const ProcessDetails1 = () => {
                                                                 /> : null
                                                                 
                                                             }
+                </div>
+                                   
+
+                                                            
                                                             </div>
                                                             );
                                                         }

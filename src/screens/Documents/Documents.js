@@ -229,6 +229,11 @@ const Documents = () => {
 			console.log(filter.from,filter.to);
 
 			//  const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970')}", "${filterData.from || new Date()}"]}`
+            let dummydate=new Date(filterData.to)
+			dummydate.setHours(24,60,60,1100);
+			let modifiedDate=new Date(dummydate)
+			console.log(filterData.to,modifiedDate)
+
 
 			const _dateFilter=` "and": [
 				{
@@ -238,7 +243,7 @@ const Documents = () => {
 				},
 				{
 					"createdAt": {
-						"lte": " ${filterData.to?new Date(filterData.to):new Date()}"
+						"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
 					}
 				}
 			]`

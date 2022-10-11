@@ -9,6 +9,7 @@ import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 import { userAuthState } from "../../services/recoil.service";
 import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../../services/https.service';
 
 
 const ProcessMatrix = () => {
@@ -41,7 +42,7 @@ const ProcessMatrix = () => {
   }, [])
   
   const getProcess=(path)=>{
-   return(fetch(`http://192.168.1.12:3200/api/${path}`, {
+   return(fetch(`${baseUrl}${path}`, {
       method: 'GET', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',

@@ -125,7 +125,7 @@ const DocumentDetails = () => {
     const updateDocument = async (body) => {
         if (body.name && body.link) {
             try {
-                const _body = { name: body.name, link: body.link }
+                const _body = { name: body.name, link: body.link,subSheetName:body.subSheetName }
                 const response = await patch(`documents/${id}`, _body)
                 if (response && response.statusCode == 200) {
                     toaster.success('Document updated successfully!')
@@ -575,7 +575,21 @@ const DocumentDetails = () => {
                 onClose={() => { setOpenEdit(false); setDocumentDetail(initData) }}
                 onConfirm={() => { updateDocument(documentDetail); setOpenEdit(false) }}
                 inject={documentDetail}
-                onChange={(e) => { e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link }) }}
+                onChange={(e) => {
+                    console.log(e)
+                    const _values = {...documentDetail}
+                    //  e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link })
+                    if(e.name){
+                        setDocumentDetail({_values, name:e.name})
+                    }
+                    else if(e.link){
+                        setDocumentDetail({_values, link:e.link})
+                    }
+                    else if(e.subSheetName){
+                        setDocumentDetail({_values, subSheetName:e.subSheetName})
+                    }
+
+                    }}
             />
         </div>
     )

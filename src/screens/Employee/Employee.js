@@ -501,7 +501,7 @@ const Employee = () => {
 				setFilterDialog(false);
 			}}
 				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleClear}
-				title="Filter Employs"
+				title="Filter Employee"
 				width={'50%'}
 				confirmLabel="Filter"
 				cancelLabel={!filterData?.to && !filterData?.from?'close':'clear'}

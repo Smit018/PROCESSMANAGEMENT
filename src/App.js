@@ -57,12 +57,12 @@ function App() {
 					<Routes>
 						<Route path='' exact element={<Login />} />
 						<Route path="process-matrix" element={<ProcessMatrix className="overflow-scroll"/>} />
-						<Route path='admin' exact element={<SideBar />}>
+						<Route path='admin' exact element={<SideBar/>}>
 							<Route path="dashboard" element={<Dashboard />} />
 							<Route path="" exact element={<Process />} />
 							<Route path="processes" exact element={<Process />} />
 							{/* <Route path="processes/:id" element={<ProcessDetails />} /> */}
-							<Route path="processes/:id" element={<ProcessDetails1 />} />
+							<Route path="processes/:id" element={<ProcessDetails1 className="overflow-scroll"/>} />
 							<Route path="employees" element={<Employee />} />
 							<Route path="employees/:id" element={<EmployeeDetails />} />
 							<Route path="vendors" element={<Vendors />} />
