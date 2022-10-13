@@ -141,6 +141,7 @@ const AddMember = (props) => {
         const _form = { ...employee, ...{ upload: saveImage } }
         const formStructure = props.type === 'vendor' ? vendorForm : employeForm
         const form_valid = await validateForm(_form, formStructure)
+        console.log(_form)
         if (form_valid.err) {
             toaster.danger(form_valid.err)
         }

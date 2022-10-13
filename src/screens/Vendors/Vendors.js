@@ -228,7 +228,7 @@ const Vendors = () => {
 		}
 
 	}
-
+//someting
 
 	const submitVendor = async (_form) => {
 		try {
@@ -345,9 +345,24 @@ const Vendors = () => {
 	const applyFilter = () => {
 		isFilterApplied=true;
 		const all = false
+		let dummydate=new Date(filterData.to)
+		dummydate.setHours(24,60,60,1100);
+		let modifiedDate=new Date(dummydate)
 		// console.log(filterData.to,filterData.from,new Date('1970').toISOString())
-		const time = `"createdAt": {"between": ["${filterData.from || new Date('1997').toISOString()}", "${filterData.to || new Date().toISOString()}"]}, `
-		const where = `"where": { ${time} "memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
+		// const time = `"createdAt": {"between": ["${filterData.from || new Date('1997').toISOString()}", "${filterData.to || new Date().toISOString()}"]} `
+		   const time = ` "and": [
+			{
+				"createdAt": {
+					"gte": "${filterData.from?new Date(filterData.from):new Date('1970')}"
+				}
+			},
+			{
+				"createdAt": {
+					"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
+				}
+			}
+		]`
+		const where = `"where": { ${time} ,"memberType":"VENDOR", "deleted": {"neq": true}}${all ? '' : `, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`}`
 		setFilterDialog(false)
 		vendorUrl({ where })	
 	}
@@ -377,6 +392,7 @@ const Vendors = () => {
 				search={search}
 				onFilter={() => { setFilterDialog(true) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
 
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>

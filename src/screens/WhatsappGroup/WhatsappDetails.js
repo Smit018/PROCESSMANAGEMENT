@@ -414,7 +414,7 @@ const WhatsappDetails = () => {
     }
 
     const deleteMe = async () => {
-        const response = await patch('whatsappGroups/' + params.id, { deleted: true })
+        const response = await deleted('whatsappGroups/' + params.id )
         if(response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
@@ -437,7 +437,7 @@ const WhatsappDetails = () => {
                             {whatsappDetail.name}
                         </Heading>
                         <Heading size={400} marginTop={8}>
-                            {whatsappDetail.link}
+                           <a href={whatsappDetail.link} className="hover:underline">{whatsappDetail.link}</a> 
                         </Heading>
                     </div>
                     <div>
@@ -577,6 +577,7 @@ const WhatsappDetails = () => {
                 onClose={() => { setOpenEdit(false); setWhatsappDetail(initData) }}
                 onConfirm={() => { updateGroup(whatsappDetail); setOpenEdit(false) }}
                 inject={whatsappDetail}
+                section="whatsaap"
                 onChange={(e) => { e.name ? setWhatsappDetail({ ...initData, name: e.name }) : setWhatsappDetail({ ...initData, link: e.link }) }}
             />
         </div>

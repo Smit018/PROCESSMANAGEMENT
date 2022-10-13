@@ -176,9 +176,10 @@ const Process = () => {
 	}
 
 	const saveProcess = async (form) => {
+		console.log(form)
 		let process = {};
 		for (let i in form) {
-			process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
+			process[`${i}`] = form[i].value ? form[i].value : form[i].value;
 		}
 		if (process['inputProcess'] == "") {
 			process.inputProcess = null

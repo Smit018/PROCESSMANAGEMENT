@@ -64,7 +64,7 @@ const myForm = {
 		regex: REGEX.ALL
 	},
 	"minutes": {
-		value: '',
+		value: 0,
 		error: false,
 		regex: REGEX.ALL
 	},
@@ -88,6 +88,7 @@ const AddProcess = (props) => {
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [processNoPrefix, setProcessNoPrefix] = useState('');
 	const [processFound, setProcessFound] = useState(false);
+	const [addbuttondisabled,setAddButtonDisabled]=useState(false);
 	const [showErrors, setShowErrors] = useState(false);
 
 	const [selectedDept, setSelectedDept] = useState(null);
@@ -98,7 +99,8 @@ const AddProcess = (props) => {
 
 	useEffect(() => {
 		if (props.inject)
-			setUpdateData(props.inject)
+		{	setUpdateData(props.inject)
+			setAddButtonDisabled(false)}
 		else {
 			cleanUpForm()
 			setFormValues(_formDefault)
@@ -173,20 +175,35 @@ const AddProcess = (props) => {
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
-		console.log()
+		// console.log()
 		const { name, value } = e.target;
+		console.log(name,value)
 		const _formValues = { ...formValues }
-		_formValues[name]['value'] = value;
+		
+		if(name==='minutes' && value>59){
+				let hourInc=Math.floor(value/60)
+				let actualMin=value%60;
+				console.log(hourInc,actualMin)
+
+				let hours=parseInt(_formValues['hours']['value'])
+				hours+=hourInc;
+				_formValues['hours']['value']=hours;
+
+				_formValues[name]['value'] = actualMin;
+		}
+		else{
+			_formValues[name]['value'] = value;
+		}
 		if (e.target.name == 'inputProcess') {
 			if (value) setInProcessSel(true)
 			else setInProcessSel(false)
 		}
-		// if (name == "typeId") {
-		// 	let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
-		// 	setpTypeCode(processTypeCode);
-		// 	_formValues['processNumber']['value'] = processTypeCode + dTypeCode + uniqueNumber;
-		// 	verifyProcessNumber(processTypeCode + dTypeCode + uniqueNumber);
-		// }
+		if (name == "typeId") {
+			let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
+			// setpTypeCode(processTypeCode);
+			// _formValues['processNumber']['value'] = processTypeCode + dTypeCode + uniqueNumber;
+			verifyProcessNumber(processTypeCode + dTypeCode + uniqueNumber);
+		}
 		setFormValues(_formValues);
 	};
 
@@ -237,8 +254,11 @@ const AddProcess = (props) => {
 	const submit = async () => {
 		console.log(selectedInpProcess)
 		setLoading(true)
-		const _form = await validateForm(formValues)
+		try{
+			const _form = await validateForm(formValues)
+
 		if (_form && _form.error) {
+			console.log(_form);
 			toaster.danger('Invalid form values, please check the form values and try again')
 			setShowErrors(true)
 		}
@@ -249,9 +269,14 @@ const AddProcess = (props) => {
 			props.onSubmit({ ..._form.form, processNoPrefix })
 			setFormValues(null)
 		}
+		}
+		catch(err){
+              toaster.danger(err);
+		}
 	}
 
 	const validateForm = (_form) => {
+		console.log(_form);
 		// VALIDATES THE DATA IN FORM
 		let error = false
 		return new Promise(resolve => {
@@ -265,7 +290,7 @@ const AddProcess = (props) => {
 				// }
 				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
 				if (_form[_key]['error']) error = true
-				if (index === _formKeys.length - 1) resolve({ form: _form, error })
+				if (index === _formKeys.length - 1) resolve({ form:_form, error })
 			}
 		})
 	}
@@ -276,25 +301,46 @@ const AddProcess = (props) => {
 
 	const verifyProcessNumber = async (e) => {
 		const check = await get(`processes?filter={"where":{"processNumber":"${processNoPrefix + e}"}}`);
-		if (check.statusCode >= 200 && check.statusCode < 300) {
+		console.log(check)
+		if (check.statusCode >= 200 && check.statusCode < 300 && props.data.id) {
+			if (check.data.length > 0 && props.data.id!=check?.data[0].id) {
+				let formData = { ...formValues };
+					// formData['processNumber']['value'] = (e) + uniqueNumber + 1;
+				setUniqueNumber(uniqueNumber + 1);
+				setProcessFound(processNoPrefix + e);
+				setAddButtonDisabled(true)
+
+				}	
+				
+
+			else{ setProcessFound(false)
+			setAddButtonDisabled(false)}
+		}
+		else{
 			if (check.data.length > 0) {
 				let formData = { ...formValues };
-				formData['processNumber']['value'] = (e) + uniqueNumber + 1;
+					// formData['processNumber']['value'] = (e) + uniqueNumber + 1;
 				setUniqueNumber(uniqueNumber + 1);
-				setProcessFound(processNoPrefix + e)
-			}
-			else setProcessFound(false)
-		}
-	}
+				setProcessFound(processNoPrefix + e);
+				setAddButtonDisabled(true)
 
+				}
+				else{ setProcessFound(false)
+					setAddButtonDisabled(false)}
+				}	
+		}
+			
 
 	return (
 		<Pane>
+
+
 			<Dialog
 				isShown={props.open}
 				header={header}
 				shouldCloseOnOverlayClick={false}
 				width={'60%'}
+				isConfirmDisabled={addbuttondisabled}
 				onCloseComplete={() => { props.onClose() }}
 				onConfirm={submit}
 				confirmLabel={props.inject ? "Edit Process" : "Add Process"}
@@ -321,7 +367,8 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
+						<FormField className='w-full' isRequired label="Process
+						 Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => { setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
@@ -505,8 +552,8 @@ const AddProcess = (props) => {
 								value={formValues?.status?.value}
 								validationMessage={formValues?.status?.error ? "Status is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option value="Partially Implemented">Partially Implemented</option>
 								<option value="" selected>Select Status</option>
+								<option value="Partially Implemented">Partially Implemented</option>
 								<option value="Implemented">Implemented</option>
 								<option value="Not Implemented">Not Implemented</option>
 							</SelectField>

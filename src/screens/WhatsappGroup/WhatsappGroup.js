@@ -185,11 +185,29 @@ const WhatsappGroup = () => {
 
 	const _filterGroups = () => {
 		isFilterApplied=true;
-		const filter = { where: '', include: '', order: '' }
-		console.log(new Date(filterData.from).toISOString(),new Date('1970'))
+		let dummydate=new Date(filterData.to)
+		dummydate.setHours(24,60,60,1100);
+		let modifiedDate=new Date(dummydate)
 
-		const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970') }", "${filterData.to || new Date().toISOString()}"]}`
-		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+
+		const filter = { where: '', include: '', order: '' }
+		// console.log(new Date(filterData.from).toISOString(),new Date('1970'))
+
+		// const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970') }", "${filterData.to || new Date().toISOString()}"]}`
+			const _dateFilter= ` "and": [
+				{
+					"createdAt": {
+						"gte": "${filterData.from?new Date(filterData.from):new Date('1970')}"
+					}
+				},
+				{
+					"createdAt": {
+						"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
+					}
+				}
+			]`
+			filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+
 		whatsappUrl(filter)
 		setTotalData(1)
 		setFilterDialog(false)
@@ -297,6 +315,7 @@ const WhatsappGroup = () => {
 				filter="true"
 				search={search}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
 
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>

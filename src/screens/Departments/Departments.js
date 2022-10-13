@@ -29,7 +29,10 @@ const Departments = () => {
 	// let currentDeparmentId=''
 	// let setCurrentDepartmentId=(str)=>{currentDeparmentId=str}
     const [currentDeparmentId,setCurrentDepartmentId]=useState('');
-
+    let currDeparmentId=''
+	function setCurrDepartmentId(str){
+		currDeparmentId=str;
+	}
 	useEffect(() => {
 		fetchDepartment()
 	}, []);
@@ -88,14 +91,15 @@ const Departments = () => {
 	}
 
 		// checking for number of process involved in a departement
-		const validateDelete=async()=>{
-			console.log('clicked validatedelete')
-		
+		const validateDelete=async(id)=>{
+			console.log('clicked validatedelete');
+		     console.log(currentDeparmentId);
 			try{
 
-			let processes=await get(`processes?filter={"where":{"departmentId":"${currentDeparmentId}"}}`);
+			let processes=await get(`processes?filter={"where":{"departmentId":"${id}"}}`);
 			if(processes.statusCode==200 && processes.data.length>0){
 			setCurrentDPcount(processes.data.length);
+			setCurrentDepartmentId(id);
 			}
 		else{
 			setCurrentDPcount(0)
@@ -130,11 +134,8 @@ const Departments = () => {
 			toaster.danger(err.message)
 		}
 	}
-
-
-
 	const deleteDepartment = async () => {
-		
+		    console.log(currentDeparmentId)
 		try{
 		  let res= await deleted(`/departments/${currentDeparmentId}`);
 		  if(res.statusCode==200){
@@ -222,6 +223,8 @@ const Departments = () => {
 				addEv={() => setOpen(true)}
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
+				placeholder="Search by name or code"
+				
 			/>
 			<br></br>
 			<br></br>
@@ -244,18 +247,21 @@ const Departments = () => {
 								<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
 								<Table.TextCell className="tb-c">
 									<IconButton icon={EditIcon} margin={2} onClick={(event) =>{
-										setOpenEdit(true);
+										
 										setCurrentDepartmentId(item.id);
+										setCurrDepartmentId(item.id)
 										setName(item.name)
+										setOpenEdit(true);
+									}} />
 										
 
 										
-										}} />
 									<IconButton icon={CrossIcon} margin={2} onClick={()=>{
 										setOpenDelete(true);
+										 setCurrDepartmentId(item.id);
 										 setCurrentDepartmentId(item.id);
 										 setName(item.name);
-										 validateDelete();
+										 validateDelete(item.id);
 										 }} />
 
 								</Table.TextCell>

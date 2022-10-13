@@ -232,7 +232,7 @@ const Documents = () => {
             let dummydate=new Date(filterData.to)
 			dummydate.setHours(24,60,60,1100);
 			let modifiedDate=new Date(dummydate)
-			console.log(filterData.to,modifiedDate)
+			// console.log(filterData.to,modifiedDate)
 
 
 			const _dateFilter=` "and": [
@@ -334,6 +334,7 @@ const Documents = () => {
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
 
 			/>
 			<br></br>

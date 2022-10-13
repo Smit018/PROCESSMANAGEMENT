@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { post, get, patch } from '../../services/https.service';
+import { post, get, patch,deleted } from '../../services/https.service';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Table, toaster, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -24,6 +24,7 @@ import {
 import 'react-accessible-accordion/dist/fancy-example.css';
 import TopBar from '../../components/TopBar/TopBar';
 import { ProcessList } from '../../components/AvatarList/AvatarList';
+import { upload } from '@testing-library/user-event/dist/upload';
 
 export default function VendorDetails() {
     const params = useParams()
@@ -175,7 +176,38 @@ export default function VendorDetails() {
         setAllProcess(allProcess)
     }
 
+    const _upload = async (file) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let _formdata = new FormData()
+				_formdata.append('file', file)
+				const _img = await post(`photos/vendor/upload`, _formdata)
+				// console.log(_img)
+				if (_img.data) {
+					resolve(_img.data.result.files.file[0].name)
+				}
+				else reject({ err: 'Failed to upload image!' })
+			}
+			catch (err) {
+				reject(err)
+			}
+		})
+	}
+
     const saveEmployee = async (form) => {
+
+       
+       try{
+        if (form['upload'])
+        {
+           let uploadRes= await _upload(form['upload']);
+           console.log(uploadRes)
+            form['profile']=uploadRes;
+        }
+        if(form.contactNo.length!=10){
+            throw('phone number should have 10 digits')
+        }
+        console.log(form)
         if (form) {
             const response = await patch('members/' + id, form)
             if (response.statusCode === 200) {
@@ -189,10 +221,14 @@ export default function VendorDetails() {
                 })
             }
         }
+       }
+       catch(err){
+             toaster.danger(err,{duration:2})
+       }
     }
 
     const deleteMe = async () => {
-        const response = await patch('members/' + id, { deleted: true })
+        const response = await deleted('members/' + id)
         if (response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
@@ -315,7 +351,7 @@ export default function VendorDetails() {
             {_showDelete ?
                 <PromptDialog
                     open={_showDelete}
-                    title={`Delete Employee!`}
+                    title={`Delete Vendor!`}
                     onClose={() => showDelete(false)}
                     onConfirm={() => deleteMe(false)}
                     message={`Do you really want to delete this employee?`}
@@ -328,6 +364,7 @@ export default function VendorDetails() {
                     onClose={(ev) => showUpdate(ev)}
                     inject={employeeDetail}
                     onSubmit={(form) => { saveEmployee(form) }}
+
                 /> : null
 
             }

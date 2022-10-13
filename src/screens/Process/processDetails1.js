@@ -676,6 +676,7 @@ const ProcessDetails1 = () => {
                     // console.log(myProps.datasource)
                     return (
                         myProps.datasource.map((data, index) => {
+                          
                             return (<div key={index} className="flex flex-col mb-6">
                             <div className='flex justify-between items-center'>
                             <Heading size={500}>{index + 1}. {data.description}</Heading>
@@ -752,8 +753,9 @@ const ProcessDetails1 = () => {
                                     getAllInputWhatsapp()
                                 }
                                 else if (type == 'documentProcess') {
+                                    getAllInputDocument()
                                     getAllOutputDocument()
-                                    getAllOutputDocument()
+
                                 }
                                 console.log('Success Delete')
                             }
@@ -774,7 +776,7 @@ const ProcessDetails1 = () => {
                             console.log({ ...form })
                             let process = {};
                             for (let i in form) {
-                                process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
+                                process[`${i}`] = form[i].value ? form[i].value : form[i].value;
                             }
                             if (process['inputProcess'] == "") {
                                 process.inputProcess = null
@@ -1111,7 +1113,7 @@ const ProcessDetails1 = () => {
                                                             {_showUpdate ?
                                                                 <AddProcess
                                                                 open={_showUpdate}
-                                                                data={{ types, members, departments, process }}
+                                                                data={{ types, members, departments, process,id:params.id }}
                                                                 onClose={(ev) => showUpdate(ev)}
                                                                 inject={processDetail}
                                                                 onSubmit={(form) => { saveProcess(form) }}
@@ -1119,11 +1121,11 @@ const ProcessDetails1 = () => {
                                                                 
                                                             }
                 </div>
+                                                            </div>
+                                                            );
                                    
 
                                                             
-                                                            </div>
-                                                            );
                                                         }
                                                         
                                                         

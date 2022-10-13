@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { post, get, patch } from '../../services/https.service';
+import { post, get, patch,deleted } from '../../services/https.service';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon, toaster, Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -192,9 +192,55 @@ export default function EmployeeDetails() {
         console.log(allProcess)
     }
 
+    const _uploadFile = async (file) => {
+		// UPLOAD IMAGE
+		return new Promise(async (resolve, reject) => {
+			try {
+				const body = JSON.stringify({"name":"employee"})
+				const options = {
+					method:'POST',
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body
+				}
+				const container = await fetch(`${baseUrl}photos/`, options)
+				
+			  const res=await container.json()
+			   if(res.error.message.includes('EEXIST') && res.error.statusCode==500){
+				if(container.statusCode==500 && container.message==''){}
+				const formData = new FormData();
+				// console.log(file)
+				formData.append('file', file)
+				// console.log(formData)
+				const image = await post("photos/employee/upload", formData)
+				// console.log(image)
+				if (image.data) {
+				resolve(image.data.result.files.file[0].name)
+				}
+				else {
+				reject(image);
+				}
+			
+			   }
+				}
+			catch (err) {
+				console.log(err)
+				reject(err)
+			}
+		})
+	}
+
+
+
+
     const saveEmployee = async (form) => {
       try{
         if (form) {
+
+            if (form['upload'])
+				form['profile'] = await _uploadFile(form['upload'])
+
             if(form.contactNo.length!=10){
                 console.log(form.contactNo)
                 throw('contact number should have 10 digits')
@@ -216,7 +262,7 @@ export default function EmployeeDetails() {
     }
 
     const deleteMe = async () => {
-        const response = await patch('members/' + id, { deleted: true })
+        const response = await deleted('members/' + id)
         if (response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
@@ -418,7 +464,7 @@ export default function EmployeeDetails() {
             {_showDelete ?
                 <PromptDialog
                     open={_showDelete}
-                    title={`Delete Vendor!`}
+                    title={`Delete employee!`}
                     onClose={() => showDelete(false)}
                     onConfirm={() => deleteMe(false)}
                     message={`Do you really want to delete this Vendor?`}

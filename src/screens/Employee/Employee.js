@@ -192,11 +192,11 @@ const Employee = () => {
 			   if(res.error.message.includes('EEXIST') && res.error.statusCode==500){
 				if(container.statusCode==500 && container.message==''){}
 				const formData = new FormData();
-				console.log(file)
+				// console.log(file)
 				formData.append('file', file)
-				console.log(formData)
+				// console.log(formData)
 				const image = await post("photos/employee/upload", formData)
-				console.log(image)
+				// console.log(image)
 				if (image.data) {
 				resolve(image.data.result.files.file[0].name)
 				}
@@ -384,17 +384,40 @@ const Employee = () => {
 
 	const applyFilter = () => {
 		isFilterApplied=true;
+
 		try{
-			console.log(new Date(), new Date(filterData.to));
-			const dateFilter=`"and": [
+
+			let dummydatefrom=new Date(filterData.from)
+			dummydatefrom.setHours(0,0,0,100)
+			let modifiedFromDate=new Date(dummydatefrom)
+
+			let dummydate=new Date(filterData.to)
+			dummydate.setHours(24,60,60,1100);
+			let modifiedDate=new Date(dummydate)
+			// console.log(new Date(), new Date(filterData.to));
+			// const dateFilter=`"and": [
+			// 	{
+			// 		"doj": {
+			// 			"gte": "${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}"
+			// 		}
+			// 	},
+			// 	{
+			// 		"doj": {
+			// 			"lte": "${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"
+			// 		}
+			// 	}
+			// ]`
+			
+			const dateFilter=` "and": [
 				{
 					"doj": {
-						"gte": "${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}"
+						"gte": "${filterData.from?new Date(modifiedFromDate):new Date('1970')}"
+						
 					}
 				},
 				{
 					"doj": {
-						"lte": "${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"
+						"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
 					}
 				}
 			]`
@@ -406,7 +429,7 @@ const Employee = () => {
 		const where=`  "where": {
 			"memberType": "EMPLOYEE",
 			"deleted": {
-				"neq": false
+				"neq": true
 			},
 			${dateFilter}
 		}`
@@ -447,6 +470,7 @@ const Employee = () => {
 				onFilter={() => { setFilterDialog(true) }}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
 
 			/>
 			<br></br>

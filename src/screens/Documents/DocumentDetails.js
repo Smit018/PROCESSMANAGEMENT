@@ -26,7 +26,10 @@ const DocumentDetails = () => {
     const id = params.id
     const [members, setMembers] = useState([]);
     const [newMembers, setNewMembers] = useState([])
-    const [documentDetail, setDocumentDetail] = useState({});
+    // const [documentDetail, setDocumentDetail] = useState({});
+    const [name,setName]=useState('');
+    const [subSheetName,setSubSheetName]=useState('')
+    const [link,setLink]=useState('')
     const [search, setSearch] = useState('');
     const [suggestmember, setSuggestMember] = useState([]);
     const [documentInputSources, setDocumentInputSources] = useState([]);
@@ -177,7 +180,11 @@ const DocumentDetails = () => {
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log(saveDoc.data)
             initData = saveDoc.data
-            setDocumentDetail(saveDoc.data);
+            // setDocumentDetail(saveDoc.data);
+            setName(saveDoc.data.name)
+            setLink(saveDoc.data.link)
+            setSubSheetName(saveDoc.data.subSheetName);
+
         } else {
             // console.log('Fetch Document member')
             toaster.danger('Failed to fetch Document detail!')
@@ -325,7 +332,7 @@ const DocumentDetails = () => {
     }
 
     const deleteMe = async () => {
-        const response = await patch('documents/' + params.id, { deleted: true })
+        const response = await deleted('documents/' + params.id)
         if(response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
@@ -426,10 +433,10 @@ const DocumentDetails = () => {
                 <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                     <div>
                         <Heading size={600}>
-                            {documentDetail.name}
+                            {name}
                         </Heading>
                         <Heading size={400} marginTop={8}>
-                           <a href={documentDetail.link} target="_blank">{documentDetail.link}</a>
+                           <a href={link} target="_blank">{link}</a>
                         </Heading>
                     </div>
                     <div>
@@ -572,21 +579,32 @@ const DocumentDetails = () => {
             <DocDialog
                 open={openEdit}
                 title={`Update Document`}
-                onClose={() => { setOpenEdit(false); setDocumentDetail(initData) }}
-                onConfirm={() => { updateDocument(documentDetail); setOpenEdit(false) }}
-                inject={documentDetail}
+                onClose={() => { setOpenEdit(false);
+                    //  setDocumentDetail(initData) 
+                    setName(initData.name)
+                    setLink(initData.link)
+                    setSubSheetName(initData.subSheetName)
+                    
+                    }}
+                onConfirm={() => { updateDocument({name,link,subSheetName}); setOpenEdit(false) }}
+                inject={{name,link,subSheetName}}
                 onChange={(e) => {
-                    console.log(e)
-                    const _values = {...documentDetail}
+                    const key = Object.keys(e)[0]
+                    console.log(e, key)
+                    // const _values = {...documentDetail}
                     //  e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link })
-                    if(e.name){
-                        setDocumentDetail({_values, name:e.name})
+                    if(key === 'name'){
+                        
+                        // setDocumentDetail({_values, name:e.name})
+                        setName(e.name)
                     }
-                    else if(e.link){
-                        setDocumentDetail({_values, link:e.link})
+                    else if(key === 'link'){
+                        // setDocumentDetail({_values, link:e.link})
+                        setLink(e.link)
                     }
-                    else if(e.subSheetName){
-                        setDocumentDetail({_values, subSheetName:e.subSheetName})
+                    else if(key === 'subSheetName'){
+                        // setDocumentDetail({_values, subSheetName:e.subSheetName})
+                        setSubSheetName(e.subSheetName)
                     }
 
                     }}

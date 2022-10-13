@@ -6,6 +6,7 @@ import ProcessMatrixBox from './ProcessMatrixBox';
 import Xarrow, {useXarrow, Xwrapper} from 'react-xarrows';
 import { SettingsAccessibility } from '@mui/icons-material';
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { userAuthState } from "../../services/recoil.service";
 import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 import { useNavigate } from 'react-router-dom';
@@ -84,7 +85,16 @@ const clickProcess=async (pId,index) => {
     const res=await response.json();
     // console.log(res)
    
-   console.log('this is index'+index+'and current ids are'+currentId)
+  //  console.log('this is index'+index+'and current ids are'+currentId)
+  if(res.length){
+    
+  }
+  else{
+    toaster.notify('process not found', {
+      duration:1,
+    })
+  
+  }
 
 
     if (res.length && !currentId.includes(pId)){
@@ -127,8 +137,8 @@ return (
   {/* <TopBar title="Process Matrix" breadscrubs={path}   className="sticky top-0  bg-blue-800"/> */}
   <div className="flex p-5 gap-5 align-middle align-center  ">
 
-      <p onClick={()=>{navigate('../')}} className="cursor-pointer text-xl scale-150">  <ArrowCircleLeftIcon/> </p>
-      <p className='text-xl'>Process Matrix</p>
+      <p onClick={()=>{navigate('../')}} className="cursor-pointer text-xl scale-150"> <ArrowBackIcon/> </p>
+      <p className='text-xl relative top-1'>Process Matrix</p>
   
    
   </div>
