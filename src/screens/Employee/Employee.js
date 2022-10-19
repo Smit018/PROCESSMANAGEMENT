@@ -471,6 +471,8 @@ const Employee = () => {
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
 				placeholder="search by name"
+				total={totalData}
+
 
 			/>
 			<br></br>

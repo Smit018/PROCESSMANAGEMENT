@@ -149,6 +149,24 @@ const AddMember = (props) => {
         console.log(_form)
     }
 
+    const preventNum=(e) => {
+        
+        console.log(e.target.value.length)
+        let key=e.target.value.length? /[A-Za-z \'\b]/i.test(e.target.value.slice(e.target.value.length-1)):true;
+        if(key){
+            console.log(key);  
+             return true;
+
+        }
+        else{
+            console.log(key)
+            return false;
+        }
+        
+      
+
+    }
+
     return (
         <Pane>
             <Dialog
@@ -167,7 +185,15 @@ const AddMember = (props) => {
                         label="Name"
                         name="name"
                         value={employee.name}
-                        onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
+                        onChange={(event)=>{
+                        let bool=preventNum(event);
+
+                        if(bool){
+                        setEmployee({ ...employee, name: event.target.value })
+                        }
+
+                        
+                        }}
                     />
                     <div className='flex justify-center items-center'>
                         <TextInputField
@@ -185,7 +211,17 @@ const AddMember = (props) => {
                             label="Contact Person Name"
                             value={employee.designation}
                             name="designation"
-                            onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                            // onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                            onChange={(event)=>{
+                                let bool=preventNum(event);
+        
+                                if(bool){
+                                setEmployee({ ...employee, designation: event.target.value })
+                                }
+        
+                                
+                                }}
+
                         /> : null}
                     </div>
                     {props.type === 'vendor' ? null :

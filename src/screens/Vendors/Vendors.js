@@ -393,6 +393,7 @@ const Vendors = () => {
 				onFilter={() => { setFilterDialog(true) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
 				placeholder="search by name"
+				total={totalData}
 
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>

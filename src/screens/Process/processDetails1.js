@@ -153,6 +153,7 @@ const ProcessDetails1 = () => {
     const getProcessDetails = async () => {
         const getDetaills = await get(`processes/${id}?filter={"include":["processOwner", "process"]}`);
         if (getDetaills.statusCode >= 200 && getDetaills.statusCode < 300) {
+            console.log(getDetaills?.data)
             setProcessDetail(getDetaills.data);
             setProcessOwner(getDetaills.data.inputSourceSelf)
         }
@@ -163,10 +164,12 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryProcessMembers = async (text, memberList) => {
         const alreadyMember = memberList.map(e => e.member.id);
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"memberType":"EMPLOYEE"}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        // let filter =`processes/${params.id}/personProcess?filter={"include":"member"}`
+        
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
-            // console.log("Fetch suggested Members", whatsap.data);
+            console.log("Fetch suggested Members", whatsap);
             let dataMember = [...whatsap.data];
             let filtered = []
             console.log(alreadyMember)
@@ -222,7 +225,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputWhatsapp = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
+        const alreadyGroup = groupList.map(e => e.whatsappGroup?.id);
         let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
@@ -239,7 +242,7 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryOutputWhatsapp = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
-        let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
+        let filter = `whatsappGroups?filter={"wh    ere":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -277,7 +280,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputDocument = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.document.id);
+        const alreadyGroup = groupList.map(e => e?.document?.id);
         let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
@@ -331,7 +334,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputPerson = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.member.id);
+        const alreadyGroup = groupList.map(e => e?.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -388,11 +391,19 @@ const ProcessDetails1 = () => {
     async function suggestQueryStepMembers(text, memberList) {
         console.log(memberList)
         const alreadyGroup = memberList.map(e => e.id);
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
+        // let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
+        let filter=`processMembers?filter={"where": {"processId": "${params.id}"},"include": "member"}`
         const members = await get(filter);
-        if (members.statusCode >= 200 && members.statusCode < 300) {
-            // console.log("Fetch suggested Members", whatsap.data);
-            let dataMember = [...members.data];
+        console.log(members)
+        let newDataMember=members.data.map((m)=>{
+            return m['member']
+        })
+        
+        if (members.statusCode >= 200 && members.statusCode < 300 && newDataMember) {
+            console.log("Fetch suggested Members",[members.data[0]['member']]);
+            console.log(newDataMember)
+            let dataMember =[...newDataMember]
+            
             console.log(alreadyGroup)
             dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
             console.log(dataMember, alreadyGroup)
@@ -528,6 +539,7 @@ const ProcessDetails1 = () => {
     
     const addProcessMember = async (mem) => {
         let addMember = { processId: id, memberId: mem.id, memberType: mem.memberType, source: "Whatsapp" }
+        console.log(addMember);
         const whatsap = await post(`processMembers`, addMember);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Members added to process");
@@ -577,6 +589,9 @@ const ProcessDetails1 = () => {
     const postProcess = (type, mem) => {
         if (type == "processMember") {
             addProcessMember(mem);
+            addSteps();
+            setSuggestStepMember([...suggestStepMember,mem])
+            
         }
         else if (type == 'input-whatsapp') {
             addInput_OutputWhatsapp(mem, 'INPUT')
@@ -597,24 +612,27 @@ const ProcessDetails1 = () => {
             addInput_OutputPerson(mem, 'OUTPUT')
         }
         else if (type == 'step') {
-            // console.log(mem)
+            console.log('hello brother')
             pushStepmember(mem)
         }
     }
     
     
+    
     const autoItem = (item, variable) => {
-        const Img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
+        // const Img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
         return (
-            <span key={item.children.name} onClick={() => { console.log('items', item.children, variable); postProcess(variable, item.children) }}>
+            <div key={item.children.name} onClick={() => { console.log('items is here', item.children, variable); 
+            postProcess(variable, item.children) }}  >
             <AvatarList
-            avatar={Img}
             name={item.children.name}
             description={item.children.designation || ''}
             action={false}
             _item={item}
             />
-            </span>
+            
+            </div>
+            
             )
         }
         
@@ -626,13 +644,24 @@ const ProcessDetails1 = () => {
         
         
         const AutoTextInput = (myProps) => {
+            // console.log("babu samjho ishareey "+myProps.datasource).
+            // let d=myProps.datasource.map((data)=>{
+            //     return data.name
+            // })
             return (
                 <Autocomplete
-                onChange={changedItem => console.log(changedItem)}
+                onChange={changedItem => {                
+                    postProcess(myProps.variable,changedItem);
+                    
+                }}
                 items={myProps.datasource}
-                itemToString={(item) => { return item ? item : '' }}
-                renderItem={(item, index) => autoItem(item, myProps.variable)}
-                itemSize={75}
+                
+                itemToString={(item) => { 
+                    return item ?
+                  item.memberType?(`${item.name} (${item.memberType})`):`${item.name}` 
+                    : '' }}
+                itemSize={50}
+                popoverMaxHeight={200}
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
                 onInputValueChange={changedItem => {
                     console.log(changedItem)
@@ -648,7 +677,7 @@ const ProcessDetails1 = () => {
                     openMenu,
                     toggleMenu
                 }) => (
-                    <Pane key={key} ref={getRef} display="flex">
+                    <Pane key={key}  style={{ marginTop: 16 }} ref={getRef} display="flex">
                     <TextInput
                     flex="1"
                     value={inputValue || myProps.value}
@@ -676,7 +705,7 @@ const ProcessDetails1 = () => {
                     // console.log(myProps.datasource)
                     return (
                         myProps.datasource.map((data, index) => {
-                          
+                            
                             return (<div key={index} className="flex flex-col mb-6">
                             <div className='flex justify-between items-center'>
                             <Heading size={500}>{index + 1}. {data.description}</Heading>
@@ -705,7 +734,7 @@ const ProcessDetails1 = () => {
                             );
                         }
                         
-                        const removeMember = async (type, data) => {
+                        const removeMember = async (type, data,itemia) => {
                             let deleteRecord;
                             if (type == "step-member") {
                                 deleteRecord = await deleted(`stepsMembers/${data}`);
@@ -723,6 +752,16 @@ const ProcessDetails1 = () => {
                             }
                             else if (type == "processMember") {
                                 deleteRecord = await deleted(`processMembers/${data}`);
+                                console.log(suggestStepMember)
+                                console.log('data is ataaaaaa  ', data,itemia);
+                                let meme= suggestStepMember.find((m)=>{
+                                    return (m.id==itemia.member.id)
+                                })
+                                console.log(meme,suggestStepMember.indexOf(meme))
+                                let newsuggestions=suggestStepMember
+                                newsuggestions.splice(suggestStepMember.indexOf(meme),1);
+                                setSuggestStepMember(newsuggestions);
+                                
                             }
                             else if (type == "processPerson") {
                                 deleteRecord = await deleted(`personProcesses/${data}`);
@@ -743,6 +782,7 @@ const ProcessDetails1 = () => {
                                 }
                                 else if (type == 'processMember') {
                                     getAllProcessMembers()
+                                    
                                 }
                                 else if (type == 'processPerson') {
                                     getAllInputPerson();
@@ -755,7 +795,7 @@ const ProcessDetails1 = () => {
                                 else if (type == 'documentProcess') {
                                     getAllInputDocument()
                                     getAllOutputDocument()
-
+                                    
                                 }
                                 console.log('Success Delete')
                             }
@@ -763,12 +803,16 @@ const ProcessDetails1 = () => {
                         
                         
                         async function fetchRemovelist(type, ind, mem) {
-                            console.log(mem)
                             if (type == "suggestedStep") {
                                 popStepmember(ind)
+                                console.log('meep is not better than perry the platipuss',mem)
+                                
                             }
                             else if (type == "step") {
-                                removeMember("step-member", mem.id)
+                                removeMember("step-member", mem.id);
+                                console.log('meep is not better than perry the platipuss',mem)
+                                
+                                
                             }
                         }
                         
@@ -812,7 +856,7 @@ const ProcessDetails1 = () => {
                         
                         return (
                             <div className="w-full">
-                            <TopBar title="Processes" breadscrubs={paths} />
+                            <TopBar title="Processes" breadscrubs={paths} total='' />
                             <Pane className="w-full l-blue" elevation={1} >
                             <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                             <div>
@@ -821,6 +865,7 @@ const ProcessDetails1 = () => {
                             </Heading>
                             <Heading size={400} marginTop={8}>
                             {/* Uploading youtube videos for study app. */}
+                            
                             {processDetail.title}
                             </Heading>
                             </div>
@@ -847,8 +892,11 @@ const ProcessDetails1 = () => {
                             </div>
                             {processDetail.process ?
                                 <div>
-                                <Heading className="primary" fontWeight={500} size={500}>{processDetail.process.processNumber}</Heading>
-                                <Text size={300}>{processDetail.process.title}</Text>
+                                <Heading className="primary cursor-pointer" fontWeight={500} size={500} onClick={()=>{
+                                    navigate(`../processes/${processDetail.process.id}`)
+                                    window.open(window.location.href,'_self')
+                                }} >{processDetail.process.processNumber}</Heading>
+                                <Text size={300}>{processDetail.process.title} </Text>
                                 <Heading size={200}>Input Process</Heading>
                                 </div> : null
                             }
@@ -871,10 +919,12 @@ const ProcessDetails1 = () => {
                                 return (
                                     <AvatarList
                                     avatar={`${baseUrl}photos/${item?.member?.memberType?.toLowerCase()}/download/${item?.member?.profile}`}
-                                    sendDelete={e => removeMember('processMember', item.id)}
+                                    sendDelete={e => removeMember('processMember', item.id,item)}
                                     name={item?.member?.name}
                                     description={item?.member?.designation}
                                     actionText={item?.member?.memberType}
+                                    memberId={item?.memberId}
+                                    memberT={item?.member?.memberType.toLowerCase()+'s'}
                                     />
                                     )
                                 })}
@@ -903,6 +953,8 @@ const ProcessDetails1 = () => {
                                         name={item?.name}
                                         description={item?.designation}
                                         actionText={item?.memberType}
+                                       
+
                                         />
                                         )
                                     })}
@@ -937,9 +989,9 @@ const ProcessDetails1 = () => {
                                     <br></br>
                                     <br></br>
                                     {/* INPUT SOURCES */}
-
-                            <div>
-                <div className='flex flex-wrap justify-between items-center'>
+                                    
+                                    <div>
+                                    <div className='flex flex-wrap justify-between items-center'>
                                     <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
                                     <div className='flex items-center'>
                                     <Text size={400}>Process Owner &nbsp; &nbsp;</Text>
@@ -957,7 +1009,9 @@ const ProcessDetails1 = () => {
                                             name={item?.member?.name}
                                             sendDelete={e => removeMember('processPerson', item.id)}
                                             description={''}
-                                            actionText={''}
+                                            actionText={item.member?.memberType}
+                                            memberId={item?.memberId}
+                                            memberT={item?.member?.memberType.toLowerCase()+'s'}
                                             />
                                             )
                                         })}
@@ -982,6 +1036,8 @@ const ProcessDetails1 = () => {
                                                 sendDelete={e => removeMember('whatsappProcess', item.id)}
                                                 description={''}
                                                 actionText={''}
+                                                memberId={`${item?.whatsappId}/${item?.whatsappGroup?.name}`}
+                                                memberT={`whatsapp-groups`}
                                                 />
                                                 )
                                             })}
@@ -1007,6 +1063,8 @@ const ProcessDetails1 = () => {
                                                     sendDelete={e => removeMember('documentProcess', item.id)}
                                                     description={''}
                                                     actionText={''}
+                                                    memberId={`${item?.documentId}/${item?.document?.name}`}
+                                                    memberT={`documents`}
                                                     />
                                                     )
                                                 })}
@@ -1035,7 +1093,9 @@ const ProcessDetails1 = () => {
                                                         name={item?.member?.name}
                                                         sendDelete={e => removeMember('processPerson', item.id)}
                                                         description={''}
-                                                        actionText={''}
+                                                        actionText={item.member?.memberType}
+                                                        memberId={item?.memberId}
+                                                        memberT={item?.member?.memberType.toLowerCase()+'s'}
                                                         />
                                                         )
                                                     })}
@@ -1060,6 +1120,8 @@ const ProcessDetails1 = () => {
                                                             name={item?.whatsappGroup?.name}
                                                             description={''}
                                                             actionText={''}
+                                                            memberId={`${item?.whatsappId}/${item?.whatsappGroup?.name}`}
+                                                            memberT={`whatsapp-groups`}
                                                             />
                                                             )
                                                         })}
@@ -1084,6 +1146,8 @@ const ProcessDetails1 = () => {
                                                                 sendDelete={e => removeMember('documentProcess', item.id)}
                                                                 description={''}
                                                                 actionText={''}
+                                                                memberId={`${item?.documentId}/${item?.document?.name}`}
+                                                                memberT={`documents`}
                                                                 />
                                                                 )
                                                             })}
@@ -1104,10 +1168,10 @@ const ProcessDetails1 = () => {
                                                             {_showDelete ?
                                                                 <PromptDialog
                                                                 open={_showDelete}
-                                                                title={`Delete Process!`}
+                                                                title={`Process!`}
                                                                 onClose={() => showDelete(false)}
                                                                 onConfirm={() => deleteProcess()}
-                                                                message={`Do you really want to delete this process?`}
+                                                                message="Do you really want to delete this process?"
                                                                 /> : null
                                                             }
                                                             {_showUpdate ?
@@ -1120,11 +1184,11 @@ const ProcessDetails1 = () => {
                                                                 /> : null
                                                                 
                                                             }
-                </div>
+                                                            </div>
                                                             </div>
                                                             );
-                                   
-
+                                                            
+                                                            
                                                             
                                                         }
                                                         

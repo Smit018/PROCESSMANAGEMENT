@@ -44,6 +44,9 @@ const DocumentDetails = () => {
     const [documentInputQuery, setDocumentInputQuery] = useState([]);
     const [documentOutputQuery, setDocumentOutputQuery] = useState([]);
 
+    const [inputSource,setInputSource]=useState(0);
+    const [outputSource,setOutputSource]=useState(0);
+
 
     const paths = [
         { path: '/admin/documents', title: 'Documents' },
@@ -88,7 +91,7 @@ const DocumentDetails = () => {
             else{
                 console.log(members)
                 let proc = members.filter(e=>{
-                    if(e.member.name.toLowerCase().includes(text.toLowerCase())){
+                    if(e.member?.name.toLowerCase().includes(text.toLowerCase())){
                         return e
                     }
                 })
@@ -159,6 +162,7 @@ const DocumentDetails = () => {
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentInputSources(processData);
             setDocumentInputQuery(processData)
+            setInputSource(processData.length)
         }else{
             toaster.danger('Failed to fetch Input Process!')
         }
@@ -170,6 +174,7 @@ const DocumentDetails = () => {
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentOutputSources(processData);
             setDocumentOutputQuery(processData)
+            setOutputSource(processData.length)
         }else{
             toaster.danger('Failed to fetch Output Process!')
         }
@@ -225,7 +230,7 @@ const DocumentDetails = () => {
     }
 
     const getSearchQueryMember = async (text, memberList) => {
-        let alreadyMember = memberList.map(e => e.member.id);
+        let alreadyMember = memberList.map(e => e.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const saveDoc = await get(filter);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
@@ -261,11 +266,11 @@ const DocumentDetails = () => {
     const selectMember = (e, member, i) => {
         let getMembers = [...suggestmember];
         let memberNew = [...newMembers];
-        let getIndex = memberNew.findIndex(e => e.memberId == member.id);
+        let getIndex = memberNew.findIndex(e => e.memberId == member?.id);
         if (e.target.checked) {
             getMembers[i].selected = true;
             setSuggestMember(getMembers);
-            setNewMembers([...newMembers, { memberId: member.id, admin: false }])
+            setNewMembers([...newMembers, { memberId: member?.id, admin: false }])
         } else {
             getMembers[i].selected = false;
             getMembers[i].admin = false;
@@ -279,7 +284,7 @@ const DocumentDetails = () => {
     const enableAdmin = (e, member, i) => {
         let getMembers = [...suggestmember];
         let memberNew = [...newMembers];
-        let getIndex = memberNew.findIndex(e => e.memberId == member.id);
+        let getIndex = memberNew.findIndex(e => e.memberId == member?.id);
         if (e.target.checked) {
             getMembers[i].selected = true;
             getMembers[i].admin = true;
@@ -288,7 +293,7 @@ const DocumentDetails = () => {
                 memberNew[getIndex] = { ...memberNew[getIndex], admin: true }
                 setNewMembers(memberNew);
             } else {
-                setNewMembers([...newMembers, { memberId: member.id, admin: true }])
+                setNewMembers([...newMembers, { memberId: member?.id, admin: true }])
             }
 
         } else {
@@ -313,7 +318,7 @@ const DocumentDetails = () => {
 
     const addMemeber = (member) => {
         const _member = members
-        _member.push(member)
+        _member?.push(member)
         setMembers(_member)
         console.log(newMember)
     }
@@ -459,11 +464,11 @@ const DocumentDetails = () => {
                             <Heading size={400}>Members</Heading>
                         </div>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{inputSource}</Heading>
                             <Heading size={400}>Input Sources</Heading>
                         </div>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{outputSource}</Heading>
                             <Heading size={400}>Ouput Sources</Heading>
                         </div>
                     </div>
@@ -488,10 +493,10 @@ const DocumentDetails = () => {
             </div>
                 {members.length === 0 ? showEmpty() : memberQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/${(item?.member.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member.id}`}>
+                        <Link key={item.id} to={`/admin/${(item?.member?.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member?.id}`}>
                             <MemberList
-                                name={item.member.name}
-                                designation={!item.admin ? (item.member.employeeCode + ', ' + item.member.designation) : ''}
+                                name={item.member?.name}
+                                designation={!item.admin ? (item.member?.employeeCode + ', ' + item.member?.designation) : ''}
                                 type={item.admin ? 'Owner' : 'Member'}
                                 showSwitch={true}
                                 admin={item.admin}

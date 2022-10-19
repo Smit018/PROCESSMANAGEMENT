@@ -1,15 +1,20 @@
 import { Avatar, CrossIcon, Heading, IconButton, Text, Pane, PeopleIcon, ChevronRightIcon, Switch } from 'evergreen-ui';
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DateFormat } from '../../services/dateFormat';
 
 const AvatarList = (props) => {
 
     const crossAvatarList = (id)=>{
+       
         props.sendDelete(id)
+
     }
+    const navigate=useNavigate()
 
     return (
-        <div className='hover:bg-slate-100 hover:cursor-pointer flex items-center px-4 py-3 shadow rounded'>
+        <div className='hover:bg-slate-100 hover:cursor-pointer  flex items-center px-4 py-3 shadow rounded'
+        onClick={()=>{navigate(`../${props.memberT}/${props.memberId}`)}} >
             <div className='mr-4'>
                 <Avatar size={40} src={props.avatar} name={props.name}/>
             </div>
@@ -19,11 +24,16 @@ const AvatarList = (props) => {
                     <Text className='capitalize' size={400}>{props.description}</Text>
                 </div>
                 <div className='w-6'></div>
+
                 {props.action != false ? (
                     < div className='flex items-center'>
                         {props.actionText ? <Text size={300}>{props.actionText}</Text> : null}
                         &nbsp;&nbsp;
-                        <IconButton className='border-hidden outline-none' onClick={()=>crossAvatarList(props)} icon={CrossIcon} />
+                        <IconButton className='border-hidden outline-none' onClick={(event)=>{
+                            event.stopPropagation()
+                            crossAvatarList(props);
+                            
+                            }} icon={CrossIcon} />
                     </div>
                 ) : null
                 }

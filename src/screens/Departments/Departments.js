@@ -82,10 +82,12 @@ const Departments = () => {
 	}
 
 	const formValidation = () => {
-		if (name.trim().length > 3) {
+		if (name.trim().length > 3 && !(/\s/).test(typeCode) && typeCode.length>0) {
 			return false;
+
 		}
 		else {
+		
 			return true;
 		}
 	}
@@ -224,6 +226,7 @@ const Departments = () => {
 				search={search}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 				placeholder="Search by name or code"
+				total={totalData}
 				
 			/>
 			<br></br>

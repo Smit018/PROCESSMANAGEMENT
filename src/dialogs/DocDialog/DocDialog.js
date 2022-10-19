@@ -5,7 +5,7 @@ import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, 
 
 const DocDialog = (props) => {
     
-    let _form = props.inject || { name: '', link: '',subSheetName:'' }
+    let _form = props.inject || { name: '', link: ''}
     console.log(props)
 
     const header = (title) => {
@@ -30,8 +30,6 @@ const DocDialog = (props) => {
                 <form>
                     <div className='flex justify-center items-center'>
                         <TextInputField size={100} required label="Name" value={_form.name} onChange={(e) => props.onChange({name: e.target.value})} />
-                        <div style={{ margin: "0 10px" }}></div>
-                        {props.section!=="whatsaap"?<TextInputField size={100} required label="Sub sheet name" value={_form.subSheetName} onChange={(e)=> props.onChange({subSheetName: e.target.value})} />:null}
                         <div style={{ margin: "0 10px" }}></div>
                         <TextInputField size={100} required label="Link" value={_form.link} onChange={(e) => props.onChange({link: e.target.value})} />
 

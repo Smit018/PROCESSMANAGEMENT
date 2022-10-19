@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { post, get, patch,deleted } from '../../services/https.service';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Button, Table, toaster, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon } from "evergreen-ui";
+import { Button, Table, toaster, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon,Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
 import { Pane, Text } from 'evergreen-ui'
 import TWOPEOPLE from "../../assets/images/twoPeople.png"
@@ -35,9 +35,12 @@ export default function VendorDetails() {
     const [whatsapps, setWhatsapps] = useState(0);
     const [documents, setDocuments] = useState(0);
     const [document, setDocument] = useState([])
+    const [process, setProcess] = useState(0);
+
     const pathArray = window.location.pathname.split('/');
     const [whatsappQuery, setWhatsappQuery] = useState([]);
     const [documentQuery, setDocumentQuery] = useState([]);
+    const [processQuery,setProcessQuery]=useState([])
 
     const id = pathArray[3]
 
@@ -56,22 +59,42 @@ export default function VendorDetails() {
     }, [0]);
 
 
-    function getAllProcesses() {
-        let obj = {
-            name: "OPHSB3A", description: "Uploading Youtube Video for APT Students", role: "Member", accordian: false,
-            process: [
-                { name: "Step 2", description: "Add Cases" },
-                { name: "Step 5", description: "Register Case" },
-                { name: "Step 6", description: "Collect Fee" },
-                { name: "Step 10", description: "Welcome Call" },
-            ]
-        };
-        let arr = [];
-        for (let i = 0; i < 10; i++) {
-            arr.push(obj);
-        }
+    async function getAllProcesses(text = "") {
 
-        setAllProcess(arr);
+        const getProcessInfo = await get(`processMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"process","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        //  const getProcessInfo=[]
+
+        const getProcessfromProcessOwner=await get(`processes?filter={"where":{"processOwner":"${id}"}}`);
+        console.log(getProcessfromProcessOwner.data);
+        if (getProcessInfo.statusCode >= 200 && getProcessInfo.statusCode < 300) {
+            let stepmemberArr = getProcessInfo.data;
+            console.log(stepmemberArr)
+            stepmemberArr = stepmemberArr.map(e => { return { ...e, processNumber: e.process.processNumber, stepDescription:'',processTitle:e.process.title}});
+            let arr = [];
+            getProcessfromProcessOwner.data.forEach((p)=>{
+                arr.push({ "processNumber": p.processNumber, process:[], processTitle: p.title,processId:p.id,processOwner:'Owned process' })
+            })
+            const groupedMap = stepmemberArr.reduce(
+                (entryMap, e) => entryMap.set(e.processNumber, [...entryMap.get(e.processNumber) || [], e]),
+                new Map()
+            );
+            console.log('line 72 ghrerer ',groupedMap);
+
+            for (let [key, value] of groupedMap) {
+                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.process?.deleted) {
+                    let stepProcess = value.map(e => e.stepDescription);
+                    arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle,processId:value[0].processId,processOwner:'' })
+                }
+            }
+            console.log('hello tehrejd jlksdadfjl lkd df')
+            
+            // setEmployeeDetails({...employeeDetails,process:arr.length});
+            setProcess(arr.length)
+            setAllProcess(arr);
+            setProcessQuery(arr)
+        } else {
+            toaster.danger(getProcessInfo.message)
+        }
 
     }
 
@@ -113,6 +136,24 @@ export default function VendorDetails() {
     }
 
     function onQuery(type, text) {
+
+        if (type == "process") {
+            if (text == "") {
+                setProcessQuery(allProcess)
+            }
+            else {
+                console.log(allProcess)
+                let proc = allProcess.filter(e => {
+                    if (e.processNumber.toLowerCase().includes(text.toLowerCase())) {
+                        return { ...e }
+                    }
+                })
+
+                setProcessQuery(proc)
+            }
+        }
+
+
         if (type == "whatsapp") {
             if (text == "") {
                 setWhatsappQuery(whatsapp)
@@ -271,6 +312,14 @@ export default function VendorDetails() {
                     </div>
                     <div className='flex flex-col justify-center '>
                         <div className='font-medium'>
+                            {process}
+                        </div>
+                        <div className='text-xs text-pri-col'>
+                             Processes
+                        </div>
+                    </div>
+                    <div className='flex flex-col justify-center '>
+                        <div className='font-medium'>
                             {whatsapps}
                         </div>
                         <div className='text-xs text-pri-col'>
@@ -287,6 +336,45 @@ export default function VendorDetails() {
                     </div>
                 </div>
             </Pane>
+
+             {/* //Process section */}
+             <div className='py-10'>
+                <div className='flex justify-between items-center mb-6'>
+                    <div className='text-xl'>PROCESSES</div>
+                    <div className='search-bar flex mr-4'>
+                        <div>
+                            <TextInput height={40} placeholder="Search..." onChange={e => { onQuery('process', e.target.value) }} className='l-blue' />
+                        </div>
+                        <div className='h-10 rounded flex items-center justify-center px-2 white right'>
+                            <SearchIcon size={18} className='primary' />
+                        </div>
+                    </div>
+                </div>
+                <Accordion allowZeroExpanded>
+                    {processQuery?.map((item, index) => (
+                        <AccordionItem key={item.id} onClick={()=>{navigate(`../processes/${item.processId}`)}}>
+                           
+                            <AccordionItemHeading>
+                                <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-white shadow'>
+                                    <div className='flex flex-col'>
+                                        <small className='text-pri-col text-sm text-blue-700 pb-1'>{item.processOwner}</small>
+                                        <Heading size={500}>{item?.processNumber}</Heading>
+                                        <div className='text-pri-col text-sm pb-1'>{item?.processTitle}</div>
+                                    </div>
+                                    
+                                    <div className='text-lg text-pri-col'>
+                                        <ChevronRightIcon />
+                                    </div>
+                                </AccordionItemButton>
+                          
+                            </AccordionItemHeading>
+                        
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+
+
 
             <div className='py-10'>
                 <div className='flex justify-between items-center mb-6'>
@@ -351,10 +439,10 @@ export default function VendorDetails() {
             {_showDelete ?
                 <PromptDialog
                     open={_showDelete}
-                    title={`Delete Vendor!`}
+                    title={`Vendor!`}
                     onClose={() => showDelete(false)}
                     onConfirm={() => deleteMe(false)}
-                    message={`Do you really want to delete this employee?`}
+                    message="Do you really want to delete this vendor ?"
                 /> : null
             }
             {_showUpdate ?

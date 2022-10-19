@@ -144,7 +144,9 @@ const AddProcess = (props) => {
 					setSelectedProcessOwner(item[0])
 					_formDefault[key]['value'] = data[key]['id']
 				}
-				else _formDefault[key]['value'] = data[key]
+				else{ 
+					_formDefault[key]['value'] = data[key]
+				}
 			}
 		}
 		setFormValues(_formDefault)
@@ -157,6 +159,7 @@ const AddProcess = (props) => {
 			resolve(_data)
 		})
 	}
+	
 
 	const departmentChange = (item, type) => {
 		let formData = { ...formValues };
@@ -370,8 +373,11 @@ const AddProcess = (props) => {
 						<FormField className='w-full' isRequired label="Process
 						 Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => { setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
+								onChange={changedItem => {
+									console.log(changedItem)
+									setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
+								
 								itemToString={(item) => { return item ? `${item.name} (${item.typeCode})` : '' }}
 								selectedItem={selectedDept}
 							>
@@ -506,8 +512,10 @@ const AddProcess = (props) => {
 								label=""
 								isInvalid={formValues?.frequency?.error}
 								validationMessage={formValues?.frequency?.error ? "Frequency is mandatory!" : null}
-								onChange={e => handleInputChange(e)}>
+								onChange={e => handleInputChange(e)}
 								value={formValues?.frequency?.value}
+								>
+								
 								<option selected  value="" disabled >Select Frequency</option>
 								<option value="Daily">Daily</option>
 								<option value="Weekly">Weekly</option>

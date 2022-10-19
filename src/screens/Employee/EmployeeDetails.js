@@ -25,6 +25,7 @@ import {
 import 'react-accessible-accordion/dist/fancy-example.css';
 import TopBar from '../../components/TopBar/TopBar';
 import { ProcessList } from '../../components/AvatarList/AvatarList';
+import { data } from 'autoprefixer';
 
 export default function EmployeeDetails() {
     const navigate = useNavigate()
@@ -58,23 +59,33 @@ export default function EmployeeDetails() {
 
     async function getAllProcesses(text = "") {
 
-        const getProcessInfo = await get(`stepsMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"steps","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        const getProcessInfo = await get(`processMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"process","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        //  const getProcessInfo=[]
+
+        const getProcessfromProcessOwner=await get(`processes?filter={"where":{"processOwner":"${id}"}}`);
+        console.log(getProcessfromProcessOwner.data);
         if (getProcessInfo.statusCode >= 200 && getProcessInfo.statusCode < 300) {
             let stepmemberArr = getProcessInfo.data;
-            stepmemberArr = stepmemberArr.map(e => { return { ...e, processNumber: e.steps.process.processNumber, stepDescription: e.steps.description, processTitle: e.steps.process.title } });
+            console.log(stepmemberArr)
+            stepmemberArr = stepmemberArr.map(e => { return { ...e, processNumber: e.process.processNumber, stepDescription:'',processTitle:e.process.title}});
             let arr = [];
+            getProcessfromProcessOwner.data.forEach((p)=>{
+                arr.push({ "processNumber": p.processNumber, process:[], processTitle: p.title,processId:p.id,processOwner:'Owned process' })
+            })
             const groupedMap = stepmemberArr.reduce(
                 (entryMap, e) => entryMap.set(e.processNumber, [...entryMap.get(e.processNumber) || [], e]),
                 new Map()
             );
-            console.log(groupedMap)
+            console.log('line 72 ghrerer ',groupedMap);
+
             for (let [key, value] of groupedMap) {
-                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.steps?.process?.deleted) {
+                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.process?.deleted) {
                     let stepProcess = value.map(e => e.stepDescription);
-                    arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle })
+                    arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle,processId:value[0].processId,processOwner:'' })
                 }
             }
-            console.log(arr)
+            console.log('hello tehrejd jlksdadfjl lkd df')
+            
             // setEmployeeDetails({...employeeDetails,process:arr.length});
             setProcess(arr.length)
             setAllProcess(arr);
@@ -377,31 +388,23 @@ export default function EmployeeDetails() {
                 })} */}
                 <Accordion allowZeroExpanded>
                     {processQuery?.map((item, index) => (
-                        <AccordionItem key={item.id}>
+                        <AccordionItem key={item.id} onClick={()=>{navigate(`../processes/${item.processId}`)}}>
+                           
                             <AccordionItemHeading>
                                 <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-white shadow'>
                                     <div className='flex flex-col'>
+                                        <small className='text-pri-col text-sm text-blue-700 pb-1'>{item.processOwner}</small>
                                         <Heading size={500}>{item?.processNumber}</Heading>
                                         <div className='text-pri-col text-sm pb-1'>{item?.processTitle}</div>
                                     </div>
+                                    
                                     <div className='text-lg text-pri-col'>
                                         <ChevronRightIcon />
                                     </div>
                                 </AccordionItemButton>
+                          
                             </AccordionItemHeading>
-                            <AccordionItemPanel className="bg-white p-5">
-                                <div className='flex items-center justify-between'>
-                                    <div className='flex flex-col px-4'>
-                                        {item?.process.map((item1, index1) => {
-                                            return (
-                                                <div className='flex items-end'>
-                                                    <Text size={300}>{index1 + 1}. &nbsp;</Text>
-                                                    <Heading size={400}> {item1}</Heading>
-                                                </div>)
-                                        })}
-                                    </div>
-                                </div>
-                            </AccordionItemPanel>
+                        
                         </AccordionItem>
                     ))}
                 </Accordion>

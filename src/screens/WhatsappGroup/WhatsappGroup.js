@@ -106,6 +106,7 @@ const WhatsappGroup = () => {
 			if (response.statusCode >= 200 && response.statusCode < 300) {
 				setFilterApplied(isFilterApplied)
 				allData = response.data
+				console.log(allData)
 				setWhatsappData(allData)
 			}
 			else {
@@ -316,10 +317,12 @@ const WhatsappGroup = () => {
 				search={search}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
 				placeholder="search by name"
+				total={totalData}
 
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
+			
 			<br></br>
 			{!whatsappData ? showSpinner() : whatsappData?.length === 0 ? showEmpty() : showContent()}
 			<Dialog isShown={open} onCloseComplete={handleClose}

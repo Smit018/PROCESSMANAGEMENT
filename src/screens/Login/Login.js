@@ -6,7 +6,7 @@ import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
 import { post } from "../../services/https.service";
-import { TextInput, TextInputField, Button } from "evergreen-ui";
+import { TextInput, TextInputField, Button, toaster } from "evergreen-ui";
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 
@@ -46,8 +46,8 @@ const Login = () => {
         navigate('/admin')
       }
       else {
-        // navigate('/')
-        
+
+        //null
       }
     }
   }, [])
@@ -89,19 +89,26 @@ const Login = () => {
         }
         else {
           // FAILED LOGIN ATTEMPT
+          // toaster.danger('invaild login credintials')
           setLoading(false)
         }
       }
       else {
         // FAILED LOGIN ATTEMPT
+        // toaster.danger('invaild login credintials')
+        toaster.danger(response?.message)
+
         setLoading(false)
+
       }
       setSubmitted(true)
     }
     catch (err) {
       setSubmitted(true)
       setLoading(false)
-    }
+      // toaster.danger('invaild login credintials')
+
+   }
   }
 
   const validateForm = (_form) => {

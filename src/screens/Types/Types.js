@@ -223,6 +223,7 @@ const Types = () => {
 		add={true}
 		addTitle="Add Type"
 		addEv={() => setOpen(true)}
+		total={totalData}
 		/>
 		<br></br>
 		<br></br>

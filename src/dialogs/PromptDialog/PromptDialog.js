@@ -17,14 +17,14 @@ const PromptDialog = (props) => {
         <Pane>
             <Dialog
                 isShown={props.open}
-                header={header(props.title)}
+                header={header('Delete '+props.title)}
                 shouldCloseOnOverlayClick={false}
                 width={450}
                 onCloseComplete={() => props.onClose()}
                 onConfirm={() => props.onConfirm(true)}
-                confirmLabel={props.title}
+                confirmLabel={`Delete`}
                 hasHeader={false}>
-                    <Heading size={500}>{props.message}</Heading>
+                    <Heading size={500}>{'Do you really want to delete this '+props.title}</Heading>
             </Dialog>
         </Pane>
     )

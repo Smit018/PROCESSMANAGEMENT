@@ -335,6 +335,7 @@ const Documents = () => {
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
 				placeholder="search by name"
+				total={totalData}
 
 			/>
 			<br></br>
@@ -353,10 +354,6 @@ const Documents = () => {
 					<div className='flex justify-center items-center'>
 						<TextInputField size={100} required label="Name" value={name} onChange={(e) => setName(e.target.value)} />
 						<div style={{ margin: "0 10px" }}></div>
-						<TextInputField size={100} required label="Sub Sheet Name" value={subSheetName} onChange={(e) => setSubsheetName(e.target.value)} />
-						
-						<div style={{ margin: "0 10px" }}></div>
-
 						<TextInputField size={100} required  label="Link" value={link} onChange={(e) => setLink(e.target.value)} />
 					</div>
 				</form>
