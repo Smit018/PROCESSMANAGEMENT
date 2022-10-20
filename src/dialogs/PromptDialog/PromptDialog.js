@@ -8,7 +8,7 @@ const PromptDialog = (props) => {
     const header = (title) => {
         return (
             <div>
-                {title}
+                {title=="Logout?"?title:`Delete ${title}`}
             </div>
         );
     }
@@ -17,14 +17,14 @@ const PromptDialog = (props) => {
         <Pane>
             <Dialog
                 isShown={props.open}
-                header={header('Delete '+props.title)}
+                header={header(props.title)}
                 shouldCloseOnOverlayClick={false}
                 width={450}
                 onCloseComplete={() => props.onClose()}
                 onConfirm={() => props.onConfirm(true)}
                 confirmLabel={`Delete`}
                 hasHeader={false}>
-                    <Heading size={500}>{'Do you really want to delete this '+props.title}</Heading>
+                    <Heading size={500}>{props.title=='Logout?'?`Are you sure you want to Logout`:`Do you really want to delete this ${props.title}`}</Heading>
             </Dialog>
         </Pane>
     )

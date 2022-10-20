@@ -46,8 +46,7 @@ const Login = () => {
         navigate('/admin')
       }
       else {
-
-        //null
+        navigate('/')
       }
     }
   }, [])
