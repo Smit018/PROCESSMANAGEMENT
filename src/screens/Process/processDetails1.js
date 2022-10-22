@@ -31,7 +31,8 @@ const ProcessDetails1 = () => {
     const [_showDelete, showDelete] = useState(false);
     const [_showUpdate, showUpdate] = useState(false);
     const [_updateStep, setUpdateStep] = useState(false);
-    const [_updateStepId, setUpdateStepId] = useState(null)
+    const [_updateStepId, setUpdateStepId] = useState(null);
+    const [addstepDisabled,setAddstepDisabled]=useState(true)
     
     // FOR DIALOG
     const [types, setTypes] = useState([])
@@ -125,6 +126,7 @@ const ProcessDetails1 = () => {
         if (response) {
             if (response.statusCode == 200) {
                 setMembers(response.data)
+              
             }
         }
     }
@@ -173,6 +175,7 @@ const ProcessDetails1 = () => {
             let dataMember = [...whatsap.data];
             let filtered = []
             console.log(alreadyMember)
+            console.log(processMembers)
             dataMember = dataMember.filter((e) => !alreadyMember.includes(e.id))
             console.log(dataMember)
             setSuggestProcessMembers(dataMember);
@@ -350,15 +353,21 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryOutputPerson = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.member.id);
+        const alreadyGroup = groupList.map(e => e?.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
             let dataMember = [...members.data];
             console.log(alreadyGroup)
-            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
-            console.log(dataMember)
+            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))          
+            // dataMember=dataMember.filter((e)=>{
+            //     processMembers.includes(e)
+            // })
+
+            
+
+            console.log("datamemeber"+dataMember)
             setSuggestOutputPerson(dataMember);
         } else {
             console.log('Failed fetching Output Person')
@@ -390,17 +399,24 @@ const ProcessDetails1 = () => {
     
     async function suggestQueryStepMembers(text, memberList) {
         console.log(memberList)
-        const alreadyGroup = memberList.map(e => e.id);
+        if(memberList.length && description.length){
+            setAddstepDisabled(false);
+        }
+        else{
+
+            setAddstepDisabled(true);
+        }
+        const alreadyGroup = memberList.map(e => e?.id);
         // let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         let filter=`processMembers?filter={"where": {"processId": "${params.id}"},"include": "member"}`
         const members = await get(filter);
         console.log(members)
-        let newDataMember=members.data.map((m)=>{
+        let newDataMember=members?.data.map((m)=>{
             return m['member']
         })
         
         if (members.statusCode >= 200 && members.statusCode < 300 && newDataMember) {
-            console.log("Fetch suggested Members",[members.data[0]['member']]);
+            console.log("Fetch suggested Members",[members?.data[0]['member']]);
             console.log(newDataMember)
             let dataMember =[...newDataMember]
             
@@ -575,11 +591,12 @@ const ProcessDetails1 = () => {
     }
     
     const addInput_OutputPerson = async (mem, source) => {
+        console.log('580000000000'+JSON.stringify(mem),source)
         let addMember = { processId: id, memberId: mem.id, source: source }
         const persons = await post(`personProcesses`, addMember);
         if (persons.statusCode >= 200 && persons.statusCode < 300) {
             console.log("Persons added to process");
-            (source == 'INPUT') ? getAllInputPerson() : getAllOutputPerson()
+            (source == 'INPUT') ? getAllInputPerson(mem) : getAllOutputPerson(mem)
             
         } else {
             console.log('Failed to add process Persons')
@@ -644,10 +661,7 @@ const ProcessDetails1 = () => {
         
         
         const AutoTextInput = (myProps) => {
-            // console.log("babu samjho ishareey "+myProps.datasource).
-            // let d=myProps.datasource.map((data)=>{
-            //     return data.name
-            // })
+            
             return (
                 <Autocomplete
                 onChange={changedItem => {                
@@ -658,14 +672,13 @@ const ProcessDetails1 = () => {
                 
                 itemToString={(item) => { 
                     return item ?
-                  item.memberType?(`${item.name} (${item.memberType})`):`${item.name}` 
+                  item.memberType?(`${item?.name} (${item?.memberType})`):`${item?.name}` 
                     : '' }}
                 itemSize={50}
                 popoverMaxHeight={200}
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
                 onInputValueChange={changedItem => {
                     console.log(changedItem)
-                    // checkSuggest(myProps.variable, changedItem)
                 }}
                 >
                 {({
@@ -678,7 +691,7 @@ const ProcessDetails1 = () => {
                     toggleMenu
                 }) => (
                     <Pane key={key}  style={{ marginTop: 16 }} ref={getRef} display="flex">
-                    <TextInput
+                    <TextInput className='w-full relative bottom-2'
                     flex="1"
                     value={inputValue || myProps.value}
                     height={50}
@@ -817,6 +830,7 @@ const ProcessDetails1 = () => {
                         }
                         
                         const saveProcess = async (form) => {
+                            console.log('hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
                             console.log({ ...form })
                             let process = {};
                             for (let i in form) {
@@ -827,10 +841,14 @@ const ProcessDetails1 = () => {
                             }
                             process['duration'] = `${process['hours']}:${process['minutes']}`;
                             process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
-                            console.log(process)
+                            console.log('nearrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
+                            console.log(JSON.stringify(process))
+
                             try {
                                 const response = await patch("processes/" + params.id, process);
                                 if (response.statusCode === 200) {
+                                    console.log('')
+                                    console.log(response.data)
                                     toaster.success('Process Updated successfully')
                                     showUpdate(false)
                                     getProcessDetails()
@@ -946,6 +964,7 @@ const ProcessDetails1 = () => {
                                 datasource={allStep}
                                 />
                                 {saveStepMember.map((item, index) => {
+                                    
                                     return (
                                         <AvatarList
                                         sendDelete={e => fetchRemovelist('suggestedStep', index)}
@@ -958,19 +977,36 @@ const ProcessDetails1 = () => {
                                         />
                                         )
                                     })}
-                                    <div className='flex py-3'>
-                                    <div className='w-1/2'>
-                                    <TextInput className="w-full" height={50} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter step description here" />
+                                    <div className='flex py-3 align-middle justify-center m-auto'>
+                                    <div className='w-1/2 flex align-middle m-auto'>
+                                    <TextInput className="w-full" height={50} value={description} onChange={e =>{ 
+                                        setDescription(e.target.value)
+                                        if(saveStepMember.length && e.target.value){
+                                            console.log(e.target.value,saveStepMember.length);
+                                            setAddstepDisabled(false);
+                                        }
+                                        else{
+
+                                            setAddstepDisabled(true);
+                                        }
+                                        }} placeholder="Enter step description here" />
                                     </div>
                                     &nbsp;&nbsp;&nbsp;
-                                    <div className='w-1/2'>
+                                    <div className='w-1/2 flex align-middle'>
                                     <AutoTextInput
                                     datasource={suggestStepMember}
                                     placeholder="Add Member"
                                     variable="step"
                                     value={newMember}
-                                    inputChange={(e) => setNewMember(e.target.value)}
+                                    inputChange={(e) =>{ 
+                                        console.log(description.length)
+                                        setNewMember(e.target.value);
+                                    }}
                                     />
+                                    
+                                        
+                                        
+                                    
                                     </div>
                                     </div>
                                     <div className='flex justify-end py-2'>
@@ -978,7 +1014,7 @@ const ProcessDetails1 = () => {
                                         <Button className="primary" onClick={updatesteps}>
                                         Update Step
                                         </Button> :
-                                        <Button className="primary" onClick={addSteps}>
+                                        <Button className="primary relative right-1 disabled:opacity-50"  disabled={addstepDisabled} onClick={addSteps}>
                                         Add Step
                                         </Button>
                                     }
@@ -1017,7 +1053,7 @@ const ProcessDetails1 = () => {
                                         })}
                                         <div className='py-3 w-full'>
                                         <AutoTextInput
-                                        datasource={suggestInputPerson}
+                                        datasource={suggestStepMember}
                                         placeholder="Add Member and Vendors"
                                         variable="input-person"
                                         value={newMember}
@@ -1101,7 +1137,7 @@ const ProcessDetails1 = () => {
                                                     })}
                                                     <div className='py-3 w-full'>
                                                     <AutoTextInput
-                                                    datasource={suggestOutputPerson}
+                                                    datasource={suggestStepMember}
                                                     variable="output-person"
                                                     placeholder="Add Employees and Vendors"
                                                     value={newMember}

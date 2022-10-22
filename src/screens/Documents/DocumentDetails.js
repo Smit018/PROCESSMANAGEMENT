@@ -576,7 +576,7 @@ const DocumentDetails = () => {
             </div>
             <PromptDialog
                 open={openDelete}
-                title={`Delete Document!`}
+                title={`Document!`}
                 onClose={() => setOpenDelete(false)}
                 onConfirm={() => deleteMe()}
                 message={`Do you really want to delete document ${params.name}?`}

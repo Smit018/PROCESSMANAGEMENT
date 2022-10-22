@@ -11,7 +11,7 @@ const AvatarList = (props) => {
 
     }
     const navigate=useNavigate()
-
+     console.log(props.avatar); 
     return (
         <div className='hover:bg-slate-100 hover:cursor-pointer  flex items-center px-4 py-3 shadow rounded'
         onClick={()=>{navigate(`../${props.memberT}/${props.memberId}`)}} >
@@ -49,7 +49,7 @@ const AvatarCard = (props) => {
     return (
         <div className='flex items-center px-4 py-3 shadow border rounded relative'>
             <div className='mr-4'>
-                <Avatar size={40} src={props.avatar} />
+                <Avatar size={40} src={props.avatar}  name={props.name} />
             </div>
             <div className='flex justify-between items-center w-full'>
                 <div>
@@ -66,8 +66,11 @@ const AvatarCard = (props) => {
 
 
 const ListCard = (props) => {
+    const navigate=useNavigate()
+
     return (
-        <div className='w-full flex justify-between items-center px-6 py-5 shadow rounded-none'>
+        <div className='w-full flex justify-between items-center cursor-pointer px-6 py-5 shadow rounded-none'
+         onClick={()=>{navigate(`../processes/${props.processId}`)}}>
             <div className='flex items-center justify-center'>
                 <div className='rounded-full bg-slate-200 h-12 w-12 flex items-center justify-center'>
                     {props.icon}

@@ -42,6 +42,8 @@ const Departments = () => {
 		setOpenEdit(false)
 		setOpenDelete(false);
 		setCurrentDPcount(0);
+		setName('');
+		setTypeCode('')
 
 	}
 
@@ -284,11 +286,17 @@ const Departments = () => {
 			</Table>
 
 			{/* dialog for add department */}
-			<Dialog isShown={open} onCloseComplete={handleClose}
+			<Dialog isShown={open}
+			 onCloseComplete={()=>{
+				
+				 handleClose()
+				
+			}}
 				title="Add Department"
 				confirmLabel="Save Department"
 				isConfirmDisabled={formValidation()}
 				onConfirm={createDepartment}
+			
 			>
 				<form>
 					<TextInputField required label="Name" value={name} onChange={(e) => setName(e.target.value)} />

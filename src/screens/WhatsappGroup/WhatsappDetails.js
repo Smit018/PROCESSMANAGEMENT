@@ -580,7 +580,7 @@ const WhatsappDetails = () => {
                             </div>
                             <PromptDialog
                             open={openDelete}
-                            title={`Delete Whatsapp Group!`}
+                            title={`Whatsapp Group!`}
                             onClose={() => setOpenDelete(false)}
                             onConfirm={() => deleteMe(false)}
                             message={`Do you really want to delete whatsapp group ${params.name}?`}
