@@ -537,7 +537,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentInputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
@@ -565,7 +565,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentOutputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
