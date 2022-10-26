@@ -47,7 +47,7 @@ const AvatarCard = (props) => {
         props.sendDelete(prop)
     }
     return (
-        <div className='flex items-center px-4 py-3 shadow border rounded relative'>
+        <div className='flex items-center px-4 py-3 w-60     shadow border rounded relative'>
             <div className='mr-4'>
                 <Avatar size={40} src={props.avatar}  name={props.name} />
             </div>
@@ -55,6 +55,7 @@ const AvatarCard = (props) => {
                 <div>
                     <Heading size={500}>{props.name}</Heading>
                     <Text size={400}>{props.description}</Text>
+
                     <br></br>
                     <Text size={300}>{props.type}</Text>
                 </div>

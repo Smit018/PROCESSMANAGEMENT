@@ -735,7 +735,7 @@ const ProcessDetails1 = () => {
                                     avatar={`${baseUrl}photos/${member?.type?.toLowerCase()}/download/${member?.profile}`}
                                     sendDelete={e => fetchRemovelist('step', index, member)}
                                     name={member.name}
-                                    description={`${member.code}, ${member.position}`}
+                                    description={member.code?`${member.code} , ${member.position}`:`${member.position}`}
                                     type={member.type}
                                     />
                                     </div>
