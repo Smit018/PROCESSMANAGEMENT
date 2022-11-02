@@ -31,7 +31,8 @@ const ProcessDetails1 = () => {
     const [_showDelete, showDelete] = useState(false);
     const [_showUpdate, showUpdate] = useState(false);
     const [_updateStep, setUpdateStep] = useState(false);
-    const [_updateStepId, setUpdateStepId] = useState(null)
+    const [_updateStepId, setUpdateStepId] = useState(null);
+    const [addstepDisabled,setAddstepDisabled]=useState(true)
     
     // FOR DIALOG
     const [types, setTypes] = useState([])
@@ -125,6 +126,7 @@ const ProcessDetails1 = () => {
         if (response) {
             if (response.statusCode == 200) {
                 setMembers(response.data)
+              
             }
         }
     }
@@ -153,6 +155,7 @@ const ProcessDetails1 = () => {
     const getProcessDetails = async () => {
         const getDetaills = await get(`processes/${id}?filter={"include":["processOwner", "process"]}`);
         if (getDetaills.statusCode >= 200 && getDetaills.statusCode < 300) {
+            console.log(getDetaills?.data)
             setProcessDetail(getDetaills.data);
             setProcessOwner(getDetaills.data.inputSourceSelf)
         }
@@ -163,13 +166,16 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryProcessMembers = async (text, memberList) => {
         const alreadyMember = memberList.map(e => e.member.id);
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"memberType":"EMPLOYEE"}}`;
+        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        // let filter =`processes/${params.id}/personProcess?filter={"include":"member"}`
+        
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
-            // console.log("Fetch suggested Members", whatsap.data);
+            console.log("Fetch suggested Members", whatsap);
             let dataMember = [...whatsap.data];
             let filtered = []
             console.log(alreadyMember)
+            console.log(processMembers)
             dataMember = dataMember.filter((e) => !alreadyMember.includes(e.id))
             console.log(dataMember)
             setSuggestProcessMembers(dataMember);
@@ -222,7 +228,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputWhatsapp = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
+        const alreadyGroup = groupList.map(e => e.whatsappGroup?.id);
         let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
@@ -239,7 +245,7 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryOutputWhatsapp = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
-        let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
+        let filter = `whatsappGroups?filter={"wh    ere":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -277,7 +283,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputDocument = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.document.id);
+        const alreadyGroup = groupList.map(e => e?.document?.id);
         let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
@@ -331,7 +337,7 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryInputPerson = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.member.id);
+        const alreadyGroup = groupList.map(e => e?.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -347,15 +353,21 @@ const ProcessDetails1 = () => {
     }
     
     const getSearchQueryOutputPerson = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.member.id);
+        const alreadyGroup = groupList.map(e => e?.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
             let dataMember = [...members.data];
             console.log(alreadyGroup)
-            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
-            console.log(dataMember)
+            dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))          
+            // dataMember=dataMember.filter((e)=>{
+            //     processMembers.includes(e)
+            // })
+
+            
+
+            console.log("datamemeber"+dataMember)
             setSuggestOutputPerson(dataMember);
         } else {
             console.log('Failed fetching Output Person')
@@ -387,12 +399,27 @@ const ProcessDetails1 = () => {
     
     async function suggestQueryStepMembers(text, memberList) {
         console.log(memberList)
-        const alreadyGroup = memberList.map(e => e.id);
-        let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
+        if(memberList.length && description.length){
+            setAddstepDisabled(false);
+        }
+        else{
+
+            setAddstepDisabled(true);
+        }
+        const alreadyGroup = memberList.map(e => e?.id);
+        // let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
+        let filter=`processMembers?filter={"where": {"processId": "${params.id}"},"include": "member"}`
         const members = await get(filter);
-        if (members.statusCode >= 200 && members.statusCode < 300) {
-            // console.log("Fetch suggested Members", whatsap.data);
-            let dataMember = [...members.data];
+        console.log(members)
+        let newDataMember=members?.data.map((m)=>{
+            return m['member']
+        })
+        
+        if (members.statusCode >= 200 && members.statusCode < 300 && newDataMember) {
+            console.log("Fetch suggested Members",[members?.data[0]['member']]);
+            console.log(newDataMember)
+            let dataMember =[...newDataMember]
+            
             console.log(alreadyGroup)
             dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
             console.log(dataMember, alreadyGroup)
@@ -528,6 +555,7 @@ const ProcessDetails1 = () => {
     
     const addProcessMember = async (mem) => {
         let addMember = { processId: id, memberId: mem.id, memberType: mem.memberType, source: "Whatsapp" }
+        console.log(addMember);
         const whatsap = await post(`processMembers`, addMember);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Members added to process");
@@ -563,11 +591,12 @@ const ProcessDetails1 = () => {
     }
     
     const addInput_OutputPerson = async (mem, source) => {
+        console.log('580000000000'+JSON.stringify(mem),source)
         let addMember = { processId: id, memberId: mem.id, source: source }
         const persons = await post(`personProcesses`, addMember);
         if (persons.statusCode >= 200 && persons.statusCode < 300) {
             console.log("Persons added to process");
-            (source == 'INPUT') ? getAllInputPerson() : getAllOutputPerson()
+            (source == 'INPUT') ? getAllInputPerson(mem) : getAllOutputPerson(mem)
             
         } else {
             console.log('Failed to add process Persons')
@@ -577,6 +606,9 @@ const ProcessDetails1 = () => {
     const postProcess = (type, mem) => {
         if (type == "processMember") {
             addProcessMember(mem);
+            addSteps();
+            setSuggestStepMember([...suggestStepMember,mem])
+            
         }
         else if (type == 'input-whatsapp') {
             addInput_OutputWhatsapp(mem, 'INPUT')
@@ -597,24 +629,27 @@ const ProcessDetails1 = () => {
             addInput_OutputPerson(mem, 'OUTPUT')
         }
         else if (type == 'step') {
-            // console.log(mem)
+            console.log('hello brother')
             pushStepmember(mem)
         }
     }
     
     
+    
     const autoItem = (item, variable) => {
-        const Img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
+        // const Img = item.children.profile ? `${baseUrl}photos/${item.children.memberType?.toLowerCase()}/download/${item.children.profile}` : ''
         return (
-            <span key={item.children.name} onClick={() => { console.log('items', item.children, variable); postProcess(variable, item.children) }}>
+            <div key={item.children.name} onClick={() => { console.log('items is here', item.children, variable); 
+            postProcess(variable, item.children) }}  >
             <AvatarList
-            avatar={Img}
             name={item.children.name}
             description={item.children.designation || ''}
             action={false}
             _item={item}
             />
-            </span>
+            
+            </div>
+            
             )
         }
         
@@ -626,17 +661,24 @@ const ProcessDetails1 = () => {
         
         
         const AutoTextInput = (myProps) => {
+            
             return (
                 <Autocomplete
-                onChange={changedItem => console.log(changedItem)}
+                onChange={changedItem => {                
+                    postProcess(myProps.variable,changedItem);
+                    
+                }}
                 items={myProps.datasource}
-                itemToString={(item) => { return item ? item : '' }}
-                renderItem={(item, index) => autoItem(item, myProps.variable)}
-                itemSize={75}
+                
+                itemToString={(item) => { 
+                    return item ?
+                  item.memberType?(`${item?.name} (${item?.memberType})`):`${item?.name}` 
+                    : '' }}
+                itemSize={50}
+                popoverMaxHeight={200}
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
                 onInputValueChange={changedItem => {
                     console.log(changedItem)
-                    // checkSuggest(myProps.variable, changedItem)
                 }}
                 >
                 {({
@@ -648,8 +690,8 @@ const ProcessDetails1 = () => {
                     openMenu,
                     toggleMenu
                 }) => (
-                    <Pane key={key} ref={getRef} display="flex">
-                    <TextInput
+                    <Pane key={key}  style={{ marginTop: 16 }} ref={getRef} display="flex">
+                    <TextInput className='w-full relative bottom-2'
                     flex="1"
                     value={inputValue || myProps.value}
                     height={50}
@@ -676,6 +718,7 @@ const ProcessDetails1 = () => {
                     // console.log(myProps.datasource)
                     return (
                         myProps.datasource.map((data, index) => {
+                            
                             return (<div key={index} className="flex flex-col mb-6">
                             <div className='flex justify-between items-center'>
                             <Heading size={500}>{index + 1}. {data.description}</Heading>
@@ -692,7 +735,7 @@ const ProcessDetails1 = () => {
                                     avatar={`${baseUrl}photos/${member?.type?.toLowerCase()}/download/${member?.profile}`}
                                     sendDelete={e => fetchRemovelist('step', index, member)}
                                     name={member.name}
-                                    description={`${member.code}, ${member.position}`}
+                                    description={member.code?`${member.code} , ${member.position}`:`${member.position}`}
                                     type={member.type}
                                     />
                                     </div>
@@ -704,7 +747,7 @@ const ProcessDetails1 = () => {
                             );
                         }
                         
-                        const removeMember = async (type, data) => {
+                        const removeMember = async (type, data,itemia) => {
                             let deleteRecord;
                             if (type == "step-member") {
                                 deleteRecord = await deleted(`stepsMembers/${data}`);
@@ -722,6 +765,16 @@ const ProcessDetails1 = () => {
                             }
                             else if (type == "processMember") {
                                 deleteRecord = await deleted(`processMembers/${data}`);
+                                console.log(suggestStepMember)
+                                console.log('data is ataaaaaa  ', data,itemia);
+                                let meme= suggestStepMember.find((m)=>{
+                                    return (m.id==itemia.member.id)
+                                })
+                                console.log(meme,suggestStepMember.indexOf(meme))
+                                let newsuggestions=suggestStepMember
+                                newsuggestions.splice(suggestStepMember.indexOf(meme),1);
+                                setSuggestStepMember(newsuggestions);
+                                
                             }
                             else if (type == "processPerson") {
                                 deleteRecord = await deleted(`personProcesses/${data}`);
@@ -742,6 +795,7 @@ const ProcessDetails1 = () => {
                                 }
                                 else if (type == 'processMember') {
                                     getAllProcessMembers()
+                                    
                                 }
                                 else if (type == 'processPerson') {
                                     getAllInputPerson();
@@ -752,8 +806,9 @@ const ProcessDetails1 = () => {
                                     getAllInputWhatsapp()
                                 }
                                 else if (type == 'documentProcess') {
+                                    getAllInputDocument()
                                     getAllOutputDocument()
-                                    getAllOutputDocument()
+                                    
                                 }
                                 console.log('Success Delete')
                             }
@@ -761,30 +816,39 @@ const ProcessDetails1 = () => {
                         
                         
                         async function fetchRemovelist(type, ind, mem) {
-                            console.log(mem)
                             if (type == "suggestedStep") {
                                 popStepmember(ind)
+                                console.log('meep is not better than perry the platipuss',mem)
+                                
                             }
                             else if (type == "step") {
-                                removeMember("step-member", mem.id)
+                                removeMember("step-member", mem.id);
+                                console.log('meep is not better than perry the platipuss',mem)
+                                
+                                
                             }
                         }
                         
                         const saveProcess = async (form) => {
+                            console.log('hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
                             console.log({ ...form })
                             let process = {};
                             for (let i in form) {
-                                process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
+                                process[`${i}`] = form[i].value ? form[i].value : form[i].value;
                             }
                             if (process['inputProcess'] == "") {
                                 process.inputProcess = null
                             }
                             process['duration'] = `${process['hours']}:${process['minutes']}`;
                             process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
-                            console.log(process)
+                            console.log('nearrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
+                            console.log(JSON.stringify(process))
+
                             try {
                                 const response = await patch("processes/" + params.id, process);
                                 if (response.statusCode === 200) {
+                                    console.log('')
+                                    console.log(response.data)
                                     toaster.success('Process Updated successfully')
                                     showUpdate(false)
                                     getProcessDetails()
@@ -809,9 +873,9 @@ const ProcessDetails1 = () => {
                         }
                         
                         return (
-                            <div className="w-full h-full">
-                            <TopBar title="Processes" breadscrubs={paths} />
-                            <Pane className="w-full l-blue" elevation={1}>
+                            <div className="w-full">
+                            <TopBar title="Processes" breadscrubs={paths} total='' />
+                            <Pane className="w-full l-blue" elevation={1} >
                             <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                             <div>
                             <Heading size={600}>
@@ -819,6 +883,7 @@ const ProcessDetails1 = () => {
                             </Heading>
                             <Heading size={400} marginTop={8}>
                             {/* Uploading youtube videos for study app. */}
+                            
                             {processDetail.title}
                             </Heading>
                             </div>
@@ -845,8 +910,11 @@ const ProcessDetails1 = () => {
                             </div>
                             {processDetail.process ?
                                 <div>
-                                <Heading className="primary" fontWeight={500} size={500}>{processDetail.process.processNumber}</Heading>
-                                <Text size={300}>{processDetail.process.title}</Text>
+                                <Heading className="primary cursor-pointer" fontWeight={500} size={500} onClick={()=>{
+                                    navigate(`../processes/${processDetail.process.id}`)
+                                    window.open(window.location.href,'_self')
+                                }} >{processDetail.process.processNumber}</Heading>
+                                <Text size={300}>{processDetail.process.title} </Text>
                                 <Heading size={200}>Input Process</Heading>
                                 </div> : null
                             }
@@ -869,10 +937,12 @@ const ProcessDetails1 = () => {
                                 return (
                                     <AvatarList
                                     avatar={`${baseUrl}photos/${item?.member?.memberType?.toLowerCase()}/download/${item?.member?.profile}`}
-                                    sendDelete={e => removeMember('processMember', item.id)}
+                                    sendDelete={e => removeMember('processMember', item.id,item)}
                                     name={item?.member?.name}
                                     description={item?.member?.designation}
                                     actionText={item?.member?.memberType}
+                                    memberId={item?.memberId}
+                                    memberT={item?.member?.memberType.toLowerCase()+'s'}
                                     />
                                     )
                                 })}
@@ -894,6 +964,7 @@ const ProcessDetails1 = () => {
                                 datasource={allStep}
                                 />
                                 {saveStepMember.map((item, index) => {
+                                    
                                     return (
                                         <AvatarList
                                         sendDelete={e => fetchRemovelist('suggestedStep', index)}
@@ -901,22 +972,41 @@ const ProcessDetails1 = () => {
                                         name={item?.name}
                                         description={item?.designation}
                                         actionText={item?.memberType}
+                                       
+
                                         />
                                         )
                                     })}
-                                    <div className='flex py-3'>
-                                    <div className='w-1/2'>
-                                    <TextInput className="w-full" height={50} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter step description here" />
+                                    <div className='flex py-3 align-middle justify-center m-auto'>
+                                    <div className='w-1/2 flex align-middle m-auto'>
+                                    <TextInput className="w-full" height={50} value={description} onChange={e =>{ 
+                                        setDescription(e.target.value)
+                                        if(saveStepMember.length && e.target.value){
+                                            console.log(e.target.value,saveStepMember.length);
+                                            setAddstepDisabled(false);
+                                        }
+                                        else{
+
+                                            setAddstepDisabled(true);
+                                        }
+                                        }} placeholder="Enter step description here" />
                                     </div>
                                     &nbsp;&nbsp;&nbsp;
-                                    <div className='w-1/2'>
+                                    <div className='w-1/2 flex align-middle'>
                                     <AutoTextInput
                                     datasource={suggestStepMember}
                                     placeholder="Add Member"
                                     variable="step"
                                     value={newMember}
-                                    inputChange={(e) => setNewMember(e.target.value)}
+                                    inputChange={(e) =>{ 
+                                        console.log(description.length)
+                                        setNewMember(e.target.value);
+                                    }}
                                     />
+                                    
+                                        
+                                        
+                                    
                                     </div>
                                     </div>
                                     <div className='flex justify-end py-2'>
@@ -924,7 +1014,7 @@ const ProcessDetails1 = () => {
                                         <Button className="primary" onClick={updatesteps}>
                                         Update Step
                                         </Button> :
-                                        <Button className="primary" onClick={addSteps}>
+                                        <Button className="primary relative right-1 disabled:opacity-50"  disabled={addstepDisabled} onClick={addSteps}>
                                         Add Step
                                         </Button>
                                     }
@@ -935,6 +1025,8 @@ const ProcessDetails1 = () => {
                                     <br></br>
                                     <br></br>
                                     {/* INPUT SOURCES */}
+                                    
+                                    <div>
                                     <div className='flex flex-wrap justify-between items-center'>
                                     <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
                                     <div className='flex items-center'>
@@ -953,13 +1045,15 @@ const ProcessDetails1 = () => {
                                             name={item?.member?.name}
                                             sendDelete={e => removeMember('processPerson', item.id)}
                                             description={''}
-                                            actionText={''}
+                                            actionText={item.member?.memberType}
+                                            memberId={item?.memberId}
+                                            memberT={item?.member?.memberType.toLowerCase()+'s'}
                                             />
                                             )
                                         })}
                                         <div className='py-3 w-full'>
                                         <AutoTextInput
-                                        datasource={suggestInputPerson}
+                                        datasource={suggestStepMember}
                                         placeholder="Add Member and Vendors"
                                         variable="input-person"
                                         value={newMember}
@@ -978,6 +1072,8 @@ const ProcessDetails1 = () => {
                                                 sendDelete={e => removeMember('whatsappProcess', item.id)}
                                                 description={''}
                                                 actionText={''}
+                                                memberId={`${item?.whatsappId}/${item?.whatsappGroup?.name}`}
+                                                memberT={`whatsapp-groups`}
                                                 />
                                                 )
                                             })}
@@ -1003,6 +1099,8 @@ const ProcessDetails1 = () => {
                                                     sendDelete={e => removeMember('documentProcess', item.id)}
                                                     description={''}
                                                     actionText={''}
+                                                    memberId={`${item?.documentId}/${item?.document?.name}`}
+                                                    memberT={`documents`}
                                                     />
                                                     )
                                                 })}
@@ -1019,8 +1117,6 @@ const ProcessDetails1 = () => {
                                                 </div>
                                                 </div>
                                                 <br></br>
-                                                <br></br>
-                                                <br></br>
                                                 <Heading size={800} marginBottom={10}>OUTPUT SOURCES</Heading>
                                                 <div className='flex flex-wrap justify-between'>
                                                 <div>
@@ -1033,13 +1129,15 @@ const ProcessDetails1 = () => {
                                                         name={item?.member?.name}
                                                         sendDelete={e => removeMember('processPerson', item.id)}
                                                         description={''}
-                                                        actionText={''}
+                                                        actionText={item.member?.memberType}
+                                                        memberId={item?.memberId}
+                                                        memberT={item?.member?.memberType.toLowerCase()+'s'}
                                                         />
                                                         )
                                                     })}
                                                     <div className='py-3 w-full'>
                                                     <AutoTextInput
-                                                    datasource={suggestOutputPerson}
+                                                    datasource={suggestStepMember}
                                                     variable="output-person"
                                                     placeholder="Add Employees and Vendors"
                                                     value={newMember}
@@ -1058,6 +1156,8 @@ const ProcessDetails1 = () => {
                                                             name={item?.whatsappGroup?.name}
                                                             description={''}
                                                             actionText={''}
+                                                            memberId={`${item?.whatsappId}/${item?.whatsappGroup?.name}`}
+                                                            memberT={`whatsapp-groups`}
                                                             />
                                                             )
                                                         })}
@@ -1082,6 +1182,8 @@ const ProcessDetails1 = () => {
                                                                 sendDelete={e => removeMember('documentProcess', item.id)}
                                                                 description={''}
                                                                 actionText={''}
+                                                                memberId={`${item?.documentId}/${item?.document?.name}`}
+                                                                memberT={`documents`}
                                                                 />
                                                                 )
                                                             })}
@@ -1102,16 +1204,16 @@ const ProcessDetails1 = () => {
                                                             {_showDelete ?
                                                                 <PromptDialog
                                                                 open={_showDelete}
-                                                                title={`Delete Process!`}
+                                                                title={`Process!`}
                                                                 onClose={() => showDelete(false)}
                                                                 onConfirm={() => deleteProcess()}
-                                                                message={`Do you really want to delete this process?`}
+                                                                message="Do you really want to delete this process?"
                                                                 /> : null
                                                             }
                                                             {_showUpdate ?
                                                                 <AddProcess
                                                                 open={_showUpdate}
-                                                                data={{ types, members, departments, process }}
+                                                                data={{ types, members, departments, process,id:params.id }}
                                                                 onClose={(ev) => showUpdate(ev)}
                                                                 inject={processDetail}
                                                                 onSubmit={(form) => { saveProcess(form) }}
@@ -1119,7 +1221,11 @@ const ProcessDetails1 = () => {
                                                                 
                                                             }
                                                             </div>
+                                                            </div>
                                                             );
+                                                            
+                                                            
+                                                            
                                                         }
                                                         
                                                         

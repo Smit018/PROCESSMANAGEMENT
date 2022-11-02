@@ -10,7 +10,7 @@ export const Breadcrumbs = (props) => {
             {props.paths.map((path, index) => {
                 return (
                     <Link key={index} to={path.path}>
-                        <div className='flex justify-center items-center m-label breadcrumb'> <span className='nav-title'>{path.title}</span> {(index < props.paths.length - 1) ? <ChevronRightIcon /> : null} </div>
+                        <div className='flex justify-center items-center m-label breadcrumb'> <span className='nav-title'>{props.total? `${path.title}(${props.total})`:`${path.title}`}</span> {(index < props.paths.length - 1) ? <ChevronRightIcon /> : null} </div>
                     </Link>
                 )
             })}

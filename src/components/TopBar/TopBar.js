@@ -74,9 +74,10 @@ const TopBar = (props) => {
 
 	return (
 		<div className="flex flex-wrap justify-between items-center h-16">
+		
 			<div role="presentation" onClick={handleClick}>
 				{props.breadscrubs && props.breadscrubs.length > 0 ?
-					<Breadcrumbs paths={props.breadscrubs} /> : null
+					<Breadcrumbs paths={props.breadscrubs} total={props.total} /> : null
 				}
 			</div>
 			<div className='flex flex-wrap items-center' role="presentation">

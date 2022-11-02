@@ -43,7 +43,7 @@ const myForm = {
 		error: false,
 		regex: REGEX.ALL
 	},
-	"processOwner": {
+	"processOwnerId": {
 		value: '',
 		error: false,
 		regex: REGEX.ALL
@@ -64,7 +64,7 @@ const myForm = {
 		regex: REGEX.ALL
 	},
 	"minutes": {
-		value: '',
+		value: 0,
 		error: false,
 		regex: REGEX.ALL
 	},
@@ -88,17 +88,22 @@ const AddProcess = (props) => {
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [processNoPrefix, setProcessNoPrefix] = useState('');
 	const [processFound, setProcessFound] = useState(false);
+	const [addbuttondisabled,setAddButtonDisabled]=useState(false);
 	const [showErrors, setShowErrors] = useState(false);
 
 	const [selectedDept, setSelectedDept] = useState(null);
 	const [selectedInpProcess, setSelectedInpProcess] = useState(null);
 	const [selectedProcessOwner, setSelectedProcessOwner] = useState(null);
 	const [inProcessSel, setInProcessSel] = useState(null);
-
+	const [initialProcessNumberPrefix,setInitialProcessNumberPrefix]=useState(null);
 
 	useEffect(() => {
 		if (props.inject)
+		{	
+			console.log(props.inject.processOwner.name)
 			setUpdateData(props.inject)
+		
+			setAddButtonDisabled(false)}	
 		else {
 			cleanUpForm()
 			setFormValues(_formDefault)
@@ -125,10 +130,14 @@ const AddProcess = (props) => {
 				if (key === 'processNumber') {
 					const abbr = data[key].substring(0, 5)
 					setProcessNoPrefix(abbr)
+					const abbr2=abbr.substring(2)
+					setInitialProcessNumberPrefix(abbr2);
+
 					_formDefault[key]['value'] = data[key].substring(5, data[key].length)
 				}
 				else if (key == 'departmentId') {
 					const item = await _arrayFilter(props.data.departments, data[key], 'id')
+					console.log(item[0]);
 					setSelectedDept(item[0])
 					_formDefault[key]['value'] = data[key]
 				}
@@ -137,12 +146,27 @@ const AddProcess = (props) => {
 					setSelectedInpProcess(item[0])
 					_formDefault[key]['value'] = data[key]
 				}
-				else if (key === 'processOwner') {
-					const item = await _arrayFilter(props.data.members, data[key]['id'], 'id')
+				else if (key === 'processOwnerId') {
+					console.log(key)
+					console.log(props.data.members)
+					console.log( data[key], 'id')
+					const item = props.inject? await _arrayFilter(props.data.members, data[key], 'id'):
+					await _arrayFilter(props.data.members, data[key]['id'], 'id')
 					setSelectedProcessOwner(item[0])
 					_formDefault[key]['value'] = data[key]['id']
+					console.log(_formDefault)
 				}
-				else _formDefault[key]['value'] = data[key]
+
+				// else if(key=='processOwner'){
+				// 	console.log(key)
+				// 	console.log('Process owener name is here'+data.processOwner.name)
+				// 	// setSelectedProcessOwner(data.processOwner.name)
+				// 	_formDefault[key]['value']=data[key]['name']
+				// 	console.log(_formDefault[key]['value']);
+				// }
+				else{ 
+					_formDefault[key]['value'] = data[key]
+				}
 			}
 		}
 		setFormValues(_formDefault)
@@ -155,6 +179,7 @@ const AddProcess = (props) => {
 			resolve(_data)
 		})
 	}
+	
 
 	const departmentChange = (item, type) => {
 		let formData = { ...formValues };
@@ -166,27 +191,42 @@ const AddProcess = (props) => {
 			// verifyProcessNumber(pTypeCode + item.typeCode + uniqueNumber);
 		}
 		else {
-			formData['processOwner']['value'] = item.id;
+			formData['processOwnerId']['value'] = item.id;
 		}
 		setFormValues(formData);
 	}
 
 	const handleInputChange = (e) => {
 		// HANDLE INPUT CHANGE
-		console.log()
+		// console.log()
 		const { name, value } = e.target;
+		console.log(name,value)
 		const _formValues = { ...formValues }
-		_formValues[name]['value'] = value;
+		
+		if(name==='minutes' && value>59){
+				let hourInc=Math.floor(value/60)
+				let actualMin=value%60;
+				console.log(hourInc,actualMin)
+
+				let hours=parseInt(_formValues['hours']['value'])
+				hours+=hourInc;
+				_formValues['hours']['value']=hours;
+
+				_formValues[name]['value'] = actualMin;
+		}
+		else{
+			_formValues[name]['value'] = value;
+		}
 		if (e.target.name == 'inputProcess') {
 			if (value) setInProcessSel(true)
 			else setInProcessSel(false)
 		}
-		// if (name == "typeId") {
-		// 	let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
-		// 	setpTypeCode(processTypeCode);
-		// 	_formValues['processNumber']['value'] = processTypeCode + dTypeCode + uniqueNumber;
-		// 	verifyProcessNumber(processTypeCode + dTypeCode + uniqueNumber);
-		// }
+		if (name == "typeId") {
+			let processTypeCode = props.data.types.filter(e => e.id == value)[0]['typeCode']
+			// setpTypeCode(processTypeCode);
+			// _formValues['processNumber']['value'] = processTypeCode + dTypeCode + uniqueNumber;
+			verifyProcessNumber(processTypeCode + dTypeCode + uniqueNumber);
+		}
 		setFormValues(_formValues);
 	};
 
@@ -237,8 +277,11 @@ const AddProcess = (props) => {
 	const submit = async () => {
 		console.log(selectedInpProcess)
 		setLoading(true)
-		const _form = await validateForm(formValues)
+		try{
+			const _form = await validateForm(formValues)
+
 		if (_form && _form.error) {
+			console.log(_form);
 			toaster.danger('Invalid form values, please check the form values and try again')
 			setShowErrors(true)
 		}
@@ -249,9 +292,14 @@ const AddProcess = (props) => {
 			props.onSubmit({ ..._form.form, processNoPrefix })
 			setFormValues(null)
 		}
+		}
+		catch(err){
+              toaster.danger(err);
+		}
 	}
 
 	const validateForm = (_form) => {
+		console.log(_form);
 		// VALIDATES THE DATA IN FORM
 		let error = false
 		return new Promise(resolve => {
@@ -265,7 +313,7 @@ const AddProcess = (props) => {
 				// }
 				_form[_key]['error'] = !(pattern.test(_form[_key]['value']))
 				if (_form[_key]['error']) error = true
-				if (index === _formKeys.length - 1) resolve({ form: _form, error })
+				if (index === _formKeys.length - 1) resolve({ form:_form, error })
 			}
 		})
 	}
@@ -276,25 +324,46 @@ const AddProcess = (props) => {
 
 	const verifyProcessNumber = async (e) => {
 		const check = await get(`processes?filter={"where":{"processNumber":"${processNoPrefix + e}"}}`);
-		if (check.statusCode >= 200 && check.statusCode < 300) {
+		console.log(check)
+		if (check.statusCode >= 200 && check.statusCode < 300 && props.data.id) {
+			if (check.data.length > 0 && props.data.id!=check?.data[0].id) {
+				let formData = { ...formValues };
+					// formData['processNumber']['value'] = (e) + uniqueNumber + 1;
+				setUniqueNumber(uniqueNumber + 1);
+				setProcessFound(processNoPrefix + e);
+				setAddButtonDisabled(true)
+}	
+
+				
+
+			else{ setProcessFound(false)
+			setAddButtonDisabled(false)}
+		}
+		else{
 			if (check.data.length > 0) {
 				let formData = { ...formValues };
-				formData['processNumber']['value'] = (e) + uniqueNumber + 1;
+					// formData['processNumber']['value'] = (e) + uniqueNumber + 1;
 				setUniqueNumber(uniqueNumber + 1);
-				setProcessFound(processNoPrefix + e)
-			}
-			else setProcessFound(false)
-		}
-	}
+				setProcessFound(processNoPrefix + e);
+				setAddButtonDisabled(true)
 
+				}
+				else{ setProcessFound(false)
+					setAddButtonDisabled(false)}
+				}	
+		}
+			
 
 	return (
 		<Pane>
+
+
 			<Dialog
 				isShown={props.open}
 				header={header}
 				shouldCloseOnOverlayClick={false}
 				width={'60%'}
+				isConfirmDisabled={addbuttondisabled}
 				onCloseComplete={() => { props.onClose() }}
 				onConfirm={submit}
 				confirmLabel={props.inject ? "Edit Process" : "Add Process"}
@@ -321,10 +390,15 @@ const AddProcess = (props) => {
 							</SelectField>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
+						<FormField className='w-full' isRequired label="Process
+						 Department" validationMessage={formValues?.departmentId?.error ? "Process department is required!" : null}>
 							<Autocomplete
-								onChange={changedItem => { setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
+								onChange={changedItem => {
+									console.log(changedItem)
+									setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
+
+								
 								itemToString={(item) => { return item ? `${item.name} (${item.typeCode})` : '' }}
 								selectedItem={selectedDept}
 							>
@@ -346,6 +420,14 @@ const AddProcess = (props) => {
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
+											onBlur={(e)=>{
+												if(!e.target.value && props.inject){
+													let typeCode=processNoPrefix.substring(0,2)
+													setProcessNoPrefix(`${typeCode}${initialProcessNumberPrefix}`)
+												}
+												
+												
+											}}
 										/>
 									</Pane>
 								)}
@@ -420,7 +502,7 @@ const AddProcess = (props) => {
 							</Autocomplete>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues?.processOwner?.error ? "Process owner is required!" : null}>
+						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues?.processOwnerId?.error ? "Process owner is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => { departmentChange(changedItem, 'owner') }}
 								items={props.data.members}
@@ -440,7 +522,7 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="processOwner"
-											isInvalid={formValues?.processOwner?.error}
+											isInvalid={formValues?.processOwnerId?.error}
 											value={formValues?.processOwner?.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
@@ -459,8 +541,10 @@ const AddProcess = (props) => {
 								label=""
 								isInvalid={formValues?.frequency?.error}
 								validationMessage={formValues?.frequency?.error ? "Frequency is mandatory!" : null}
-								onChange={e => handleInputChange(e)}>
+								onChange={e => handleInputChange(e)}
 								value={formValues?.frequency?.value}
+								>
+								
 								<option selected  value="" disabled >Select Frequency</option>
 								<option value="Daily">Daily</option>
 								<option value="Weekly">Weekly</option>
@@ -505,8 +589,8 @@ const AddProcess = (props) => {
 								value={formValues?.status?.value}
 								validationMessage={formValues?.status?.error ? "Status is mandatory!" : null}
 								onChange={e => handleInputChange(e)}>
-								<option value="Partially Implemented">Partially Implemented</option>
 								<option value="" selected>Select Status</option>
+								<option value="Partially Implemented">Partially Implemented</option>
 								<option value="Implemented">Implemented</option>
 								<option value="Not Implemented">Not Implemented</option>
 							</SelectField>

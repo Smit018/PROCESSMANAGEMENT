@@ -113,6 +113,7 @@ const Process = () => {
 			console.log(response)
 			if (response) {
 				if (response.statusCode == 200) {
+					console.log(response.data)
 					
 					setAllProcess(response.data)
 					allData = response.data
@@ -180,9 +181,12 @@ const Process = () => {
 	}
 
 	const saveProcess = async (form) => {
+
+		console.log('it is called')
+		console.log(form)
 		let process = {};
 		for (let i in form) {
-			process[`${i}`] = form[i].value ? form[i].value.trim() : form[i].value;
+			process[`${i}`] = form[i].value ? form[i].value : form[i].value;
 		}
 		if (process['inputProcess'] == "") {
 			process.inputProcess = null
@@ -326,7 +330,7 @@ const Process = () => {
 				for (let index = 0; index < array.length; index++) {
 					const ioProcess = array[index];
 					if (ioProcess.source?.toLowerCase() == type.toLowerCase()) {
-						text = text ? text + ', ' + ioProcess[key]['name'] : ioProcess[key]['name']
+						text = text ? text + ', ' + ioProcess[key]?.name : ioProcess[key]?.name;
 					}
 					if (index === array.length - 1) resolve(text)
 				}
@@ -343,6 +347,7 @@ const Process = () => {
 	}
 
 	let isFilterApplied = false
+	
 	const applyFilter = () => {
 		isFilterApplied = true;
 		console.log(filterData);
@@ -385,6 +390,7 @@ const Process = () => {
 					onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 					onFilter={() => setFilterDialog(true)}
 					placeholder="Search by title or process number"
+					total={totalData}
 				/>
 				<br></br>
 				<Table>
@@ -419,7 +425,8 @@ const Process = () => {
 												key={index}
 												marginLeft={index > 0 ? (-((index * 2) + 20)) : 0}
 												size={40}
-												src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
+												src={member?.member?.profile ? 
+												`${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
 												name={member?.member?.name}
 											/>)
 										})}

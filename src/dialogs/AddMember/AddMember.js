@@ -23,6 +23,7 @@ const AddMember = (props) => {
 
 
     useEffect(() => {
+       
         fetchTypes()
         fetchDepartments()
         if (props.inject)
@@ -51,10 +52,13 @@ const AddMember = (props) => {
     const setForm = (data) => {
         console.log(data)
         if (props.type == "vendor") {
+            console.log('hereeeeeee')
             setEmployee({ ...data })
         }
         else {
-            setEmployee({ ...data, doe: DateFormat(data.doe, 'picker'), doj: DateFormat(data.doj, 'picker') })
+            console.log(data.doj,data.doe)
+            setEmployee({ ...data, doe:data.doe? DateFormat(data.doe, 'picker'):new Date(), 
+            doj:data.doj? DateFormat(data.doj, 'picker'):new Date()});
         }
         if (data.profile) {
             setImgPresent(true)
@@ -137,11 +141,30 @@ const AddMember = (props) => {
         const _form = { ...employee, ...{ upload: saveImage } }
         const formStructure = props.type === 'vendor' ? vendorForm : employeForm
         const form_valid = await validateForm(_form, formStructure)
+        console.log(_form)
         if (form_valid.err) {
             toaster.danger(form_valid.err)
         }
         else props.onSubmit(_form)
         console.log(_form)
+    }
+
+    const preventNum=(e) => {
+        
+        console.log(e.target.value.length)
+        let key=e.target.value.length? /[A-Za-z \'\b]/i.test(e.target.value.slice(e.target.value.length-1)):true;
+        if(key){
+            console.log(key);  
+             return true;
+
+        }
+        else{
+            console.log(key)
+            return false;
+        }
+        
+      
+
     }
 
     return (
@@ -162,7 +185,15 @@ const AddMember = (props) => {
                         label="Name"
                         name="name"
                         value={employee.name}
-                        onChange={(e) => setEmployee({ ...employee, name: e.target.value })}
+                        onChange={(event)=>{
+                        let bool=preventNum(event);
+
+                        if(bool){
+                        setEmployee({ ...employee, name: event.target.value })
+                        }
+
+                        
+                        }}
                     />
                     <div className='flex justify-center items-center'>
                         <TextInputField
@@ -180,7 +211,17 @@ const AddMember = (props) => {
                             label="Contact Person Name"
                             value={employee.designation}
                             name="designation"
-                            onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                            // onChange={(e) => setEmployee({ ...employee, designation: e.target.value })}
+                            onChange={(event)=>{
+                                let bool=preventNum(event);
+        
+                                if(bool){
+                                setEmployee({ ...employee, designation: event.target.value })
+                                }
+        
+                                
+                                }}
+
                         /> : null}
                     </div>
                     {props.type === 'vendor' ? null :
@@ -278,7 +319,7 @@ const AddMember = (props) => {
                         <div style={{ margin: "0 10px" }}></div>
                         <TextInputField
                             size={100}
-                            label={props.type == "vendor" ? "Address" : "Bank Details"}
+                            label={props.type == "vendor" ? "Address*" : "Bank Details"}
                             name={props.type == "vendor" ? "address" : 'bankDetails'}
                             value={props.type == "vendor" ? employee.address : employee.bankDetails}
                             onChange={(e) => setEmployee({ ...employee, address: props.type == "vendor" ? e.target.value : undefined, bankDetails: props.type == "vendor" ? undefined : e.target.value })}
@@ -362,7 +403,7 @@ const vendorForm = [
     { key: 'email', label: 'Email', required: true },
     { key: 'designation', label: 'Contact Person Name', required: true },
     { key: 'contactNo', label: 'Conact Number', required: true },
-    { key: 'address', label: 'Address', required: false },
+    { key: 'address', label: 'Address', required: true },
     { key: 'upload', label: 'profile', required: false }
 ]
 

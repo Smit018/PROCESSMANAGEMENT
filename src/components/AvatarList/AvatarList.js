@@ -1,15 +1,20 @@
 import { Avatar, CrossIcon, Heading, IconButton, Text, Pane, PeopleIcon, ChevronRightIcon, Switch } from 'evergreen-ui';
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DateFormat } from '../../services/dateFormat';
 
 const AvatarList = (props) => {
 
     const crossAvatarList = (id)=>{
+       
         props.sendDelete(id)
-    }
 
+    }
+    const navigate=useNavigate()
+     console.log(props.avatar); 
     return (
-        <div className='hover:bg-slate-100 hover:cursor-pointer flex items-center px-4 py-3 shadow rounded'>
+        <div className='hover:bg-slate-100 hover:cursor-pointer  flex items-center px-4 py-3 shadow rounded'
+        onClick={()=>{navigate(`../${props.memberT}/${props.memberId}`)}} >
             <div className='mr-4'>
                 <Avatar size={40} src={props.avatar} name={props.name}/>
             </div>
@@ -19,11 +24,16 @@ const AvatarList = (props) => {
                     <Text className='capitalize' size={400}>{props.description}</Text>
                 </div>
                 <div className='w-6'></div>
+
                 {props.action != false ? (
                     < div className='flex items-center'>
                         {props.actionText ? <Text size={300}>{props.actionText}</Text> : null}
                         &nbsp;&nbsp;
-                        <IconButton className='border-hidden outline-none' onClick={()=>crossAvatarList(props)} icon={CrossIcon} />
+                        <IconButton className='border-hidden outline-none' onClick={(event)=>{
+                            event.stopPropagation()
+                            crossAvatarList(props);
+                            
+                            }} icon={CrossIcon} />
                     </div>
                 ) : null
                 }
@@ -37,14 +47,15 @@ const AvatarCard = (props) => {
         props.sendDelete(prop)
     }
     return (
-        <div className='flex items-center px-4 py-3 shadow border rounded relative'>
+        <div className='flex items-center px-4 py-3 w-60     shadow border rounded relative'>
             <div className='mr-4'>
-                <Avatar size={40} src={props.avatar} />
+                <Avatar size={40} src={props.avatar}  name={props.name} />
             </div>
             <div className='flex justify-between items-center w-full'>
                 <div>
                     <Heading size={500}>{props.name}</Heading>
                     <Text size={400}>{props.description}</Text>
+
                     <br></br>
                     <Text size={300}>{props.type}</Text>
                 </div>
@@ -56,8 +67,11 @@ const AvatarCard = (props) => {
 
 
 const ListCard = (props) => {
+    const navigate=useNavigate()
+
     return (
-        <div className='w-full flex justify-between items-center px-6 py-5 shadow rounded-none'>
+        <div className='w-full flex justify-between items-center cursor-pointer px-6 py-5 shadow rounded-none'
+         onClick={()=>{navigate(`../processes/${props.processId}`)}}>
             <div className='flex items-center justify-center'>
                 <div className='rounded-full bg-slate-200 h-12 w-12 flex items-center justify-center'>
                     {props.icon}

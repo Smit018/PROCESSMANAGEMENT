@@ -28,10 +28,15 @@ const Types = () => {
 	const [openDelete,setOpenDelete]=useState(false);
 	const [processCount, setProcessCount]=useState(0);
 	const [currTypeId, setCurrTypeId]=useState('');
+	const [currentTypeCode,setCurrentTypeCode]=useState('');
+	// const [currentTypeId,setCurrentTypeId]=useState('')
+
 	let currentTypeId=''
 	let setCurrentTypeId=(str)=>{
 		currentTypeId=str;
 	}
+
+	
 	
 	
 	
@@ -40,7 +45,7 @@ const Types = () => {
 	
 	
 	const paths = [
-		{ path: '/admin/types', title: 'Types' }
+		{ path: '/admin/type', title: 'Types' }
 	]
 	
 	useEffect(() => {
@@ -116,8 +121,12 @@ const Types = () => {
 	}
 	
 	const deleteType= async()=>{
+		console.log(currTypeId);
+		console.log(currentTypeId);
+		console.log(currentTypeCode);
+
 		try{
-			console.log(currentTypeId);
+			
 			let res= await deleted(`types/${currTypeId}`);
 			if(res.statusCode==200){
 				fetchTypes();
@@ -136,9 +145,10 @@ const Types = () => {
 	
 	const editType=async()=>{
 		try{
-			console.log(currentTypeId,name);
+			console.log(currentTypeId,name,currentTypeCode);
+			console.log(currTypeId)
 			if(name){
-				let res=await patch(`types/${currentTypeId}`,{name})
+				let res=await patch(`types/${currTypeId}`,{name,typeCode:currentTypeCode})
 				if(res.statusCode==200){
 					toaster.success('Type edited successfully');
 					fetchTypes()
@@ -168,6 +178,7 @@ const Types = () => {
 				currentTprCount=processes.data.length;
 				console.log(currentTprCount);
 				setCurrTypeId(typeId)
+				setCurrentTypeId(typeId);
 			}
 			else{
 				currentTprCount=0;
@@ -180,7 +191,7 @@ const Types = () => {
 	
 	const _validateForm = () => { 
 		
-		if (name.trim().length > 3) return false;
+		if (name.trim().length > 3 && !(/\s/).test(typeCode)) return false;
 		else return true;
 	}
 	
@@ -212,6 +223,7 @@ const Types = () => {
 		add={true}
 		addTitle="Add Type"
 		addEv={() => setOpen(true)}
+		total={totalData}
 		/>
 		<br></br>
 		<br></br>
@@ -230,14 +242,23 @@ const Types = () => {
 				<Table.TextCell className="tb-c">{item.name}</Table.TextCell>
 				<Table.TextCell className="tb-c">{item.typeCode}</Table.TextCell>
 				<Table.TextCell className="tb-c">
-				<IconButton icon={EditIcon} margin={2} onClick={(event) =>{setOpenEdit(true);setCurrentTypeId(item.id);
-					setName(item.name)
+				<IconButton icon={EditIcon} margin={2} onClick={(event) =>{
+					
+					setCurrTypeId(item.id);
+					setCurrentTypeId(item.id)
+					setName(item.name);
+					setCurrentTypeCode(item.typeCode);
+					setOpenEdit(true);
+					
 				}} />
 				<IconButton icon={CrossIcon} margin={2} onClick={(event) =>{
 					setCurrentTypeId(item.id);
 					console.log(currentTypeId);
 					setName(item.name);
-					validateDelete(item.id)
+					setCurrTypeId(item.id);
+					setCurrentTypeId(item.id)
+					validateDelete(item.id);
+
 				}} />
 				</Table.TextCell>
 				</Table.Row>
@@ -269,7 +290,7 @@ const Types = () => {
 			
 			{/* dialog to edit Types  */}
 			
-			<Dialog isShown={openEdit} title="Edit Types" onCloseComplete={handleClose} confirmLabel="Edit Department"
+			<Dialog isShown={openEdit} title="Edit Types" onCloseComplete={handleClose} confirmLabel="Edit Types"
 			isConfirmDisabled={_validateForm()}
 			onConfirm={()=>{editType()}}>
 			<form onSubmit={(event)=>{event.preventDefault();editType()}}>
@@ -283,7 +304,7 @@ const Types = () => {
 				isShown={openDelete} 
 				title="Delete Types" 
 				onCloseComplete={handleClose} 
-				confirmLabel="Delete Department"
+				confirmLabel="Delete Types"
 				onConfirm={()=>{deleteType()}}   
 				isConfirmDisabled={processCount?true:false}>
 				<form>
