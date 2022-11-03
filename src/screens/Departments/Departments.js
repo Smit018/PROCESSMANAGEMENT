@@ -84,7 +84,9 @@ const Departments = () => {
 	}
 
 	const formValidation = () => {
-		if (name.trim().length > 3 && !(/\s/).test(typeCode) && typeCode.length>0) {
+		// return false;	
+
+		if (name.trim().length > 3) {
 			return false;
 
 		}
@@ -326,10 +328,6 @@ const Departments = () => {
 							{currentDPcount} processes involved in {name} Department
 						</p>
 			</Dialog>
-
-
-
-
 			<br></br>
 		</div>
 	)

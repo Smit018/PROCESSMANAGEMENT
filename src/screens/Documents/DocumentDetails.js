@@ -337,15 +337,15 @@ const DocumentDetails = () => {
     }
 
     const deleteMe = async () => {
+        console.log('delete is clicked and cheked')
         const response = await deleted('documents/' + params.id)
         if(response.statusCode === 200) {
             toaster.success('Deleted successfully!')
-            navigate(-1)
+            navigate('../documents')
             setOpenDelete(false)
         }
         else toaster.danger('Failed to delete!')
     }
-
 
     const HeaderSection = (myProps) => {
         return (
