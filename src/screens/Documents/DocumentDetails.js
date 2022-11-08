@@ -15,10 +15,7 @@ import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 import DocDialog from '../../dialogs/DocDialog/DocDialog';
 
 const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
-
-
 let initData;
-
 const DocumentDetails = () => {
     const navigate = useNavigate()
     const params = useParams()
@@ -28,7 +25,7 @@ const DocumentDetails = () => {
     const [newMembers, setNewMembers] = useState([])
     // const [documentDetail, setDocumentDetail] = useState({});
     const [name,setName]=useState('');
-    const [subSheetName,setSubSheetName]=useState('')
+    const [subSheetName,setSubSheetName]=useState('');
     const [link,setLink]=useState('')
     const [search, setSearch] = useState('');
     const [suggestmember, setSuggestMember] = useState([]);

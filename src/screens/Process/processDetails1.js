@@ -166,6 +166,7 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryProcessMembers = async (text, memberList) => {
         const alreadyMember = memberList.map(e => e.member.id);
+       
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         // let filter =`processes/${params.id}/personProcess?filter={"include":"member"}`
         
@@ -173,6 +174,7 @@ const ProcessDetails1 = () => {
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Fetch suggested Members", whatsap);
             let dataMember = [...whatsap.data];
+            console.log(dataMember)
             let filtered = []
             console.log(alreadyMember)
             console.log(processMembers)
@@ -245,7 +247,7 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryOutputWhatsapp = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
-        let filter = `whatsappGroups?filter={"wh    ere":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
+        let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -300,7 +302,7 @@ const ProcessDetails1 = () => {
     
     const getSearchQueryOutputDocument = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.document.id);
-        let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
