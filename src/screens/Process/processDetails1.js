@@ -409,6 +409,8 @@ const ProcessDetails1 = () => {
             setAddstepDisabled(true);
         }
         const alreadyGroup = memberList.map(e => e?.id);
+        console.log(memberList)
+        console.log(alreadyGroup)
         // let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         let filter=`processMembers?filter={"where": {"processId": "${params.id}"},"include": "member"}`
         const members = await get(filter);
@@ -436,6 +438,7 @@ const ProcessDetails1 = () => {
         console.log(mem)
         memArr.push({ ...mem });
         setSaveStepMember(memArr)
+        console.log(memArr)
         suggestQueryStepMembers('', memArr)
     }
     
@@ -448,6 +451,7 @@ const ProcessDetails1 = () => {
     
     const checkSuggest = (variable, e) => {
         console.log(e)
+        // alert(variable)
         if (variable == 'processMember') {
             getSearchQueryProcessMembers(e, processMembers);
         }
@@ -470,6 +474,7 @@ const ProcessDetails1 = () => {
             getSearchQueryOutputPerson(e, outputPerson);
         }
         else if (variable == 'step') {
+            // alert('it is called')
             suggestQueryStepMembers(e, saveStepMember);
         }
     }
@@ -683,6 +688,7 @@ const ProcessDetails1 = () => {
                     console.log(changedItem)
                 }}
                 >
+                    
                 {({
                     key,
                     getInputProps,
