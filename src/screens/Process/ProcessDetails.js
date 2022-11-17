@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import styles from './Process.module.css';
 import TopBar from '../../components/TopBar/TopBar';
 import AddProcess from '../../dialogs/AddProcess/AddProcess';
-import { get } from '../../services/https.service';
+import { baseUrl, get } from '../../services/https.service';
 import { useParams } from 'react-router-dom';
 import { Pane, Text, Avatar, Button, Heading, TextInput, Autocomplete, Switch, IconButton, CrossIcon, EditIcon } from 'evergreen-ui';
 import { AvatarList, AvatarCard } from '../../components/AvatarList/AvatarList';
 
-const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
+const ImageURL = `${baseUrl}photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 const ProcessDetails = () => {
     const pathArray = window.location.pathname.split('/');

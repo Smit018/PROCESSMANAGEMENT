@@ -14,7 +14,7 @@ import { showEmpty } from '../../components/GlobalComponent';
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 import DocDialog from '../../dialogs/DocDialog/DocDialog';
 
-const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
+const ImageURL = `${baseUrl}photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 
 let initData;
