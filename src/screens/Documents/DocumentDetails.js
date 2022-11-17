@@ -18,7 +18,6 @@ const ImageURL = `${baseUrl}photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2
 
 
 let initData;
-
 const DocumentDetails = () => {
     const navigate = useNavigate()
     const params = useParams()
@@ -28,7 +27,7 @@ const DocumentDetails = () => {
     const [newMembers, setNewMembers] = useState([])
     // const [documentDetail, setDocumentDetail] = useState({});
     const [name,setName]=useState('');
-    const [subSheetName,setSubSheetName]=useState('')
+    const [subSheetName,setSubSheetName]=useState('');
     const [link,setLink]=useState('')
     const [search, setSearch] = useState('');
     const [suggestmember, setSuggestMember] = useState([]);
@@ -337,15 +336,15 @@ const DocumentDetails = () => {
     }
 
     const deleteMe = async () => {
+        console.log('delete is clicked and cheked')
         const response = await deleted('documents/' + params.id)
         if(response.statusCode === 200) {
             toaster.success('Deleted successfully!')
-            navigate(-1)
+            navigate('../documents')
             setOpenDelete(false)
         }
         else toaster.danger('Failed to delete!')
     }
-
 
     const HeaderSection = (myProps) => {
         return (
@@ -537,7 +536,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentInputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
@@ -565,7 +564,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentOutputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
@@ -576,7 +575,7 @@ const DocumentDetails = () => {
             </div>
             <PromptDialog
                 open={openDelete}
-                title={`Delete Document!`}
+                title={`Document!`}
                 onClose={() => setOpenDelete(false)}
                 onConfirm={() => deleteMe()}
                 message={`Do you really want to delete document ${params.name}?`}

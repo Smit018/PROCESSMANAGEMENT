@@ -430,7 +430,7 @@ const WhatsappDetails = () => {
                             const response = await deleted('whatsappGroups/' + params.id )
                             if(response.statusCode === 200) {
                                 toaster.success('Deleted successfully!')
-                                navigate(-1)
+                                navigate("../whatsapp-groups")
                                 setOpenDelete(false)
                             }
                             else toaster.danger('Failed to delete!')
@@ -580,7 +580,7 @@ const WhatsappDetails = () => {
                             </div>
                             <PromptDialog
                             open={openDelete}
-                            title={`Delete Whatsapp Group!`}
+                            title={`Whatsapp Group!`}
                             onClose={() => setOpenDelete(false)}
                             onConfirm={() => deleteMe(false)}
                             message={`Do you really want to delete whatsapp group ${params.name}?`}

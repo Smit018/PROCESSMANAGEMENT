@@ -177,6 +177,8 @@ const Process = () => {
 	}
 
 	const saveProcess = async (form) => {
+
+		console.log('it is called')
 		console.log(form)
 		let process = {};
 		for (let i in form) {

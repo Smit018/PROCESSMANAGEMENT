@@ -191,7 +191,7 @@ const Types = () => {
 	
 	const _validateForm = () => { 
 		
-		if (name.trim().length > 3) return false;
+		if (name.trim().length > 3 && !(/\s/).test(typeCode)) return false;
 		else return true;
 	}
 	

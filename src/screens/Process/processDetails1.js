@@ -31,7 +31,8 @@ const ProcessDetails1 = () => {
     const [_showDelete, showDelete] = useState(false);
     const [_showUpdate, showUpdate] = useState(false);
     const [_updateStep, setUpdateStep] = useState(false);
-    const [_updateStepId, setUpdateStepId] = useState(null)
+    const [_updateStepId, setUpdateStepId] = useState(null);
+    const [addstepDisabled, setAddstepDisabled] = useState(true)
 
     // FOR DIALOG
     const [types, setTypes] = useState([])
@@ -125,6 +126,7 @@ const ProcessDetails1 = () => {
         if (response) {
             if (response.statusCode == 200) {
                 setMembers(response.data)
+
             }
         }
     }
@@ -164,6 +166,7 @@ const ProcessDetails1 = () => {
 
     const getSearchQueryProcessMembers = async (text, memberList) => {
         const alreadyMember = memberList.map(e => e.member.id);
+
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
         // let filter =`processes/${params.id}/personProcess?filter={"include":"member"}`
 
@@ -171,8 +174,10 @@ const ProcessDetails1 = () => {
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             console.log("Fetch suggested Members", whatsap);
             let dataMember = [...whatsap.data];
+            console.log(dataMember)
             let filtered = []
             console.log(alreadyMember)
+            console.log(processMembers)
             dataMember = dataMember.filter((e) => !alreadyMember.includes(e.id))
             console.log(dataMember)
             setSuggestProcessMembers(dataMember);
@@ -242,7 +247,7 @@ const ProcessDetails1 = () => {
 
     const getSearchQueryOutputWhatsapp = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.whatsappGroup.id);
-        let filter = `whatsappGroups?filter={"wh    ere":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
+        let filter = `whatsappGroups?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted":{"neq": true}}}`;
         const whatsap = await get(filter);
         if (whatsap.statusCode >= 200 && whatsap.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -297,7 +302,7 @@ const ProcessDetails1 = () => {
 
     const getSearchQueryOutputDocument = async (text, groupList) => {
         const alreadyGroup = groupList.map(e => e.document.id);
-        let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"}}}`;
+        let filter = `documents?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const documents = await get(filter);
         if (documents.statusCode >= 200 && documents.statusCode < 300) {
             // console.log("Fetch suggested Members", whatsap.data);
@@ -313,6 +318,7 @@ const ProcessDetails1 = () => {
 
     const getAllInputPerson = async () => {
         const inputsperson = await get(`personProcesses?filter={"where":{"processId":"${id}","source":"INPUT"},"include":"member"}`);
+
         if (inputsperson.statusCode >= 200 && inputsperson.statusCode < 300) {
             setInputPerson(inputsperson.data);
             getSearchQueryInputPerson('', inputsperson.data);
@@ -347,10 +353,12 @@ const ProcessDetails1 = () => {
         } else {
             console.log('Failed fetching Input Person')
         }
+
+
     }
 
     const getSearchQueryOutputPerson = async (text, groupList) => {
-        const alreadyGroup = groupList.map(e => e.member.id);
+        const alreadyGroup = groupList.map(e => e?.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const members = await get(filter);
         if (members.statusCode >= 200 && members.statusCode < 300) {
@@ -358,7 +366,13 @@ const ProcessDetails1 = () => {
             let dataMember = [...members.data];
             console.log(alreadyGroup)
             dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
-            console.log(dataMember)
+            // dataMember=dataMember.filter((e)=>{
+            //     processMembers.includes(e)
+            // })
+
+
+
+            console.log("datamemeber" + dataMember)
             setSuggestOutputPerson(dataMember);
         } else {
             console.log('Failed fetching Output Person')
@@ -390,20 +404,28 @@ const ProcessDetails1 = () => {
 
     async function suggestQueryStepMembers(text, memberList) {
         console.log(memberList)
-        const alreadyGroup = memberList.map(e => e.id);
+        if (memberList.length && description.length) {
+            setAddstepDisabled(false);
+        }
+        else {
+
+            setAddstepDisabled(true);
+        }
+        const alreadyGroup = memberList.map(e => e?.id);
+        console.log(memberList)
+        console.log(alreadyGroup)
         // let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         let filter = `processMembers?filter={"where": {"processId": "${params.id}"},"include": "member"}`
         const members = await get(filter);
         console.log(members)
-        let newDataMember = members.data.map((m) => {
+        let newDataMember = members?.data.map((m) => {
             return m['member']
         })
 
         if (members.statusCode >= 200 && members.statusCode < 300 && newDataMember) {
-            console.log("Fetch suggested Members", [members.data[0]['member']]);
+            console.log("Fetch suggested Members", [members?.data[0]['member']]);
             console.log(newDataMember)
             let dataMember = [...newDataMember]
-
             console.log(alreadyGroup)
             dataMember = dataMember.filter((e) => !alreadyGroup.includes(e.id))
             console.log(dataMember, alreadyGroup)
@@ -418,6 +440,7 @@ const ProcessDetails1 = () => {
         console.log(mem)
         memArr.push({ ...mem });
         setSaveStepMember(memArr)
+        console.log(memArr)
         suggestQueryStepMembers('', memArr)
     }
 
@@ -430,6 +453,7 @@ const ProcessDetails1 = () => {
 
     const checkSuggest = (variable, e) => {
         console.log(e)
+        // alert(variable)
         if (variable == 'processMember') {
             getSearchQueryProcessMembers(e, processMembers);
         }
@@ -452,6 +476,7 @@ const ProcessDetails1 = () => {
             getSearchQueryOutputPerson(e, outputPerson);
         }
         else if (variable == 'step') {
+            // alert('it is called')
             suggestQueryStepMembers(e, saveStepMember);
         }
     }
@@ -575,15 +600,37 @@ const ProcessDetails1 = () => {
     }
 
     const addInput_OutputPerson = async (mem, source) => {
-        let addMember = { processId: id, memberId: mem.id, source: source }
-        const persons = await post(`personProcesses`, addMember);
-        if (persons.statusCode >= 200 && persons.statusCode < 300) {
-            console.log("Persons added to process");
-            (source == 'INPUT') ? getAllInputPerson() : getAllOutputPerson()
+        console.log('580000000000' + JSON.stringify(mem), source)
 
-        } else {
-            console.log('Failed to add process Persons')
+        let memberlist;
+        if(source == 'INPUT') {
+            memberlist = inputPerson.map(e => {
+                return (e.member.id)
+            })
         }
+        else {
+            memberlist = outputPerson.map(e => {
+                return (e.member.id)
+            })
+        }
+
+        
+        if (!memberlist.includes(mem.id)) {
+            let addMember = { processId: id, memberId: mem.id, source: source }
+            const persons = await post(`personProcesses`, addMember);
+            if (persons.statusCode >= 200 && persons.statusCode < 300) {
+                console.log("Persons added to process");
+                (source == 'INPUT') ? getAllInputPerson(mem) : getAllOutputPerson(mem)
+
+            } else {
+                console.log('Failed to add process Persons');
+            }
+        }
+        else {
+            toaster.warning('member is already there')
+        }
+
+
     }
 
     const postProcess = (type, mem) => {
@@ -646,21 +693,21 @@ const ProcessDetails1 = () => {
 
 
     const AutoTextInput = (myProps) => {
-        // console.log("babu samjho ishareey "+myProps.datasource).
-        // let d=myProps.datasource.map((data)=>{
-        //     return data.name
-        // })
+
         return (
             <Autocomplete
-                onChange={changedItem => {
+                onChange={(changedItem) => {
+
                     postProcess(myProps.variable, changedItem);
+
+
 
                 }}
                 items={myProps.datasource}
 
                 itemToString={(item) => {
                     return item ?
-                        item.memberType ? (`${item.name} (${item.memberType})`) : `${item.name}`
+                        item.memberType ? (`${item?.name} (${item?.memberType})`) : `${item?.name}`
                         : ''
                 }}
                 itemSize={50}
@@ -668,7 +715,7 @@ const ProcessDetails1 = () => {
                 itemsFilter={(item, text) => filterAutoComplete(item, text)}
                 onInputValueChange={changedItem => {
                     console.log(changedItem)
-                    // checkSuggest(myProps.variable, changedItem)
+
                 }}
             >
                 {({
@@ -681,7 +728,7 @@ const ProcessDetails1 = () => {
                     toggleMenu
                 }) => (
                     <Pane key={key} style={{ marginTop: 16 }} ref={getRef} display="flex">
-                        <TextInput
+                        <TextInput className='w-full relative bottom-2'
                             flex="1"
                             value={inputValue || myProps.value}
                             height={50}
@@ -725,7 +772,7 @@ const ProcessDetails1 = () => {
                                         avatar={`${baseUrl}photos/${member?.type?.toLowerCase()}/download/${member?.profile}`}
                                         sendDelete={e => fetchRemovelist('step', index, member)}
                                         name={member.name}
-                                        description={`${member.code}, ${member.position}`}
+                                        description={member.code ? `${member.code} , ${member.position}` : `${member.position}`}
                                         type={member.type}
                                     />
                                 </div>
@@ -820,6 +867,7 @@ const ProcessDetails1 = () => {
     }
 
     const saveProcess = async (form) => {
+        console.log('hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
         console.log({ ...form })
         let process = {};
         for (let i in form) {
@@ -830,10 +878,14 @@ const ProcessDetails1 = () => {
         }
         process['duration'] = `${process['hours']}:${process['minutes']}`;
         process['processNumber'] = `${form['processNoPrefix'] + form['processNumber']['value']}`;
-        console.log(process)
+        console.log('nearrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
+        console.log(JSON.stringify(process))
+
         try {
             const response = await patch("processes/" + params.id, process);
             if (response.statusCode === 200) {
+                console.log('')
+                console.log(response.data)
                 toaster.success('Process Updated successfully')
                 showUpdate(false)
                 getProcessDetails()
@@ -883,7 +935,7 @@ const ProcessDetails1 = () => {
                     <div className='flex items-center'>
                         <Avatar
                             src={`${baseUrl}photos/${processDetail?.processOwner?.memberType?.toLowerCase()}/download/${processDetail?.processOwner?.profile}`}
-                            name="Alan Turing"
+                            name={processDetail?.processOwner?.name}
                             size={50}
                             marginRight={10}
                         />
@@ -955,22 +1007,41 @@ const ProcessDetails1 = () => {
                                 name={item?.name}
                                 description={item?.designation}
                                 actionText={item?.memberType}
+
+
                             />
                         )
                     })}
-                    <div className='flex py-3'>
-                        <div className='w-1/2'>
-                            <TextInput className="w-full" height={50} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter step description here" />
+                    <div className='flex py-3 align-middle justify-center m-auto'>
+                        <div className='w-1/2 flex align-middle m-auto'>
+                            <TextInput className="w-full" height={50} value={description} onChange={e => {
+                                setDescription(e.target.value)
+                                if (saveStepMember.length && e.target.value) {
+                                    console.log(e.target.value, saveStepMember.length);
+                                    setAddstepDisabled(false);
+                                }
+                                else {
+
+                                    setAddstepDisabled(true);
+                                }
+                            }} placeholder="Enter step description here" />
                         </div>
                         &nbsp;&nbsp;&nbsp;
-                        <div className='w-1/2'>
+                        <div className='w-1/2 flex align-middle'>
                             <AutoTextInput
                                 datasource={suggestStepMember}
                                 placeholder="Add Member"
                                 variable="step"
                                 value={newMember}
-                                inputChange={(e) => setNewMember(e.target.value)}
+                                inputChange={(e) => {
+                                    console.log(description.length)
+                                    setNewMember(e.target.value);
+                                }}
                             />
+
+
+
+
                         </div>
                     </div>
                     <div className='flex justify-end py-2'>
@@ -978,7 +1049,7 @@ const ProcessDetails1 = () => {
                             <Button className="primary" onClick={updatesteps}>
                                 Update Step
                             </Button> :
-                            <Button className="primary" onClick={addSteps}>
+                            <Button className="primary relative right-1 disabled:opacity-50" disabled={addstepDisabled} onClick={addSteps}>
                                 Add Step
                             </Button>
                         }
@@ -989,6 +1060,7 @@ const ProcessDetails1 = () => {
             <br></br>
             <br></br>
             {/* INPUT SOURCES */}
+
             <div>
                 <div className='flex flex-wrap justify-between items-center'>
                     <Heading size={800} marginBottom={10}>INPUT SOURCES</Heading>
@@ -1016,11 +1088,14 @@ const ProcessDetails1 = () => {
                         })}
                         <div className='py-3 w-full'>
                             <AutoTextInput
-                                datasource={suggestInputPerson}
+                                datasource={suggestStepMember}
                                 placeholder="Add Member and Vendors"
                                 variable="input-person"
                                 value={newMember}
-                                inputChange={(e) => setNewMember(e.target.value)}
+                                inputChange={(e) => {
+                                    console.log(e.target.value)
+                                    setNewMember(e.target.value);
+                                }}
                             />
                         </div>
                     </div>
@@ -1040,6 +1115,7 @@ const ProcessDetails1 = () => {
                                 />
                             )
                         })}
+
                         <div className='py-3 w-full'>
                             <AutoTextInput
                                 datasource={suggestInputWhatsapp}
@@ -1066,6 +1142,7 @@ const ProcessDetails1 = () => {
                                 />
                             )
                         })}
+
                         <div className='py-3 w-full'>
                             <AutoTextInput
                                 datasource={suggestInputDocument}
@@ -1098,7 +1175,7 @@ const ProcessDetails1 = () => {
                         })}
                         <div className='py-3 w-full'>
                             <AutoTextInput
-                                datasource={suggestOutputPerson}
+                                datasource={suggestStepMember}
                                 variable="output-person"
                                 placeholder="Add Employees and Vendors"
                                 value={newMember}
@@ -1179,6 +1256,7 @@ const ProcessDetails1 = () => {
                         inject={processDetail}
                         onSubmit={(form) => { saveProcess(form) }}
                     /> : null
+
                 }
             </div>
         </div>

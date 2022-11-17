@@ -467,7 +467,7 @@ export default function EmployeeDetails() {
             {_showDelete ?
                 <PromptDialog
                     open={_showDelete}
-                    title={`Delete employee!`}
+                    title={`employee!`}
                     onClose={() => showDelete(false)}
                     onConfirm={() => deleteMe(false)}
                     message={`Do you really want to delete this Vendor?`}

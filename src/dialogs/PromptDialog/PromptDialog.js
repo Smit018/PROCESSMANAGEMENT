@@ -22,7 +22,7 @@ const PromptDialog = (props) => {
                 width={450}
                 onCloseComplete={() => props.onClose()}
                 onConfirm={() => props.onConfirm(true)}
-                confirmLabel={`Delete`}
+                confirmLabel={props.title=='Logout?'?`Logout`:`Delete`}
                 hasHeader={false}>
                     <Heading size={500}>{props.title=='Logout?'?`Are you sure you want to Logout`:`Do you really want to delete this ${props.title}`}</Heading>
             </Dialog>

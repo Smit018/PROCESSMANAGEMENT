@@ -43,7 +43,7 @@ const myForm = {
 		error: false,
 		regex: REGEX.ALL
 	},
-	"processOwner": {
+	"processOwnerId": {
 		value: '',
 		error: false,
 		regex: REGEX.ALL
@@ -95,12 +95,15 @@ const AddProcess = (props) => {
 	const [selectedInpProcess, setSelectedInpProcess] = useState(null);
 	const [selectedProcessOwner, setSelectedProcessOwner] = useState(null);
 	const [inProcessSel, setInProcessSel] = useState(null);
-
+	const [initialProcessNumberPrefix,setInitialProcessNumberPrefix]=useState(null);
 
 	useEffect(() => {
 		if (props.inject)
-		{	setUpdateData(props.inject)
-			setAddButtonDisabled(false)}
+		{	
+			console.log(props.inject.processOwner.name)
+			setUpdateData(props.inject)
+		
+			setAddButtonDisabled(false)}	
 		else {
 			cleanUpForm()
 			setFormValues(_formDefault)
@@ -127,10 +130,14 @@ const AddProcess = (props) => {
 				if (key === 'processNumber') {
 					const abbr = data[key].substring(0, 5)
 					setProcessNoPrefix(abbr)
+					const abbr2=abbr.substring(2)
+					setInitialProcessNumberPrefix(abbr2);
+
 					_formDefault[key]['value'] = data[key].substring(5, data[key].length)
 				}
 				else if (key == 'departmentId') {
 					const item = await _arrayFilter(props.data.departments, data[key], 'id')
+					console.log(item[0]);
 					setSelectedDept(item[0])
 					_formDefault[key]['value'] = data[key]
 				}
@@ -139,11 +146,24 @@ const AddProcess = (props) => {
 					setSelectedInpProcess(item[0])
 					_formDefault[key]['value'] = data[key]
 				}
-				else if (key === 'processOwner') {
-					const item = await _arrayFilter(props.data.members, data[key]['id'], 'id')
+				else if (key === 'processOwnerId') {
+					console.log(key)
+					console.log(props.data.members)
+					console.log( data[key], 'id')
+					const item = props.inject? await _arrayFilter(props.data.members, data[key], 'id'):
+					await _arrayFilter(props.data.members, data[key]['id'], 'id')
 					setSelectedProcessOwner(item[0])
 					_formDefault[key]['value'] = data[key]['id']
+					console.log(_formDefault)
 				}
+
+				// else if(key=='processOwner'){
+				// 	console.log(key)
+				// 	console.log('Process owener name is here'+data.processOwner.name)
+				// 	// setSelectedProcessOwner(data.processOwner.name)
+				// 	_formDefault[key]['value']=data[key]['name']
+				// 	console.log(_formDefault[key]['value']);
+				// }
 				else{ 
 					_formDefault[key]['value'] = data[key]
 				}
@@ -171,7 +191,7 @@ const AddProcess = (props) => {
 			// verifyProcessNumber(pTypeCode + item.typeCode + uniqueNumber);
 		}
 		else {
-			formData['processOwner']['value'] = item.id;
+			formData['processOwnerId']['value'] = item.id;
 		}
 		setFormValues(formData);
 	}
@@ -312,8 +332,8 @@ const AddProcess = (props) => {
 				setUniqueNumber(uniqueNumber + 1);
 				setProcessFound(processNoPrefix + e);
 				setAddButtonDisabled(true)
+}	
 
-				}	
 				
 
 			else{ setProcessFound(false)
@@ -377,6 +397,7 @@ const AddProcess = (props) => {
 									console.log(changedItem)
 									setProcessNumberPrefix(changedItem); departmentChange(changedItem, 'department') }}
 								items={props.data.departments}
+
 								
 								itemToString={(item) => { return item ? `${item.name} (${item.typeCode})` : '' }}
 								selectedItem={selectedDept}
@@ -399,6 +420,14 @@ const AddProcess = (props) => {
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
 											{...getInputProps()}
+											onBlur={(e)=>{
+												if(!e.target.value && props.inject){
+													let typeCode=processNoPrefix.substring(0,2)
+													setProcessNoPrefix(`${typeCode}${initialProcessNumberPrefix}`)
+												}
+												
+												
+											}}
 										/>
 									</Pane>
 								)}
@@ -473,7 +502,7 @@ const AddProcess = (props) => {
 							</Autocomplete>
 						</FormField>
 						&nbsp;&nbsp;&nbsp;&nbsp;
-						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues?.processOwner?.error ? "Process owner is required!" : null}>
+						<FormField className='w-full' isRequired label="Process Owner" validationMessage={formValues?.processOwnerId?.error ? "Process owner is required!" : null}>
 							<Autocomplete
 								onChange={changedItem => { departmentChange(changedItem, 'owner') }}
 								items={props.data.members}
@@ -493,7 +522,7 @@ const AddProcess = (props) => {
 										<TextInput
 											flex="1"
 											name="processOwner"
-											isInvalid={formValues?.processOwner?.error}
+											isInvalid={formValues?.processOwnerId?.error}
 											value={formValues?.processOwner?.value}
 											onFocus={openMenu}
 											onChange={(e) => handleInputChange(e)}
