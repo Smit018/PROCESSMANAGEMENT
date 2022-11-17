@@ -4,8 +4,9 @@ import { Dialog, Pane, Button, SelectField, Autocomplete, TextInput, FormField, 
 
 
 const DocDialog = (props) => {
-
-    let _form = props.inject || { name: '', link: '' }
+    
+    let _form = props.inject || { name: '', link: ''}
+    console.log(props)
 
     const header = (title) => {
         return (
@@ -31,6 +32,8 @@ const DocDialog = (props) => {
                         <TextInputField size={100} required label="Name" value={_form.name} onChange={(e) => props.onChange({name: e.target.value})} />
                         <div style={{ margin: "0 10px" }}></div>
                         <TextInputField size={100} required label="Link" value={_form.link} onChange={(e) => props.onChange({link: e.target.value})} />
+
+
                     </div>
                 </form>
             </Dialog>

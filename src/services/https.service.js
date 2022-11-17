@@ -13,7 +13,7 @@ export const updateLocalStorage = (data) => {
 export const baseUrl = `http://142.93.212.14:3200/api/`;
 // export const baseUrl =`http://localhost:3200/api/`;
 // export const baseUrl =`http://192.168.1.12:3200/api/`;
-
+    
 
 
 // INTERCEPTORS FOR REQUESTS

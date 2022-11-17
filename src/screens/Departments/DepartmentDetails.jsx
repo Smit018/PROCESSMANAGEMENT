@@ -50,11 +50,13 @@ export default function DepartmentDetails() {
             {/* <h1>{params.id} and {params.name}</h1> */}
             {progressdata.length?
                 progressdata.map((item,index)=>{
+                  console.log(item)
                   return(
-                    <ListCard title={item.title}
+                    <ListCard title={item.title} 
                     subTitle={item.processNumber}
+                    processId={item.id}
                     icon= {  <Avatar size={40} src="" name={item.title}/>}
-                   />
+                     />
                   )
                 }): <p className='text-2xl text-gray-300 text-center mt-52'>NO DATA FOUND!</p>
             }

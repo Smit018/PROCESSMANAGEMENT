@@ -23,12 +23,14 @@ const Employee = () => {
 	const [showForm, setShowForm] = useState(false)
 	const [employee, setEmployee] = useState({});
 	const [imgPresent, setImgPresent] = useState(false);
-	const [image, setImage] = useState();
+	const [image, setImage] = useState('');
 	const [employeeData, setEmployeeData] = useState([]);
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
-	const [saveImage, setSaveImage] = useState();
+	const [saveImage, setSaveImage] = useState('');
 	const [height, setHeight] = useState(0);
+	const [filterApplied, setFilterApplied] = useState(false)
+    let isFilterApplied=false;
 
 	const [url, setUrl] = useState('');
 
@@ -109,6 +111,8 @@ const Employee = () => {
 			if (employ.statusCode >= 200 && employ.statusCode < 300) {
 				setEmployeeData(employ.data);
 				allData = employ.data
+				setFilterApplied(isFilterApplied)
+
 			}
 			else {
 				setEmployeeData([])
@@ -149,6 +153,8 @@ const Employee = () => {
 
 	const handleClose = () => {
 		setOpen(false);
+		setFilterApplied(false);
+
 	}
 
 	const formValidation = () => {
@@ -180,17 +186,17 @@ const Employee = () => {
 					},
 					body
 				}
-				const container = await fetch('http://192.168.1.12:3200/api/photos/', options)
+				const container = await fetch(`${baseUrl}photos/`, options)
 				
 			  const res=await container.json()
 			   if(res.error.message.includes('EEXIST') && res.error.statusCode==500){
 				if(container.statusCode==500 && container.message==''){}
 				const formData = new FormData();
-				console.log(file)
+				// console.log(file)
 				formData.append('file', file)
-				console.log(formData)
+				// console.log(formData)
 				const image = await post("photos/employee/upload", formData)
-				console.log(image)
+				// console.log(image)
 				if (image.data) {
 				resolve(image.data.result.files.file[0].name)
 				}
@@ -259,8 +265,6 @@ const Employee = () => {
 	const submitEmployee = async (_form) => {
 		console.log(_form)
 		try {
-			console.log('form', _form)
-			console.log(_form.contactNo.length)
 			if(_form.contactNo.length!=10){
 				throw new Error('contact number should have 10 digits')
 			}
@@ -272,6 +276,13 @@ const Employee = () => {
 			if (_form['upload'])
 				_form['profile'] = await _uploadFile(_form['upload'])
 			_form['memberType'] = 'EMPLOYEE'
+			// _form['doe']=_form.doe?_form.doe:new Date(0);
+			if(_form.doe==''){
+				console.log(_form.doe)
+				 delete _form.doe
+			 }
+			_form['doj']=_form.doj?_form.doj:new Date();
+
 			const response = await post('members', _form)
 			if (response.statusCode === 200) {
 				// EMPLOYEE ADDED SUCCESSFULLY!
@@ -372,17 +383,41 @@ const Employee = () => {
 	}
 
 	const applyFilter = () => {
+		isFilterApplied=true;
+
 		try{
-			console.log(new Date(), new Date(filterData.to));
-			const dateFilter=`"and": [
+
+			let dummydatefrom=new Date(filterData.from)
+			dummydatefrom.setHours(0,0,0,100)
+			let modifiedFromDate=new Date(dummydatefrom)
+
+			let dummydate=new Date(filterData.to)
+			dummydate.setHours(24,60,60,1100);
+			let modifiedDate=new Date(dummydate)
+			// console.log(new Date(), new Date(filterData.to));
+			// const dateFilter=`"and": [
+			// 	{
+			// 		"doj": {
+			// 			"gte": "${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}"
+			// 		}
+			// 	},
+			// 	{
+			// 		"doj": {
+			// 			"lte": "${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"
+			// 		}
+			// 	}
+			// ]`
+			
+			const dateFilter=` "and": [
 				{
 					"doj": {
-						"gte": "${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}"
+						"gte": "${filterData.from?new Date(modifiedFromDate):new Date('1970')}"
+						
 					}
 				},
 				{
 					"doj": {
-						"lte": "${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"
+						"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
 					}
 				}
 			]`
@@ -390,13 +425,11 @@ const Employee = () => {
 			console.log(dateFilter)
 			
 			// const _dateFilter = `"doj": {"between": ["${filterData.from ? new Date(filterData.from).toISOString() : new Date('1970').toISOString()}","${filterData.to ? new Date(filterData.to).toISOString() : new Date().toISOString()}"]}`
-
-
-		// const where = `"where": { ${_filter.doj } "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
+			// const where = `"where": { ${_filter.doj } "deleted": {"neq": true}}, "limit": ${pageLimit}, "skip": ${(page - 1) * pageLimit}`
 		const where=`  "where": {
 			"memberType": "EMPLOYEE",
 			"deleted": {
-				"neq": false
+				"neq": true
 			},
 			${dateFilter}
 		}`
@@ -436,6 +469,11 @@ const Employee = () => {
 				search={search}
 				onFilter={() => { setFilterDialog(true) }}
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
+				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
+				total={totalData}
+
+
 			/>
 			<br></br>
 			<Table aria-label="simple table">
@@ -489,7 +527,7 @@ const Employee = () => {
 				setFilterDialog(false);
 			}}
 				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleClear}
-				title="Filter Employs"
+				title="Filter Employee"
 				width={'50%'}
 				confirmLabel="Filter"
 				cancelLabel={!filterData?.to && !filterData?.from?'close':'clear'}

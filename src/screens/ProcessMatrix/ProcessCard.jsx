@@ -11,7 +11,7 @@ export default function ProcessCard(props) {
     <div>
           <p>{props.p.title}</p>
          
-          <p>{props.p.processNumber}</p>
+          <p className='text-blue-800'>{props.p.processNumber}</p>
     </div>
   )
 }

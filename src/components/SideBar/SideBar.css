@@ -15,12 +15,22 @@
 .app-bar {
     height: 64px;
     background-color: #fff;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+
 }
 
 .routes {
     flex: 1;
     background-color: #fafafa;
-    overflow: auto !important;
+    overflow: auto;
+    height: calc(100%-64px);
     margin: 1px;
+    
+}
+
+.avatar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+
 }

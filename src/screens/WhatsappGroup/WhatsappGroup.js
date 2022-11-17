@@ -37,6 +37,9 @@ const WhatsappGroup = () => {
 	// FOR CSV
 	const [_csvDwn, setCSVDwn] = useState(false);
 	const [csv_data, set_csv_data] = useState([]);
+	const [filterApplied, setFilterApplied] = useState(false)
+	let isFilterApplied=false;
+    
 
 
 	const paths = [
@@ -101,7 +104,9 @@ const WhatsappGroup = () => {
 			const _url = filter || whatsappUrl()
 			const response = await get(_url);
 			if (response.statusCode >= 200 && response.statusCode < 300) {
+				setFilterApplied(isFilterApplied)
 				allData = response.data
+				console.log(allData)
 				setWhatsappData(allData)
 			}
 			else {
@@ -144,6 +149,7 @@ const WhatsappGroup = () => {
 	}
 
 	const handleClose = () => {
+		isFilterApplied=false;
 		setOpen(false);
 	}
 
@@ -179,11 +185,30 @@ const WhatsappGroup = () => {
 	}
 
 	const _filterGroups = () => {
-		const filter = { where: '', include: '', order: '' }
-		console.log(new Date(filterData.from).toISOString(),new Date('1970'))
+		isFilterApplied=true;
+		let dummydate=new Date(filterData.to)
+		dummydate.setHours(24,60,60,1100);
+		let modifiedDate=new Date(dummydate)
 
-		const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970') }", "${filterData.to || new Date().toISOString()}"]}`
-		filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+
+		const filter = { where: '', include: '', order: '' }
+		// console.log(new Date(filterData.from).toISOString(),new Date('1970'))
+
+		// const _dateFilter = `"createdAt": {"between": ["${filterData.from || new Date('1970') }", "${filterData.to || new Date().toISOString()}"]}`
+			const _dateFilter= ` "and": [
+				{
+					"createdAt": {
+						"gte": "${filterData.from?new Date(filterData.from):new Date('1970')}"
+					}
+				},
+				{
+					"createdAt": {
+						"lte": " ${filterData.to?new Date(modifiedDate):new Date()}"
+					}
+				}
+			]`
+			filter.where = `"where": {"deleted": {"neq": true}, ${_dateFilter}}`
+
 		whatsappUrl(filter)
 		setTotalData(1)
 		setFilterDialog(false)
@@ -290,9 +315,14 @@ const WhatsappGroup = () => {
 				onFilter={() => openFilterDialog(true)}
 				filter="true"
 				search={search}
+				filterLabel={filterApplied ? 'Filter Applied' : 'Filter'}
+				placeholder="search by name"
+				total={totalData}
+
 				onSearch={(e) => { setSearch(e.target.value); onSearchType(e.target.value) }}
 			/>
 			<br></br>
+			
 			<br></br>
 			{!whatsappData ? showSpinner() : whatsappData?.length === 0 ? showEmpty() : showContent()}
 			<Dialog isShown={open} onCloseComplete={handleClose}
@@ -312,7 +342,7 @@ const WhatsappGroup = () => {
 			</Dialog>
 
 			<Dialog isShown={filterDialog} onCloseComplete={setFilterDialog}
-				title="Filter Documents"
+				title="Filter Whatsaap Group"
 				width={'50%'}
 				confirmLabel="Filter"
 				onCancel={!filterData?.to && !filterData?.from?setFilterDialog:handleCancel}

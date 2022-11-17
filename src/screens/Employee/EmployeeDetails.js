@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { post, get, patch } from '../../services/https.service';
+import { post, get, patch,deleted } from '../../services/https.service';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Table, Dialog, TextInputField, Checkbox, SearchIcon, CrossIcon, ChevronRightIcon, ChevronUpIcon, toaster, Heading } from "evergreen-ui";
 import { Autocomplete, TextInput } from 'evergreen-ui'
@@ -25,6 +25,7 @@ import {
 import 'react-accessible-accordion/dist/fancy-example.css';
 import TopBar from '../../components/TopBar/TopBar';
 import { ProcessList } from '../../components/AvatarList/AvatarList';
+import { data } from 'autoprefixer';
 
 export default function EmployeeDetails() {
     const navigate = useNavigate()
@@ -58,23 +59,33 @@ export default function EmployeeDetails() {
 
     async function getAllProcesses(text = "") {
 
-        const getProcessInfo = await get(`stepsMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"steps","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        const getProcessInfo = await get(`processMembers?filter={"where":{"memberId":"${id}"},"include":{"relation":"process","scope":{"include":{"relation":"process","scope":{"include":{"relation":"processOwner"}}}}}}`);
+        //  const getProcessInfo=[]
+
+        const getProcessfromProcessOwner=await get(`processes?filter={"where":{"processOwner":"${id}"}}`);
+        console.log(getProcessfromProcessOwner.data);
         if (getProcessInfo.statusCode >= 200 && getProcessInfo.statusCode < 300) {
             let stepmemberArr = getProcessInfo.data;
-            stepmemberArr = stepmemberArr.map(e => { return { ...e, processNumber: e.steps.process.processNumber, stepDescription: e.steps.description, processTitle: e.steps.process.title } });
+            console.log(stepmemberArr)
+            stepmemberArr = stepmemberArr.map(e => { return { ...e, processNumber: e.process.processNumber, stepDescription:'',processTitle:e.process.title}});
             let arr = [];
+            getProcessfromProcessOwner.data.forEach((p)=>{
+                arr.push({ "processNumber": p.processNumber, process:[], processTitle: p.title,processId:p.id,processOwner:'Owned process' })
+            })
             const groupedMap = stepmemberArr.reduce(
                 (entryMap, e) => entryMap.set(e.processNumber, [...entryMap.get(e.processNumber) || [], e]),
                 new Map()
             );
-            console.log(groupedMap)
+            console.log('line 72 ghrerer ',groupedMap);
+
             for (let [key, value] of groupedMap) {
-                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.steps?.process?.deleted) {
+                if (key.toLowerCase().includes(text.toLowerCase()) && !value[0]?.process?.deleted) {
                     let stepProcess = value.map(e => e.stepDescription);
-                    arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle })
+                    arr.push({ "processNumber": key, process: stepProcess, processTitle: value[0].processTitle,processId:value[0].processId,processOwner:'' })
                 }
             }
-            console.log(arr)
+            console.log('hello tehrejd jlksdadfjl lkd df')
+            
             // setEmployeeDetails({...employeeDetails,process:arr.length});
             setProcess(arr.length)
             setAllProcess(arr);
@@ -192,10 +203,61 @@ export default function EmployeeDetails() {
         console.log(allProcess)
     }
 
+    const _uploadFile = async (file) => {
+		// UPLOAD IMAGE
+		return new Promise(async (resolve, reject) => {
+			try {
+				const body = JSON.stringify({"name":"employee"})
+				const options = {
+					method:'POST',
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body
+				}
+				const container = await fetch(`${baseUrl}photos/`, options)
+				
+			  const res=await container.json()
+			   if(res.error.message.includes('EEXIST') && res.error.statusCode==500){
+				if(container.statusCode==500 && container.message==''){}
+				const formData = new FormData();
+				// console.log(file)
+				formData.append('file', file)
+				// console.log(formData)
+				const image = await post("photos/employee/upload", formData)
+				// console.log(image)
+				if (image.data) {
+				resolve(image.data.result.files.file[0].name)
+				}
+				else {
+				reject(image);
+				}
+			
+			   }
+				}
+			catch (err) {
+				console.log(err)
+				reject(err)
+			}
+		})
+	}
+
+
+
+
     const saveEmployee = async (form) => {
+      try{
         if (form) {
+
+            if (form['upload'])
+				form['profile'] = await _uploadFile(form['upload'])
+
+            if(form.contactNo.length!=10){
+                console.log(form.contactNo)
+                throw('contact number should have 10 digits')
+            }
             const response = await patch('members/' + id, form)
-            if (response.statusCode === 200) {
+            if (response.statusCode === 200 && form.contactNo.length==10) {
                 showUpdate(false)
                 employeeDet();
                 toaster.success('Employee updated successfully!')
@@ -204,10 +266,14 @@ export default function EmployeeDetails() {
                 toaster.danger('Failed to update employee!', { description: response.message })
             }
         }
+      }
+      catch(err){
+        toaster.danger(err)
+      }
     }
 
     const deleteMe = async () => {
-        const response = await patch('members/' + id, { deleted: true })
+        const response = await deleted('members/' + id)
         if (response.statusCode === 200) {
             toaster.success('Deleted successfully!')
             navigate(-1)
@@ -322,31 +388,23 @@ export default function EmployeeDetails() {
                 })} */}
                 <Accordion allowZeroExpanded>
                     {processQuery?.map((item, index) => (
-                        <AccordionItem key={item.id}>
+                        <AccordionItem key={item.id} onClick={()=>{navigate(`../processes/${item.processId}`)}}>
+                           
                             <AccordionItemHeading>
                                 <AccordionItemButton className='flex justify-between items-center px-10 py-2 bg-white shadow'>
                                     <div className='flex flex-col'>
+                                        <small className='text-pri-col text-sm text-blue-700 pb-1'>{item.processOwner}</small>
                                         <Heading size={500}>{item?.processNumber}</Heading>
                                         <div className='text-pri-col text-sm pb-1'>{item?.processTitle}</div>
                                     </div>
+                                    
                                     <div className='text-lg text-pri-col'>
                                         <ChevronRightIcon />
                                     </div>
                                 </AccordionItemButton>
+                          
                             </AccordionItemHeading>
-                            <AccordionItemPanel className="bg-white p-5">
-                                <div className='flex items-center justify-between'>
-                                    <div className='flex flex-col px-4'>
-                                        {item?.process.map((item1, index1) => {
-                                            return (
-                                                <div className='flex items-end'>
-                                                    <Text size={300}>{index1 + 1}. &nbsp;</Text>
-                                                    <Heading size={400}> {item1}</Heading>
-                                                </div>)
-                                        })}
-                                    </div>
-                                </div>
-                            </AccordionItemPanel>
+                        
                         </AccordionItem>
                     ))}
                 </Accordion>
@@ -409,7 +467,7 @@ export default function EmployeeDetails() {
             {_showDelete ?
                 <PromptDialog
                     open={_showDelete}
-                    title={`Delete Vendor!`}
+                    title={`employee!`}
                     onClose={() => showDelete(false)}
                     onConfirm={() => deleteMe(false)}
                     message={`Do you really want to delete this Vendor?`}

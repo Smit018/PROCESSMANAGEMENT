@@ -14,11 +14,10 @@ import { showEmpty } from '../../components/GlobalComponent';
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 import DocDialog from '../../dialogs/DocDialog/DocDialog';
 
-const ImageURL = `http://142.93.212.14:3200/api/photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
+const ImageURL = `${baseUrl}photos/employee/download/bee828d8-7fcd-4bbd-8b25-ae2aab884a8a.png`
 
 
 let initData;
-
 const DocumentDetails = () => {
     const navigate = useNavigate()
     const params = useParams()
@@ -26,7 +25,10 @@ const DocumentDetails = () => {
     const id = params.id
     const [members, setMembers] = useState([]);
     const [newMembers, setNewMembers] = useState([])
-    const [documentDetail, setDocumentDetail] = useState({});
+    // const [documentDetail, setDocumentDetail] = useState({});
+    const [name,setName]=useState('');
+    const [subSheetName,setSubSheetName]=useState('');
+    const [link,setLink]=useState('')
     const [search, setSearch] = useState('');
     const [suggestmember, setSuggestMember] = useState([]);
     const [documentInputSources, setDocumentInputSources] = useState([]);
@@ -40,6 +42,9 @@ const DocumentDetails = () => {
     const [memberQuery, setMemberQuery] = useState([]);
     const [documentInputQuery, setDocumentInputQuery] = useState([]);
     const [documentOutputQuery, setDocumentOutputQuery] = useState([]);
+
+    const [inputSource,setInputSource]=useState(0);
+    const [outputSource,setOutputSource]=useState(0);
 
 
     const paths = [
@@ -85,7 +90,7 @@ const DocumentDetails = () => {
             else{
                 console.log(members)
                 let proc = members.filter(e=>{
-                    if(e.member.name.toLowerCase().includes(text.toLowerCase())){
+                    if(e.member?.name.toLowerCase().includes(text.toLowerCase())){
                         return e
                     }
                 })
@@ -125,7 +130,7 @@ const DocumentDetails = () => {
     const updateDocument = async (body) => {
         if (body.name && body.link) {
             try {
-                const _body = { name: body.name, link: body.link }
+                const _body = { name: body.name, link: body.link,subSheetName:body.subSheetName }
                 const response = await patch(`documents/${id}`, _body)
                 if (response && response.statusCode == 200) {
                     toaster.success('Document updated successfully!')
@@ -156,6 +161,7 @@ const DocumentDetails = () => {
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentInputSources(processData);
             setDocumentInputQuery(processData)
+            setInputSource(processData.length)
         }else{
             toaster.danger('Failed to fetch Input Process!')
         }
@@ -167,6 +173,7 @@ const DocumentDetails = () => {
             processData= processData.map(e=>{return {...e,processNumber:e.process.processNumber,description:e.process.title}})
             setDocumentOutputSources(processData);
             setDocumentOutputQuery(processData)
+            setOutputSource(processData.length)
         }else{
             toaster.danger('Failed to fetch Output Process!')
         }
@@ -177,7 +184,11 @@ const DocumentDetails = () => {
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
             console.log(saveDoc.data)
             initData = saveDoc.data
-            setDocumentDetail(saveDoc.data);
+            // setDocumentDetail(saveDoc.data);
+            setName(saveDoc.data.name)
+            setLink(saveDoc.data.link)
+            setSubSheetName(saveDoc.data.subSheetName);
+
         } else {
             // console.log('Fetch Document member')
             toaster.danger('Failed to fetch Document detail!')
@@ -218,7 +229,7 @@ const DocumentDetails = () => {
     }
 
     const getSearchQueryMember = async (text, memberList) => {
-        let alreadyMember = memberList.map(e => e.member.id);
+        let alreadyMember = memberList.map(e => e.member?.id);
         let filter = `members?filter={"where":{"name":{"regexp":"/${text}/i"},"deleted": {"neq": true}}}`;
         const saveDoc = await get(filter);
         if (saveDoc.statusCode >= 200 && saveDoc.statusCode < 300) {
@@ -254,11 +265,11 @@ const DocumentDetails = () => {
     const selectMember = (e, member, i) => {
         let getMembers = [...suggestmember];
         let memberNew = [...newMembers];
-        let getIndex = memberNew.findIndex(e => e.memberId == member.id);
+        let getIndex = memberNew.findIndex(e => e.memberId == member?.id);
         if (e.target.checked) {
             getMembers[i].selected = true;
             setSuggestMember(getMembers);
-            setNewMembers([...newMembers, { memberId: member.id, admin: false }])
+            setNewMembers([...newMembers, { memberId: member?.id, admin: false }])
         } else {
             getMembers[i].selected = false;
             getMembers[i].admin = false;
@@ -272,7 +283,7 @@ const DocumentDetails = () => {
     const enableAdmin = (e, member, i) => {
         let getMembers = [...suggestmember];
         let memberNew = [...newMembers];
-        let getIndex = memberNew.findIndex(e => e.memberId == member.id);
+        let getIndex = memberNew.findIndex(e => e.memberId == member?.id);
         if (e.target.checked) {
             getMembers[i].selected = true;
             getMembers[i].admin = true;
@@ -281,7 +292,7 @@ const DocumentDetails = () => {
                 memberNew[getIndex] = { ...memberNew[getIndex], admin: true }
                 setNewMembers(memberNew);
             } else {
-                setNewMembers([...newMembers, { memberId: member.id, admin: true }])
+                setNewMembers([...newMembers, { memberId: member?.id, admin: true }])
             }
 
         } else {
@@ -306,7 +317,7 @@ const DocumentDetails = () => {
 
     const addMemeber = (member) => {
         const _member = members
-        _member.push(member)
+        _member?.push(member)
         setMembers(_member)
         console.log(newMember)
     }
@@ -325,15 +336,15 @@ const DocumentDetails = () => {
     }
 
     const deleteMe = async () => {
-        const response = await patch('documents/' + params.id, { deleted: true })
+        console.log('delete is clicked and cheked')
+        const response = await deleted('documents/' + params.id)
         if(response.statusCode === 200) {
             toaster.success('Deleted successfully!')
-            navigate(-1)
+            navigate('../documents')
             setOpenDelete(false)
         }
         else toaster.danger('Failed to delete!')
     }
-
 
     const HeaderSection = (myProps) => {
         return (
@@ -426,10 +437,10 @@ const DocumentDetails = () => {
                 <div className='flex flex-wrap justify-between items-center px-4 py-5'>
                     <div>
                         <Heading size={600}>
-                            {documentDetail.name}
+                            {name}
                         </Heading>
                         <Heading size={400} marginTop={8}>
-                           <a href={documentDetail.link} target="_blank">{documentDetail.link}</a>
+                           <a href={link} target="_blank">{link}</a>
                         </Heading>
                     </div>
                     <div>
@@ -452,11 +463,11 @@ const DocumentDetails = () => {
                             <Heading size={400}>Members</Heading>
                         </div>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{inputSource}</Heading>
                             <Heading size={400}>Input Sources</Heading>
                         </div>
                         <div>
-                            <Heading size={600}>0</Heading>
+                            <Heading size={600}>{outputSource}</Heading>
                             <Heading size={400}>Ouput Sources</Heading>
                         </div>
                     </div>
@@ -481,10 +492,10 @@ const DocumentDetails = () => {
             </div>
                 {members.length === 0 ? showEmpty() : memberQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/${(item?.member.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member.id}`}>
+                        <Link key={item.id} to={`/admin/${(item?.member?.memberType == 'EMPLOYEE') ? 'employees' : 'vendors'}/${item.member?.id}`}>
                             <MemberList
-                                name={item.member.name}
-                                designation={!item.admin ? (item.member.employeeCode + ', ' + item.member.designation) : ''}
+                                name={item.member?.name}
+                                designation={!item.admin ? (item.member?.employeeCode + ', ' + item.member?.designation) : ''}
                                 type={item.admin ? 'Owner' : 'Member'}
                                 showSwitch={true}
                                 admin={item.admin}
@@ -525,7 +536,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentInputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
@@ -553,7 +564,7 @@ const DocumentDetails = () => {
             </div>
                 {documentInputSources.length === 0 ? showEmpty() : documentOutputQuery.map((item, index) => {
                     return (
-                        <Link key={item.id} to={`/admin/processes/${item.id}`}>
+                        <Link key={item.id} to={`/admin/processes/${item.processId}`}>
                             <ProcessList
                                 title={item.processNumber}
                                 subTitle={item.description}
@@ -564,7 +575,7 @@ const DocumentDetails = () => {
             </div>
             <PromptDialog
                 open={openDelete}
-                title={`Delete Document!`}
+                title={`Document!`}
                 onClose={() => setOpenDelete(false)}
                 onConfirm={() => deleteMe()}
                 message={`Do you really want to delete document ${params.name}?`}
@@ -572,10 +583,35 @@ const DocumentDetails = () => {
             <DocDialog
                 open={openEdit}
                 title={`Update Document`}
-                onClose={() => { setOpenEdit(false); setDocumentDetail(initData) }}
-                onConfirm={() => { updateDocument(documentDetail); setOpenEdit(false) }}
-                inject={documentDetail}
-                onChange={(e) => { e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link }) }}
+                onClose={() => { setOpenEdit(false);
+                    //  setDocumentDetail(initData) 
+                    setName(initData.name)
+                    setLink(initData.link)
+                    setSubSheetName(initData.subSheetName)
+                    
+                    }}
+                onConfirm={() => { updateDocument({name,link,subSheetName}); setOpenEdit(false) }}
+                inject={{name,link,subSheetName}}
+                onChange={(e) => {
+                    const key = Object.keys(e)[0]
+                    console.log(e, key)
+                    // const _values = {...documentDetail}
+                    //  e.name ? setDocumentDetail({ ...initData, name: e.name }) : setDocumentDetail({ ...initData, link: e.link })
+                    if(key === 'name'){
+                        
+                        // setDocumentDetail({_values, name:e.name})
+                        setName(e.name)
+                    }
+                    else if(key === 'link'){
+                        // setDocumentDetail({_values, link:e.link})
+                        setLink(e.link)
+                    }
+                    else if(key === 'subSheetName'){
+                        // setDocumentDetail({_values, subSheetName:e.subSheetName})
+                        setSubSheetName(e.subSheetName)
+                    }
+
+                    }}
             />
         </div>
     )
