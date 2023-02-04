@@ -5,7 +5,7 @@ import { atom, RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 
 import styles from './Login.module.css';
 import { userAuthState } from "../../services/recoil.service";
-import { get, post } from "../../services/https.service";
+import { get, post, updateLocalStorage } from "../../services/https.service";
 import { TextInput, TextInputField, Button, toaster } from "evergreen-ui";
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -40,13 +40,16 @@ const Login = () => {
   const myadmin = useRecoilValue(userAuthState)
 
   useEffect(() => {
+    console.log(myadmin)
     if(myadmin) {
       if(myadmin.token && myadmin.name && myadmin.userId) {
-        const res = get('processes')
-        if(res.statusCode === 200) {
-          console.log(myadmin)
-          navigate('/admin')
-        }
+        updateLocalStorage(myadmin)
+        get('processes?filter={"limit": 1}').then(res => {
+          if(res.statusCode === 200) {
+            console.log(myadmin)
+            navigate('/admin')
+          }
+        })
       }
       else {
         navigate('/')
