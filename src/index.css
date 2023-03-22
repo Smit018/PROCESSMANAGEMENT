@@ -10,6 +10,7 @@ body,
   height: 100%;
   overflow: hidden;
   font-family: 'Poppins', sans-serif !important;
+  background-color: #F7F8FA;
 }
 
 body {
@@ -19,6 +20,7 @@ body {
 code {
   font-family: 'Poppins', sans-serif;
 }
+
 
 
 .shadow {

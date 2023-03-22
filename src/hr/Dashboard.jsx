@@ -1,0 +1,248 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardCard from '../components/DashboardCard';
+import DateSelect from '../components/DateSelect';
+import { assets, Dot, process, todo, performance, people } from '../components/Icons';
+
+
+const Dashboard = () => {
+
+    const navigate = useNavigate()
+
+    const [dates, setDates] = useState({
+        from: new Date(new Date().setDate(-30)),
+        to: new Date()
+    })
+
+    return (
+        <div className='w-full h-full flex flex-col'>
+            <div className='flex justify-between items-center mb-10'>
+                <h2 className='text-xl uppercase text-black'>Employees Dashboard</h2>
+                <div className='flex gap-4'>
+                    <DateSelect
+                        date={dates.from}
+                        onDateChange={(date) => setDates({ from: date, to: dates.to })}
+                    />
+                    <DateSelect
+                        date={dates.to}
+                        onDateChange={(date) => setDates({ to: date, from: dates.from })}
+                    />
+                </div>
+            </div>
+            <div className='flex-auto'>
+                <div className='w-full flex flex-wrap gap-10 mb-10'>
+                    <div>
+                        <h3 className='text-base mb-4'>Pending Todos</h3>
+                        <DashboardCard
+                            title={<span className='text-red-500'>Assigned To</span>}
+                            desc={236}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to/overdue')}
+                            dot={<Dot color='#F46767' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-yellow-500'>Assigned To</span>}
+                            desc={`21`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to/pending')}
+                            dot={<Dot color='#EF9000' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-red-500'>Assigned By</span>}
+                            desc={`10`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/by/overdue')}
+                            dot={<Dot color='#F46767' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-yellow-500'>Assigned By</span>}
+                            desc={`10`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/by/pending')}
+                            dot={<Dot color='#EF9000' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Process</h3>
+                        <DashboardCard
+                            title={'Process Owner'}
+                            desc={`21`}
+                            icon={process}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={'Process Member'}
+                            desc={26}
+                            icon={process}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Performance Meter</h3>
+                        <DashboardCard
+                            title={'Average Performance'}
+                            desc={8.9}
+                            icon={performance}
+                            color={`#0084FE`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Assets</h3>
+                        <DashboardCard
+                            title={'Assets Allotted'}
+                            desc={5}
+                            icon={assets}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                </div>
+            </div>
+            <br></br>
+            <br></br>
+            <div className='flex justify-between items-center mb-10'>
+                <h2 className='text-xl uppercase text-black'>Riya Mehuse</h2>
+                <div className='flex gap-4'>
+                    <DateSelect
+                        date={dates.from}
+                        onDateChange={(date) => setDates({ from: date, to: dates.to })}
+                    />
+                    <DateSelect
+                        date={dates.to}
+                        onDateChange={(date) => setDates({ to: date, from: dates.from })}
+                    />
+                </div>
+            </div>
+            <div className='flex-auto'>
+                <div className='w-full flex flex-wrap gap-10 mb-10'>
+                    <div>
+                        <h3 className='text-base mb-4'>Pending Todos</h3>
+                        <DashboardCard
+                            title={<span className='text-red-500'>Assigned To</span>}
+                            desc={12}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to')}
+                            dot={<Dot color='#F46767' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-yellow-500'>Assigned To</span>}
+                            desc={`0`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to')}
+                            dot={<Dot color='#EF9000' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-red-500'>Assigned By</span>}
+                            desc={`03`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to')}
+                            dot={<Dot color='#F46767' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={<span className='text-yellow-500'>Assigned By</span>}
+                            desc={`01`}
+                            icon={todo}
+                            color={`#8F95B2`}
+                            click={() => navigate('/hr/assigned/to')}
+                            dot={<Dot color='#EF9000' />}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Process</h3>
+                        <DashboardCard
+                            title={'Process Owner'}
+                            desc={`1`}
+                            icon={process}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>&nbsp;</h3>
+                        <DashboardCard
+                            title={'Process Member'}
+                            desc={8}
+                            icon={process}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Performance Meter</h3>
+                        <DashboardCard
+                            title={'Average Performance'}
+                            desc={9.1}
+                            icon={performance}
+                            color={`#0084FE`}
+                        />
+                    </div>
+                    <div>
+                        <h3 className='text-base mb-4'>Assets</h3>
+                        <DashboardCard
+                            title={'Assets Allotted'}
+                            desc={0}
+                            icon={assets}
+                            color={`#6E62B6`}
+                        />
+                    </div>
+                    <div>
+						<h3 className='text-base mb-4'>Employees</h3>
+						<DashboardCard
+							title={'Active Employees'}
+							desc={236}
+							icon={people}
+							color={`#7EBF7D`}
+						/>
+					</div>
+					<div>
+						<h3 className='text-base mb-4'>&nbsp;</h3>
+						<DashboardCard
+							title={'PIP'}
+							desc={`21`}
+							icon={people}
+							color={`#F2A633`}
+						/>
+					</div>
+					<div>
+						<h3 className='text-base mb-4'>Employee Exit Program</h3>
+						<DashboardCard
+							title={'Employee Exit Program'}
+							desc={`07`}
+							icon={people}
+							color={`#F46767`}
+						/>
+					</div>
+                </div>
+            </div>
+            <br></br>
+            <br></br>
+        </div>
+    )
+}
+
+export default Dashboard

@@ -1,6 +1,6 @@
 import './SideBar.css';
 import * as React from 'react';
-import { Avatar } from 'evergreen-ui';
+import { Avatar, ControlIcon, DashboardIcon } from 'evergreen-ui';
 
 import { BrowserRouter as Router, Routes, Route, Link, Outlet, useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -12,13 +12,14 @@ import { logout, updateLocalStorage } from '../../services/https.service';
 
 import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
-import { useXarrow , Xwrapper} from 'react-xarrows';
+import { useXarrow, Xwrapper } from 'react-xarrows';
 
 
 const drawerWidth = 300;
 
 
 const menu = [
+	{ title: 'Dashboard', path: 'dashboard', icon: ControlIcon },
 	{ title: 'Processes', path: 'processes', icon: RandomIcon },
 	{ title: 'Employees', path: 'employees', icon: PeopleIcon },
 	{ title: 'Vendors', path: 'vendors', icon: MugshotIcon },
@@ -39,12 +40,12 @@ const SideBar = () => {
 
 	React.useEffect(() => {
 		if (_storage.token)
-		    
+
 			updateLocalStorage(_storage)
 		else navigate('/')
 	}, [])
-    
-	const updateXarrow=useXarrow()
+
+	const updateXarrow = useXarrow()
 
 
 	const logMeOut = () => {
@@ -64,27 +65,10 @@ const SideBar = () => {
 		<div className='w-full h-screen flex'>
 			<div className='sidenav sticky top-0'>
 				{/* DEFINE ROUTES  AND ADMIN INFO */}
-				<div className='flex items-center justify-center h-16 border-b border-r bg-gray-50' 
-				style={{'color': '#66788A','fontWeight': '500','fontSize':'18'}}>
+				<div className='flex items-center justify-center h-16 border-b border-r bg-gray-50'
+					style={{ 'color': '#66788A', 'fontWeight': '500', 'fontSize': '18' }}>
 					<h1 className=''>PROCESS MANAGEMENT</h1>
 				</div>
-				
-
-				{/* <div className="flex w-10/12 overflow-auto scrollbar-hide ml-auto">
-					<div className="avatar">
-					<Avatar
-					// zIndex={index + 2}
-					size={60}
-					// src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
-					name={_storage?.name}
-				/>
-					</div>
-					<div className="info">
-						<h2>{_storage?.name}</h2>
-						<h5 className='text-gray-600'>{_storage?.userId}</h5>
-					</div>
-				</div> */}
-				
 				<Menu>
 					<Menu.Group>
 						{menu.map((_menu, index) => {
@@ -107,22 +91,22 @@ const SideBar = () => {
 			<div className='side-main'>
 				<div className='app-bar shadow-lg flex justify-end align-middle'>
 					<div className="avatar">
-					<p className='relative bottom-1 mr-1'>{_storage?.name}</p>
-					<div>
+						<p className='relative bottom-1 mr-1'>{_storage?.name}</p>
+						<div>
 
-					<Avatar
-					// zIndex={index + 2}
-					size={50}
-					// src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
-					name={_storage?.name}
-				/>
+							<Avatar
+								// zIndex={index + 2}
+								size={50}
+								// src={member?.member?.profile ? `${baseUrl}photos/${member?.member?.memberType?.toLowerCase()}/download/${member?.member?.profile}` : null}
+								name={_storage?.name}
+							/>
+						</div>
+
+
+
+
+
 					</div>
-					
-				
-				
-					
-					
-				</div>
 				</div>
 				{/* <Xwrapper> */}
 				{/* <div onScroll={updateXarrow}> */}
@@ -131,9 +115,9 @@ const SideBar = () => {
 				</div>
 				{/* </div> */}
 				{/* </Xwrapper> */}
-				
 
-				
+
+
 			</div>
 			<PromptDialog
 				open={showLogout}

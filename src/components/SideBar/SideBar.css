@@ -20,7 +20,7 @@
 
 .routes {
     flex: 1;
-    background-color: #fafafa;
+    background-color: #F7F8FA;
     overflow: auto;
     height: calc(100%-64px);
     margin: 1px;
