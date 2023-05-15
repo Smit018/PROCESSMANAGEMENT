@@ -26,7 +26,7 @@ import { userAuthState } from '../../services/recoil.service';
 import { logout, updateLocalStorage } from '../../services/https.service';
 
 
-import { TextInput, TextInputField, Button, HomeIcon, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
+import { TextInput, TextInputField, Button, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 import { ListSubheader } from '@mui/material';
 import { Dashboard } from '@mui/icons-material';
@@ -36,6 +36,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import TreeView from '@mui/lab/TreeView';
 import TreeItem from '@mui/lab/TreeItem';
+import { AllotmentIcon, HomeIcon, ProcessIcon, TodoIcon } from '../ProcessIcons';
 
 const drawerWidth = 240;
 
@@ -104,6 +105,12 @@ function SideBar(props) {
             { title: 'Performance', path: '/hr/department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Payroll', path: '/hr/department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Allotments', path: '/hr/department', icon: <Dashboard fontSize='32px' /> }
+        ],
+        employee: [
+            { title: 'Dashboard', path: '/pm/dashboard', icon: <HomeIcon/> },
+            { title: 'Processes', path: '/pm/processes', icon: <ProcessIcon/>},
+            { title: 'Todos', path: '/pm/todo', icon: <TodoIcon/> },
+            { title: 'Allotments', path: '/pm/allotments', icon: <AllotmentIcon /> }
         ]
     }
 
