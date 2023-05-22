@@ -36,7 +36,7 @@ const ProcessDetails = () => {
             setProcessDetail(getDetaills.data);
         }
         else {
-            console.log('Process Detail Not FOund')
+            console.log('Process Detail Not Found')
         }
     }
 

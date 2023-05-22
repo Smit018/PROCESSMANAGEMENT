@@ -29,7 +29,7 @@ const Dashboard = () => {
 			<div className='flex-auto'>
 				<div className='w-full flex flex-wrap gap-10 mb-10'>
 					<div>
-						<h3 className='text-base mb-4'>Pending</h3>
+						<h3 className='text-base mb-4'>Pending Todos</h3>
 						<DashboardCard
 							title={<span className='text-red-500'>Assigned To</span>}
 							desc={236}

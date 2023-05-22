@@ -4,6 +4,9 @@ import SideBar from '../components/SideBar/SideBar';
 import Dashboard from './Dashboard';
 import Login from './Login';
 import Process from './Process';
+import AssignedBy from './AssignedBy'
+import ProcessDetails from './ProcessDetails';
+import PerformanceMeter from './PerformaceMeter';
 
 const EmployeeRoutes = () => (
     <Routes>
@@ -13,6 +16,10 @@ const EmployeeRoutes = () => (
             <Route path='' element={<Dashboard/>}/>
             <Route path='dashboard' element={<Dashboard/>}/>
             <Route path='processes' element={<Process/>}/>
+            <Route path='assigned' element={<AssignedBy/>}/>
+            <Route path='process-details' element={<ProcessDetails/>}/>
+            <Route path='performance-meter' element={<PerformanceMeter/>}/>
+
         </Route>
     </Routes>
 )

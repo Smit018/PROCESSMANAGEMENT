@@ -71,3 +71,14 @@ img.img-201{
 .pointer-Mouse{
   cursor: pointer;
 }
+.micon {
+  width: 15px;
+  height: 18px;
+  background-color: pink;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  color: rgb(15, 9, 9);
+}
