@@ -6,7 +6,7 @@ const Login = () => {
     const navigate = useNavigate()
     return (
         <div className='w-full h-full flex items-center justify-center'>
-            <Button onClick={() => navigate('pm')}>Login Process Management</Button>
+            <Button onClick={() => navigate('/pm')}>Login Process Management</Button>
         </div>
     )
 }

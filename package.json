@@ -21,7 +21,6 @@
     "react-csv": "^2.2.2",
     "react-datepicker": "^4.10.0",
     "react-dom": "^18.2.0",
-    "react-dragable": "^0.0.4-1",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-xarrows": "^2.0.2",

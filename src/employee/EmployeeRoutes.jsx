@@ -7,6 +7,7 @@ import Process from './Process';
 import AssignedBy from './AssignedBy'
 import ProcessDetails from './ProcessDetails';
 import PerformanceMeter from './PerformaceMeter';
+import Allotments from './Allotments';
 
 const EmployeeRoutes = () => (
     <Routes>
@@ -16,6 +17,7 @@ const EmployeeRoutes = () => (
             <Route path='' element={<Dashboard/>}/>
             <Route path='dashboard' element={<Dashboard/>}/>
             <Route path='processes' element={<Process/>}/>
+            <Route path='allotments' element={<Allotments/>}/>
             <Route path='assigned' element={<AssignedBy/>}/>
             <Route path='process-details' element={<ProcessDetails/>}/>
             <Route path='performance-meter' element={<PerformanceMeter/>}/>

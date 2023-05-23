@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DashboardCard from '../components/DashboardCard';
 import DateSelect from '../components/DateSelect';
 import { assets, Dot, process, todo, performance } from '../components/Icons';
+import {useNavigate} from 'react-router-dom';
 
 
 const Dashboard = () => {
@@ -10,7 +11,7 @@ const Dashboard = () => {
 		from: new Date(new Date().setDate(-30)),
 		to: new Date()
 	})
-
+  const navigate=useNavigate();
     return (
         <div className='w-full h-full flex flex-col'>
 			<div className='flex justify-between items-center mb-10'>
@@ -35,6 +36,7 @@ const Dashboard = () => {
 							desc={236}
 							icon={todo}
 							color={`#8F95B2`}
+							click={() => navigate('/pm/assigned')}
                             dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -45,6 +47,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={todo}
 							color={`#8F95B2`}
+							click={() => navigate('/pm/assigned')}
                             dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -55,6 +58,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
+							click={() => navigate('/pm/assigned')}
 							dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -65,6 +69,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
+							click={() => navigate('/pm/assigned')}
 							dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -75,6 +80,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={process}
 							color={`#25CBD6`}
+							click={() => navigate('/pm/process-details')}
 						/>
 					</div>
 					<div>
@@ -84,6 +90,7 @@ const Dashboard = () => {
 							desc={26}
 							icon={process}
 							color={`#25CBD6`}
+							click={() => navigate('/pm/process-details')}
 						/>
 					</div>
 					<div>
@@ -93,6 +100,7 @@ const Dashboard = () => {
 							desc={8.9}
 							icon={performance}
 							color={`#0084FE`}
+							click={() => navigate('/pm/performance-meter')}
 						/>
 					</div>
 					<div>
@@ -102,6 +110,7 @@ const Dashboard = () => {
 							desc={5}
 							icon={assets}
 							color={`#6E62B6`}
+							click={() => navigate('/pm/performance-meter')}
 						/>
 					</div>
 				</div>
