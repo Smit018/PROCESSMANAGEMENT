@@ -9,6 +9,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+
+
+
 export default function AddAllotment(props) {
 
   const [dates, setDates] = useState({
@@ -39,7 +42,9 @@ export default function AddAllotment(props) {
             label="Description"
             type="email"
             fullWidth
+            value={props.description}
             variant="standard"
+            onChange={(e) => props.onDescriptionChange(e.target.value)}
           />
           <div className='flex gap-4 mt-5 justify-between'>
             <div>
@@ -47,10 +52,13 @@ export default function AddAllotment(props) {
                 autoFocus
                 margin="dense"
                 id="name"
+                
                 label="Employee"
                 type="email"
                 fullWidth
+                value={props.employeename}
                 variant="standard"
+                onChange={(e) => props.onNameChange(e.target.value)}
               />
             </div>
             <div>

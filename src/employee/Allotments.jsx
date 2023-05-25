@@ -3,7 +3,7 @@ import AllotmentsPage from '../pages/AllotmentsPage'
 
 const Allotments=()=>{
     return (
-       <AllotmentsPage/>
+       <AllotmentsPage button={false} />
     )
 }
 

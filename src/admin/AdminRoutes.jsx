@@ -10,6 +10,8 @@ import Vendors from "../screens/Vendors/Vendors";
 import WhatsappGroup from "../screens/WhatsappGroup/WhatsappGroup";
 import AssignedToDo from "./AssignedToDo";
 import Dashboard from "./Dashboard";
+import EmployeeDetails from "./EmployeeDetails";
+import Allotments from "./Allotments";
 
 
 const AdminRoutes = () => (
@@ -25,6 +27,8 @@ const AdminRoutes = () => (
             <Route path="documents" element={<Documents />}></Route>
             <Route path="department" element={<Departments />}></Route>
             <Route path="type" element={<Types />} />
+            <Route path="allotments" element={<Allotments/>} />
+            <Route path="employees-details"  element={<EmployeeDetails/>}></Route>
         </Route>
     </Routes>
 )

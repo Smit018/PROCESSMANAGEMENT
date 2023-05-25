@@ -5,6 +5,7 @@ import AssignedTodo from './AssignedTodo'
 import Dashboard from './Dashboard'
 import Login from './Login'
 import PerformanceImp from './PerformanceImp'
+import Allotments from './Allotments'
 
 const HumanResourceRoutes = () => (
     <Routes>
@@ -14,6 +15,7 @@ const HumanResourceRoutes = () => (
             <Route path='dashboard' element={<Dashboard />} />
             <Route path='assigned/:type/:mode' element={<AssignedTodo />} />
             <Route path='pip' element={<PerformanceImp />} />
+            <Route path='allotments' element={<Allotments />} />
         </Route>
     </Routes>
 )

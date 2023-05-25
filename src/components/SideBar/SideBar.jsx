@@ -85,6 +85,7 @@ function SideBar(props) {
             { title: 'Documents', path: 'documents', icon: <Dashboard fontSize='32px' /> },
             { title: 'Process Matrix', path: 'process-matrix', icon: <Dashboard fontSize='32px' /> },
             { title: 'Allotments', path: 'pm/allotments', icon: <Dashboard fontSize='32px' /> }
+            
         ],
         rh: [
             { title: 'Dashboard', path: 'dashboard', icon: <Dashboard fontSize='32px' /> },
@@ -92,7 +93,7 @@ function SideBar(props) {
             { title: 'Employees', path: 'employees', icon: <Dashboard fontSize='32px' /> },
             { title: 'Todos Report', path: 'documents', icon: <Dashboard fontSize='32px' /> },
             { title: 'PIP', path: 'department', icon: <Dashboard fontSize='32px' /> },
-            { title: 'Allotments', path: 'type', icon: <Dashboard fontSize='32px' /> }
+            { title: 'Allotments', path: 'allotments', icon: <Dashboard fontSize='32px' /> }
         ],
         hr: [
             { title: 'Dashboard', path: '/hr/dashboard', icon: <Dashboard fontSize='32px' /> },
@@ -104,7 +105,7 @@ function SideBar(props) {
             { title: 'Attendance', path: '/hr/department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Performance', path: '/hr/department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Payroll', path: '/hr/department', icon: <FiberManualRecordIcon fontSize='32px' /> },
-            { title: 'Allotments', path: '/hr/department', icon: <Dashboard fontSize='32px' /> }
+            { title: 'Allotments', path: '/hr/allotments', icon: <Dashboard fontSize='32px' /> }
         ],
         employee: [
             { title: 'Dashboard', path: '/pm/dashboard', icon: <HomeIcon/> },
