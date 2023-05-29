@@ -17,7 +17,7 @@ const DropdownButton = () => {
   return (
     <div className="relative inline-block text-left">
       <button
-        className="bg-white text-xs h-11 text-gray-500 py-2 px-4  rounded shadow text-right items-center border-white-500 inline-flex justify-center align-middle w-full px-4 py-2 text-sm font-medium leading-5 text-grey transition duration-150 ease-in-out bg-white-800 border border-transparent rounded-md focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700"
+        className="bg-white h-11 text-gray-500 py-2 px-4  rounded shadow text-right items-center border-white-500 inline-flex justify-center align-middle w-full  text-sm font-medium leading-5 text-grey transition duration-150 ease-in-out bg-white-800 border border-transparent focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700"
         // bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-200 rounded shadow text-right
         onClick={toggleDropdown}
       >
