@@ -1,5 +1,4 @@
-import {React,useState} from 'react'
-import Overview from '../pages/Employee/Overview'
+import { React, useState } from 'react'
 import Button from '@mui/material/Button';
 import MoveToPip from '../dialogs/MoveToPip/MoveToPip';
 import PropTypes from 'prop-types';
@@ -7,6 +6,12 @@ import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Overview from '../tabs/employe-details/Overview';
+import Financials from '../tabs/employe-details/Financials';
+import Todos from '../tabs/employe-details/Todos'
+import Attendance from '../tabs/employe-details/Attendance';
+import Performance from '../tabs/employe-details/Performance';
+import AccessControls from '../tabs/employe-details/AccessControls';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -55,20 +60,29 @@ function BasicTabs() {
           <Tab label="OVERVIEW" {...a11yProps(0)} />
           <Tab label="FINANCIALS" {...a11yProps(1)} />
           <Tab label="TODOS" {...a11yProps(2)} />
-          <Tab label="ATTENDANCE " {...a11yProps(2)} />
-          <Tab label="PERFORMANCE" {...a11yProps(2)} />
-          <Tab label="ACCESS CONTROLS" {...a11yProps(2)} />
+          <Tab label="ATTENDANCE " {...a11yProps(3)} />
+          <Tab label="PERFORMANCE" {...a11yProps(4)} />
+          <Tab label="ACCESS CONTROLS" {...a11yProps(5)} />
         </Tabs>
       </Box>
-      {/* <TabPanel value={value} index={0}>
-        Item One
+      <TabPanel value={value} index={0} pipbutt={true} eepbut={true}>
+        <Overview />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Item Two
+        <Financials />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        Item Three
-      </TabPanel> */}
+      <Todos/>
+      </TabPanel>
+      <TabPanel value={value} index={3}>
+      <Attendance />
+      </TabPanel>
+      <TabPanel value={value} index={4}>
+      <Performance />
+      </TabPanel>
+      <TabPanel value={value} index={5}>
+      <AccessControls />
+      </TabPanel>
     </Box>
   );
 }
@@ -79,32 +93,31 @@ function BasicTabs() {
 
 
 
-const EmployeeDetails = () => {
+const EmployeeDetails = (props) => {
   const [openAddDialog, setAddDialog] = useState(false)
   return (
     <div>
       <div className='w-full h-full flex flex-col mt-4'>
         <div className='flex items-center mb-10'>
           <h2 className='text-lg'>Employees &gt; Cameron Wilson </h2>
-          <div className='ml-12'>
-          <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP</Button>
-          </div>
-          <div className='ml-1 '>
-           <Button variant="outlined">START EEP</Button>
-          </div>
-         
+          {props.pipbut===true ?(  <div className='ml-12'>
+            
+            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP</Button>
+          </div>):(<p></p>)}
+        
+          {props.eepbut===true ?(  <div className='ml-12'>
+            
+            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP</Button>
+          </div>):(<p></p>)}
           <div className='flex gap-4 mr-5 ml-auto'>
             <p className="text-blue-500">View Processes</p>&gt;
           </div>
-        
         </div>
       </div>
-      <BasicTabs/>
-
-      <Overview />
+      <BasicTabs />
       <MoveToPip
         open={openAddDialog}
-        onClose={() => setAddDialog(false)}  
+        onClose={() => setAddDialog(false)}
       />
     </div>
 

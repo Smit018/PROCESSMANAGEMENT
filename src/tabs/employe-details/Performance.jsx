@@ -1,4 +1,5 @@
-import React from 'react'
+import { React, useState } from "react";
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 
 
 const DropdownButton = () => {
@@ -129,26 +130,24 @@ const DropdownButton = () => {
 
 const Performance = () => {
   
-    return (
-        <div>
-           
+  return (
+    <div>
 
-
-           
-
-
-            <div className="flex justify-between">
-                <p className='text-lg mt-5 ml-5'>{selectedText}</p>
-               <div> <DropdownButton/><button class="bg-blue-100 hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">Download CSV</button> <FileDownloadOutlinedIcon/></div>
-                
-
-            </div>
-
-            <div className='mt-9'><Table/></div>
-
-
+      <div className="flex justify-between">
+        <p className='text-lg mt-5 ml-5'>Performance</p>
+        <div> <DropdownButton /><button class="bg-blue-100 hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">
+          Download CSV</button>
+          <FileDownloadOutlinedIcon />
         </div>
-    )
+
+
+      </div>
+
+      <div className='mt-9'><Table /></div>
+
+
+    </div>
+  )
 }
 
 export default Performance
