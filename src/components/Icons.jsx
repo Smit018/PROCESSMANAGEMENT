@@ -34,3 +34,8 @@ export const AlphabetIcon = (props) => {
       </div>
     );
   };
+
+export const pipicon=
+<svg width="9" height="8" viewBox="0 0 9 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.75 2.75L8.045 3.46L6.5 1.915V4.75C6.5 6.545 5.045 8 3.25 8H0V7H3.25C4.5 7 5.5 6 5.5 4.75V1.915L3.955 3.455L3.25 2.75L6 0L8.75 2.75Z" fill="#3366FF"/>
+</svg>

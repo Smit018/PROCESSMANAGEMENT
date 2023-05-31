@@ -12,6 +12,9 @@ import Todos from '../tabs/employe-details/Todos'
 import Attendance from '../tabs/employe-details/Attendance';
 import Performance from '../tabs/employe-details/Performance';
 import AccessControls from '../tabs/employe-details/AccessControls';
+import DateSelect from '../components/DateSelect';
+import MultiSelect from '../components/MultiSelect';
+import { pipicon} from '../components/Icons';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -46,17 +49,11 @@ function a11yProps(index) {
   };
 }
 
-function BasicTabs() {
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
+function BasicTabs(props) {
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+        <Tabs value={props.value} onChange={(ev, value) => props.onChange(ev, value)} aria-label="basic tabs example">
           <Tab label="OVERVIEW" {...a11yProps(0)} />
           <Tab label="FINANCIALS" {...a11yProps(1)} />
           <Tab label="TODOS" {...a11yProps(2)} />
@@ -65,23 +62,23 @@ function BasicTabs() {
           <Tab label="ACCESS CONTROLS" {...a11yProps(5)} />
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0} pipbutt={true} eepbut={true}>
+      <TabPanel value={props.value} index={0} >
         <Overview />
       </TabPanel>
-      <TabPanel value={value} index={1}>
+      <TabPanel value={props.value} index={1}>
         <Financials />
       </TabPanel>
-      <TabPanel value={value} index={2}>
-      <Todos/>
+      <TabPanel value={props.value} index={2}>
+        <Todos />
       </TabPanel>
-      <TabPanel value={value} index={3}>
-      <Attendance />
+      <TabPanel value={props.value} index={3}>
+        <Attendance />
       </TabPanel>
-      <TabPanel value={value} index={4}>
-      <Performance />
+      <TabPanel value={props.value} index={4}>
+        <Performance />
       </TabPanel>
-      <TabPanel value={value} index={5}>
-      <AccessControls />
+      <TabPanel value={props.value} index={5}>
+        <AccessControls />
       </TabPanel>
     </Box>
   );
@@ -95,26 +92,71 @@ function BasicTabs() {
 
 const EmployeeDetails = (props) => {
   const [openAddDialog, setAddDialog] = useState(false)
+
+  const [value, setValue] = useState(0);
+
+  const handleChangeTab = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const [dates, setDates] = useState({
+    from: new Date(new Date().setDate(-30)),
+    to: new Date()
+  })
+
   return (
     <div>
       <div className='w-full h-full flex flex-col mt-4'>
         <div className='flex items-center mb-10'>
-          <h2 className='text-lg'>Employees &gt; Cameron Wilson </h2>
-          {props.pipbut===true ?(  <div className='ml-12'>
+          <h2 className='text-lg'>Employees &gt; Cameron Wilson {value===2 ? <p className='text-sm text-gray-500'>Marketing head | Bhopal</p>:null} </h2>
+          {value === 2 ?
             
-            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP</Button>
-          </div>):(<p></p>)}
-        
-          {props.eepbut===true ?(  <div className='ml-12'>
+              <div className='flex mt-5 ml-5'>
+                <div className='ml-8'>
+                  <p className='text-xs text-gray-400 ml-2'>From</p>
+                  <DateSelect
+                    date={dates.from}
+                    onDateChange={(date) => setDates({ from: date, to: dates.to })}
+                  />
+                </div>
+                <div className=''>
+                  <p className='text-xs text-gray-400 ml-2'>To</p>
+                  <DateSelect
+                    date={dates.to}
+                    onDateChange={(date) => setDates({ to: date, from: dates.from })}
+                  />
+                </div>
+                <div className='mt-4'>
+                <MultiSelect
+                    options={[]}
+                    label={'FILTER'}
+                    filter={true}
+                />
+                </div>
+              </div>
             
-            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP</Button>
-          </div>):(<p></p>)}
-          <div className='flex gap-4 mr-5 ml-auto'>
+            : null}
+
+          {(value===0 || value==1) ? (<div className='ml-12'>
+
+            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP <pipicon/></Button>
+          </div>) : null}
+
+          {(value===0 || value==1)? (<div className='ml-12'>
+
+            <Button variant="outlined" onClick={() => setAddDialog(true)}>START EEP</Button>
+          </div>) : (<p></p>)}
+
+          <div className='flex ml-auto '>
             <p className="text-blue-500">View Processes</p>&gt;
           </div>
         </div>
       </div>
-      <BasicTabs />
+
+      <BasicTabs
+        value={value}
+        onChange={(e, v) => handleChangeTab(e, v)}
+      />
       <MoveToPip
         open={openAddDialog}
         onClose={() => setAddDialog(false)}
