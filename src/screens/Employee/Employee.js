@@ -154,7 +154,6 @@ const Employee = () => {
 	const handleClose = () => {
 		setOpen(false);
 		setFilterApplied(false);
-
 	}
 
 	const formValidation = () => {

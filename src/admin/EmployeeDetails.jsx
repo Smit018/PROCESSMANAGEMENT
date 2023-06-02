@@ -14,7 +14,8 @@ import Performance from '../tabs/employe-details/Performance';
 import AccessControls from '../tabs/employe-details/AccessControls';
 import DateSelect from '../components/DateSelect';
 import MultiSelect from '../components/MultiSelect';
-import { pipicon} from '../components/Icons';
+import {AlphabetIcon,Pipicon} from '../components/Icons';
+ 
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -139,7 +140,7 @@ const EmployeeDetails = (props) => {
 
           {(value===0 || value==1) ? (<div className='ml-12'>
 
-            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP <pipicon/></Button>
+            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP </Button>
           </div>) : null}
 
           {(value===0 || value==1)? (<div className='ml-12'>
