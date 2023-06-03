@@ -7,55 +7,6 @@ import MuiAlert from '@mui/material/Alert';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 
 
-
-
-const AddAttendanceButton = ({ onClick }) => {
-  const fileInputRef = useRef(null);
-  const [isSnackBarOpen, setIsSnackBarOpen] = useState(false);
-
-  const handleButtonClick = () => {
-    fileInputRef.current.value = null;
-    fileInputRef.current.click();
-  }
-  const handleFileSelect = (event) => {
-    console.log('file select')
-    const selectedFile = event.target.files[0];
-    if (selectedFile && selectedFile.type !== 'text/csv') {
-      setIsSnackBarOpen(true);
-      return;
-    } else {
-      console.log(selectedFile);
-    }
-
-    event.target.value = null;
-  }
-  const handleSnackBarClose = () => {
-    setIsSnackBarOpen(false);
-  }
-
-
-  return (
-    <div>
-      <button className="flex items-center space-x-2 bg-primary hover:bg-slate-300 text-blue-500 font-bold px-4 rounded"
-        onClick={handleButtonClick}> +ADD ATTENDANCE </button>
-      <input
-        type="file"
-        accept=".jpg,.jpeg,.png,.pdf,.csv"
-        className="hidden"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-      />
-      <Snackbar open={isSnackBarOpen}
-        autoHideDuration={4000}
-        onClose={handleSnackBarClose}>
-        <MuiAlert onClose={handleSnackBarClose} severity='error' sx={{ width: '100%' }}>Invalid File Type!</MuiAlert>
-      </Snackbar>
-    </div>
-  );
-};
-
-
-
 const DropdownButton = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleDropdown = () => {
@@ -88,9 +39,56 @@ const DropdownButton = (props) => {
 
 
 
+const AddAttendanceButton = ({ onClick,setAttendanceTable }) => {
+  const fileInputRef = useRef(null);
+  const [isSnackBarOpen, setIsSnackBarOpen] = useState(false);
+
+  const handleButtonClick = () => {
+    fileInputRef.current.value = null;
+    fileInputRef.current.click();
+  }
+  const handleFileSelect = (event) => {
+    console.log('file select')
+    const selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile.type !== 'text/csv') {
+      setIsSnackBarOpen(true);
+      return;
+    } else {
+      setAttendanceTable(true);
+      console.log(selectedFile);
+    }
+
+    event.target.value = null;
+  }
+  const handleSnackBarClose = () => {
+    setIsSnackBarOpen(false);
+  }
+
+
+  return (
+    <div>
+      <button className="flex items-center space-x-2 bg-primary hover:bg-slate-300 text-blue-500 font-bold px-4 rounded"
+        onClick={handleButtonClick}> +ADD ATTENDANCE </button>
+      <input
+        type="file"
+        accept=".jpg,.jpeg,.png,.pdf,.csv"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+      />
+      <Snackbar open={isSnackBarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackBarClose}>
+        <MuiAlert onClose={handleSnackBarClose} severity='error' sx={{ width: '100%' }}>Invalid File Type!</MuiAlert>
+      </Snackbar>
+    </div>
+  );
+};
+
+
 const Attendance = () => {
 
-
+  const [attendanceTable,setAttendanceTable]=useState(false);
   return (
     <div>
 
@@ -98,19 +96,11 @@ const Attendance = () => {
         <p className='text-lg mt-5 ml-5'>Daily Attendance Report </p>
         <div> <DropdownButton name="2023" /><DropdownButton name="February" /></div>
       </div>
-
-      <div className="flex justify-center mt-12 text-slate-400">No attendance report added yet.  <AddAttendanceButton /> </div>
-
       
-      <div className="flex justify-between">
-        <p className='text-lg mt-5 ml-5'>Daily Attendance Report</p>
-        <div> <DropdownButton name="2023" /><button class="bg-blue-100 hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">
-          Download CSV</button>
-          <FileDownloadOutlinedIcon />
-        </div>
-      </div>
-
-      <div className='mt-9'><Table /></div>
+    
+      
+      {attendanceTable===true?(<div className='mt-9'><Table /></div>):(<div className="flex justify-center mt-12 text-slate-400">No attendance report added yet.  <AddAttendanceButton setAttendanceTable={setAttendanceTable}/> </div>)}
+      
 
 
     </div>
