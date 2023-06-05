@@ -2,10 +2,16 @@ import React from 'react'
 import { useState } from 'react'
 import '../App.css'
 import DateSelect from '../components/DateSelect';
-
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { SearchInput } from 'evergreen-ui'
+import IOsources from '../components/IOsources';
 
 const ProcessList = (list) => (
-    <div className='w-full rounded flex justify-between items-center bg-white px-4 py-5 cursor-pointer hover:bg-stone-50 hover:shadow mb-4'>
+    <div className='w-full rounded flex justify-between items-center bg-blue-50 px-4 py-5 cursor-pointer shadow-md'>
         <div className='mr-4'>
             <h2 className='text-lg text-black font-semibold mb-1'>OPLAW101</h2>
             <p className='text-sm text-gray-500'>Uploading youtube videos for APT study students</p>
@@ -14,103 +20,8 @@ const ProcessList = (list) => (
     </div>
 )
 
-
-const CollapseContent = () => {
-    const [dates, setDates] = useState({
-        from: new Date(new Date().setDate(-30)),
-        to: new Date()
-    })
-
-    return (
-        <div>
-            <div className='w-full h-full flex flex-col'>
-                <div className='flex justify-between items-center mb-10'>
-                    <h2 className='text-lg mt-5 ml-5'>Todos</h2>
-                    <div className='flex gap-4 mt-5'>
-                        <div>
-                            <p className='text-xs text-gray-400 ml-2'>From</p>
-                        <DateSelect
-                            date={dates.from}
-                            onDateChange={(date) => setDates({ from: date, to: dates.to })}
-                        />
-                        </div>
-                        <div>
-                        <p className='text-xs text-gray-400 ml-2'>To</p>
-                        <DateSelect
-                            date={dates.to}
-                            onDateChange={(date) => setDates({ to: date, from: dates.from })}
-                        />
-                        </div>
-                    </div>
-                </div>
-                <div className='ml-5'>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Create a custom thumbnail</p>
-                    <p className='mb-5'>Lorem ipsum dolor sit amet. Et labore recusandae 33 facilis suscipit quo consequuntur omnis qui eveniet ullam aut dolor nisi hic laudantium omnis! Et quis accusamus sed voluptatem galisum qui iste enim et velit sunt? Qui officia explicabo qui maxime galisum in impedit quia a inventore natus est aliquam iure vel delectus exercitationem rem consequuntur nobi</p>
-
-
-
-                </div>
-            </div>
-
-
-        </div>
-    )
-}
-
-
-
-
-const Collapse = ({ title, children }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const toggleCollapse = () => {
-        setIsOpen(!isOpen);
-    };
-
-    return (
-        <div className="border rounded p-2">
-            <button
-                className="flex justify-between items-center w-full bg-gray-200 px-4 py-2 rounded focus:outline-none"
-                onClick={toggleCollapse}
-            >
-                <span className="text-lg">{title}</span>
-                <svg
-                    className={`transform transition-transform duration-300 ${isOpen ? "rotate-360" : ""
-                        } h-6 w-6`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d={isOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                    />
-                </svg>
-            </button>
-            {isOpen && (
-                <div className="p-2 mt-2 bg-white rounded">{children}</div>
-            )}
-        </div>
-    );
-};
-
-
-
-
-
-
-
-
-
-
 const ProcessDetails = () => {
+
     return (
         <div>
             <div className='w-full h-full flex flex-col'>
@@ -122,25 +33,113 @@ const ProcessDetails = () => {
                 <ProcessList />
             </div>
             <p className='mt-5 text-lg text-black font-semibold' >STEPS</p>
-            <div className='mt-5'>
-                <Collapse title="1. Uploading youtube videos"> <CollapseContent /></Collapse>
+            <div>
+                <SimpleAccordion />
             </div>
-            <div className='mt-5'>
-                <Collapse title="2. Share youtube links on social media platforms"> <CollapseContent /></Collapse>
+            <div className='mt-5 py-12'>
+                <IOsources heading="INPUT SOURCES"/>
             </div>
-            <div className='mt-5'>
-                <Collapse title="3. Seminar head gives feedback form physically"> <CollapseContent /></Collapse>
+            <div className='mt-5 py-12'>
+                <IOsources heading="OUTPUT SOURCES"/>
             </div>
-
-
         </div>
     )
 }
 
-
-
-
-
-
-
 export default ProcessDetails
+
+
+
+
+
+const SimpleAccordion = () => {
+    return (
+        <div className=''>
+            <Accordion className='mb-3 mt-3 shadow-md'>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                >
+                    <Typography >Data Manager</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography >
+                        <AccordianContent />
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+
+            <Accordion className='mb-3 shadow-md'>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography>APT Study 2.0</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography>
+                        <AccordianContent />
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+
+            <Accordion className='mb-3 shadow-md'>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography>APT Website Admin</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography>
+                        <AccordianContent />
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+
+        </div>
+    );
+}
+
+const AccordianContent = () => {
+    const [dates, setDates] = useState({
+        from: new Date(new Date().setDate(-30)),
+        to: new Date()
+    })
+    return (
+        <div>
+            <div className='flex justify-between items-center mb-10'>
+                <h2 className='text-lg mt-5 ml-5'>Todos</h2>
+                <div className='flex gap-4 mt-5'>
+                    <div>
+                        <p className='text-xs text-gray-400 ml-2'>From</p>
+                        <DateSelect
+                            date={dates.from}
+                            onDateChange={(date) => setDates({ from: date, to: dates.to })}
+                        />
+                    </div>
+                    <div>
+                        <p className='text-xs text-gray-400 ml-2'>To</p>
+                        <DateSelect
+                            date={dates.to}
+                            onDateChange={(date) => setDates({ to: date, from: dates.from })}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className='ml-5'>
+                <p className='mb-5'>Create a custom thumbnail</p>
+                <p className='mb-5'>Create a custom thumbnail</p>
+                <p className='mb-5'>Create a custom thumbnail</p>
+                <p className='mb-5'>Create a custom thumbnail</p>
+                <p className='mb-5'>Create a custom thumbnail</p>
+                <p className='mb-5'>Create a custom thumbnail</p>
+               
+
+            </div>
+        </div>
+        )
+}
