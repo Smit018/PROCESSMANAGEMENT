@@ -103,7 +103,7 @@ const AddMember = (props) => {
         return (
             <div className='relative p-4'>
                 <button type="button" className={`h-10 w-10 flex justify-center items-center rounded-full bg-white absolute shadow-md right-3 add-btn ${imgPresent ? 'top-3 text-rose-500' : 'bottom-3 primary'}`} onClick={removeImage}>
-                    <SmallCrossIcon size={24} />
+                    <SmallCrossIcon size={12} />
                 </button>
                 <img src={image} className="pol" onClick={(e) => e.stopPropagation()} />
             </div>

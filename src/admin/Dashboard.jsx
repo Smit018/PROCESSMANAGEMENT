@@ -3,6 +3,7 @@ import DateSelect from '../components/DateSelect';
 import DashboardCard from '../components/DashboardCard';
 import { AddToArtifactIcon, Avatar, PeopleIcon } from 'evergreen-ui';
 import { assets, Dot, people, performance, process, todo } from '../components/Icons';
+import AddIcon from '@mui/icons-material/Add';
 
 const Dashboard = () => {
 
@@ -108,7 +109,10 @@ const Dashboard = () => {
 			<div className='flex-auto'>
 				<div className='w-full flex flex-wrap gap-10 mb-10'>
 					<div>
+						<div className='flex align-middle'>
 						<h3 className='text-base mb-4'>Employees</h3>
+                         <h4 className='text-blue-500 ml-2 underline text-sm font-normal'> Employee Report</h4>
+						</div>
 						<DashboardCard
 							title={'Active Employees'}
 							desc={236}
@@ -161,6 +165,7 @@ const Dashboard = () => {
 							desc={8.9}
 							icon={performance}
 							color={`#0084FE`}
+							button={<AddIcon className='bg-blue-500 text-white w-5 h-5'/>}
 						/>
 					</div>
 					<div>

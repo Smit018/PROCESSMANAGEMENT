@@ -16,18 +16,18 @@ const AccessControls = () => {
     <div>
 
 
-      <div className='w-full rounded flex justify-between items-center bg-blue-100 px-4 cursor-pointer hover:bg-stone-50 hover:shadow mb-4'>
+      <div className='w-full rounded flex justify-between items-center bg-blue-50 px-4 cursor-pointer hover:shadow mb-4'>
         <div className='mr-4 flex-1 py-2'>
           <h2 className='text-lg text-black font-semibold mb-1'>5</h2>
           <p className='text-sm text-gray-400 '>Whatsapp groups</p>
         </div>
         <div className='mr-4 flex-1 py-2'>
           <h2 className='text-lg text-black font-semibold mb-1'>5</h2>
-          <p className='text-sm text-gray-400 '>Whatsapp groups</p>
+          <p className='text-sm text-gray-400 '>Documents</p>
         </div>
         <div className='mr-4 flex-1 py-2'>
           <h2 className='text-lg text-black font-semibold mb-1'>5</h2>
-          <p className='text-sm text-gray-400 '>Whatsapp groups</p>
+          <p className='text-sm text-gray-400 '>Applications</p>
         </div>
 
       </div>
@@ -86,8 +86,7 @@ const SimpleAccordion=()=>{
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
+          <RadioButtonsGroup/>
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -102,8 +101,7 @@ const SimpleAccordion=()=>{
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
+          <RadioButtonsGroup/>
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -117,8 +115,7 @@ const SimpleAccordion=()=>{
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
+          <RadioButtonsGroup/>
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -133,8 +130,7 @@ const SimpleAccordion=()=>{
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
+          <RadioButtonsGroup/>
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -149,19 +145,19 @@ const RadioButtonsGroup=()=> {
   return (
     <FormControl>
      
-      <RadioGroup
+      <RadioGroup className='flex justify-between'
         aria-labelledby="demo-radio-buttons-group-label"
         defaultValue="female"
         name="radio-buttons-group"
-      > <div className='flex '>
-        <FormControlLabel className='text-gray-400 flex-1 ' value="No Access" control={<Radio />} label="Female" />
-        <FormControlLabel className='text-gray-400 flex-1' value="admin" control={<Radio />} label="Male" />
-        <FormControlLabel className='text-gray-400 flex-1' value="Database manager" control={<Radio />} label="Other" />
-        <FormControlLabel className='text-gray-400 flex-1' value="Notes Manager" control={<Radio />} label="Female" />
-        <FormControlLabel className='text-gray-400 flex-1' value="Video Manager" control={<Radio />} label="Male" />
-        <FormControlLabel className='text-gray-400 flex-1' value="Demo Video Manager" control={<Radio />} label="Other" />
-        <FormControlLabel className='text-gray-400 flex-1' value="Objective Question Manager" control={<Radio />} label="Other" />
-        <FormControlLabel className='text-gray-400 flex-1' value="SUbjective Question Manager" control={<Radio />} label="Other" />   
+      > <div className='flex justify-between'>
+        <FormControlLabel className='text-gray-400 ' value="No Access" control={<Radio />} label="No Access" />
+        <FormControlLabel className='text-gray-400' value="admin" control={<Radio />} label="admin" />
+        <FormControlLabel className='text-gray-400' value="Database manager" control={<Radio />} label="Database manager" />
+        <FormControlLabel className='text-gray-400' value="Notes Manager" control={<Radio />} label="Notes Manager" />
+        <FormControlLabel className='text-gray-400' value="Video Manager" control={<Radio />} label="Video Manager" />
+        <FormControlLabel className='text-gray-400' value="Demo Video Manager" control={<Radio />} label="Demo Video Manager" />
+        <FormControlLabel className='text-gray-400' value="Objective Question Manager" control={<Radio />} label="Objective Question Manager" />
+        <FormControlLabel className='text-gray-400' value="SUbjective Question Manager" control={<Radio />} label="Subjective Question Manager" />   
       </div>
   
       </RadioGroup>

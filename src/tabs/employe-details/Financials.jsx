@@ -167,7 +167,7 @@ const Financials = () => {
         <p className='text-lg mt-5 ml-5'>Salary Pay History</p>
         <div> <DropdownButton /><button class="bg-blue-100 hover:bg-gray-100 text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">
           Download CSV</button>
-          <FileDownloadOutlinedIcon />
+          <FileDownloadOutlinedIcon className="bg-white h-full w-15 " />
         </div>
       </div>
 

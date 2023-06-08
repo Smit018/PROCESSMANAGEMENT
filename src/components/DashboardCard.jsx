@@ -16,8 +16,11 @@ const DashboardCard = (props) => {
                 </div>
             </div>
             <div className='flex-auto px-4 py-0'>
-                <p className='text-gray-400 text-sm uppercase mb-1'>{props.title}</p>
+                <p className='text-gray-400 text-xs uppercase mb-1'>{props.title}</p>
                 <p className='text-black text-lg'>{props.desc}</p>
+            </div>
+            <div className='align-middle flex items-center'>
+               {props.button}
             </div>
         </div>
     )

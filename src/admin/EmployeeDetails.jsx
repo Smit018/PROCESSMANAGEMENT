@@ -14,8 +14,9 @@ import Performance from '../tabs/employe-details/Performance';
 import AccessControls from '../tabs/employe-details/AccessControls';
 import DateSelect from '../components/DateSelect';
 import MultiSelect from '../components/MultiSelect';
-import {AlphabetIcon,Pipicon} from '../components/Icons';
- 
+import { PersonRemoveAlt1OutlinedIcon } from '@mui/icons-material/PersonRemoveAlt1Outlined';
+
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -52,7 +53,7 @@ function a11yProps(index) {
 
 function BasicTabs(props) {
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%'}}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={props.value} onChange={(ev, value) => props.onChange(ev, value)} aria-label="basic tabs example">
           <Tab label="OVERVIEW" {...a11yProps(0)} />
@@ -109,10 +110,28 @@ const EmployeeDetails = (props) => {
     <div>
       <div className='w-full h-full flex flex-col mt-4'>
         <div className='flex items-center mb-10'>
-          <h2 className='text-lg'>Employees &gt; Cameron Wilson {value===2 ? <p className='text-sm text-gray-500'>Marketing head | Bhopal</p>:null} </h2>
-          {value === 2 ?
-            
-              <div className='flex mt-5 ml-5'>
+          <div className='flex mr-2'>
+
+            <h2 className='text-lg'>Employees &gt; Cameron Wilson {(value === 1 || value === 2 || value === 3 || value === 4 || value === 5)
+              ? <div className='flex '><p className='text-sm text-gray-500'>Marketing head | Bhopal </p><p className='text-xs px-1 py-1 text-green-800 bg-green-100 ml-2 border rounded-lg'>Active</p></div> : null}
+            </h2>
+            {(value === 0) ? (<div className='ml-2 bg-white text-blue-400 mb-4 border-white ' >
+
+              <Button variant="outlined" className='border-white' onClick={() => setAddDialog(true)}>MOVE TO PIP </Button>
+            </div>) : null}
+
+            {(value === 0) ? (<div className='ml-2 bg-white mb-4'>
+
+              <Button variant="outlined" className='border-white' onClick={() => setAddDialog(true)}>START EEP  </Button>
+            </div>) : (<p></p>)}
+          </div>
+
+
+
+          <div className='flex ml-auto'>
+            {value === 2 ?
+
+              <div className='flex ml-5'>
                 <div className='ml-8'>
                   <p className='text-xs text-gray-400 ml-2'>From</p>
                   <DateSelect
@@ -128,28 +147,18 @@ const EmployeeDetails = (props) => {
                   />
                 </div>
                 <div className='mt-4'>
-                <MultiSelect
+                  <MultiSelect
                     options={[]}
                     label={'FILTER'}
                     filter={true}
-                />
+                  />
                 </div>
               </div>
-            
-            : null}
 
-          {(value===0 || value==1) ? (<div className='ml-12'>
+              : null}
 
-            <Button variant="outlined" onClick={() => setAddDialog(true)}>MOVE TO PIP </Button>
-          </div>) : null}
+            <p className="text-blue-500 mt-6 ml-2">View Processes &gt;</p>
 
-          {(value===0 || value==1)? (<div className='ml-12'>
-
-            <Button variant="outlined" onClick={() => setAddDialog(true)}>START EEP</Button>
-          </div>) : (<p></p>)}
-
-          <div className='flex ml-auto '>
-            <p className="text-blue-500">View Processes</p>&gt;
           </div>
         </div>
       </div>
@@ -168,3 +177,13 @@ const EmployeeDetails = (props) => {
 }
 
 export default EmployeeDetails
+
+
+
+
+
+
+
+
+
+
