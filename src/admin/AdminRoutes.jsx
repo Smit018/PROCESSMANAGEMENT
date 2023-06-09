@@ -12,7 +12,7 @@ import AssignedToDo from "./AssignedToDo";
 import Dashboard from "./Dashboard";
 import EmployeeDetails from "./EmployeeDetails";
 import Allotments from "./Allotments";
-
+import AddEmployee from "./AddEmployee"
 
 const AdminRoutes = () => (
     <Routes>
@@ -29,6 +29,7 @@ const AdminRoutes = () => (
             <Route path="type" element={<Types />} />
             <Route path="allotments" element={<Allotments/>} />
             <Route path="employees/employee-details"  element={<EmployeeDetails/>}></Route>
+            <Route path="employees/add-employee"  element={<AddEmployee/>}></Route>
         </Route>
     </Routes>
 )
