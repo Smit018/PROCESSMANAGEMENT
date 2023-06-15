@@ -116,7 +116,7 @@ const Navigator=()=> {
           </Step>
         ))}
       </Stepper>
-      <div>
+      <div className='bg-white'>
         {allStepsCompleted() ? (
           <Fragment>
             <Typography sx={{ mt: 2, mb: 1 }}>
@@ -135,10 +135,8 @@ const Navigator=()=> {
                {activeStep ===2 && <SalaryTerms/> }
                {activeStep ===3 && <Benefits/> }
             </Typography>
-            
-   
 
-            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 25,pb:5,bgcolor:"white" }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 25,pb:5}}>
              
               <Box sx={{ flex: '1 1 auto' }} />
               <Button 

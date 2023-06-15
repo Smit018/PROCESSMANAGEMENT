@@ -17,13 +17,13 @@ import { AvatarList } from '../../components/AvatarList/AvatarList';
 let allData = []
 
 const Process = () => {
-	const navigate = useNavigate()
-	const [showForm, setShowForm] = useState(false)
-	const [search, setSearch] = useState('')
-	const [screenHeight, setScreenHeight] = useState('')
-	const [types, setTypes] = useState([])
-	const [departments, setDept] = useState([])
-	const [members, setMembers] = useState([])
+	const navigate = useNavigate();
+	const [showForm, setShowForm] = useState(false);
+	const [search, setSearch] = useState('');
+	const [screenHeight, setScreenHeight] = useState('');
+	const [types, setTypes] = useState([]);
+	const [departments, setDept] = useState([]);
+	const [members, setMembers] = useState([]);
 	const [process, setProcess] = useState([]);
 	const [uniqueNumber, setUniqueNumber] = useState(1);
 	const [allProcess, setAllProcess] = useState(null);
@@ -85,7 +85,7 @@ const Process = () => {
 	}
 
 	const fetchCount = (where) => {
-		return new Promise(async (resolve, reject) => {
+		return new Promise(async (resolve,reject) => {
 			try {
 				where = where || `where={"deleted": {"neq": true}}`
 				const url = `processes/count?${where}`
