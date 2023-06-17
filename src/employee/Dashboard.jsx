@@ -36,7 +36,7 @@ const Dashboard = () => {
 							desc={236}
 							icon={todo}
 							color={`#8F95B2`}
-							click={() => navigate('/pm/assigned')}
+							path='/pm/assigned'
                             dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -47,7 +47,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={todo}
 							color={`#8F95B2`}
-							click={() => navigate('/pm/assigned')}
+							path='/pm/assigned'
                             dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -58,7 +58,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
-							click={() => navigate('/pm/assigned')}
+							path='/pm/assigned'
 							dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -69,7 +69,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
-							click={() => navigate('/pm/assigned')}
+							path='/pm/assigned'
 							dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -80,7 +80,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={process}
 							color={`#25CBD6`}
-							click={() => navigate('/pm/process-details')}
+							path='/pm/process-details'
 						/>
 					</div>
 					<div>
@@ -90,7 +90,7 @@ const Dashboard = () => {
 							desc={26}
 							icon={process}
 							color={`#25CBD6`}
-							click={() => navigate('/pm/process-details')}
+							path='/pm/process-details'
 						/>
 					</div>
 					<div>
@@ -100,7 +100,7 @@ const Dashboard = () => {
 							desc={8.9}
 							icon={performance}
 							color={`#0084FE`}
-							click={() => navigate('/pm/performance-meter')}
+							path='/pm/performance-meter'
 						/>
 					</div>
 					<div>
@@ -110,7 +110,7 @@ const Dashboard = () => {
 							desc={5}
 							icon={assets}
 							color={`#6E62B6`}
-							click={() => navigate('/pm/performance-meter')}
+							path='/pm/performance-meter'
 						/>
 					</div>
 				</div>

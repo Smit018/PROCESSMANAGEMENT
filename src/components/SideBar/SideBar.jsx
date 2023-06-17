@@ -111,7 +111,10 @@ function SideBar(props) {
             { title: 'Dashboard', path: '/pm/dashboard', icon: <HomeIcon/> },
             { title: 'Processes', path: '/pm/processes', icon: <ProcessIcon/>},
             { title: 'Todos', path: '/pm/todo', icon: <TodoIcon/> },
-            { title: 'Allotments', path: '/pm/allotments', icon: <AllotmentIcon /> }
+            { title: 'Allotments', path: '/pm/allotments', icon: <AllotmentIcon /> },
+            { title: 'Whatsapp groups', path: '/pm/whatsapp-groups', icon: <AllotmentIcon /> },
+            { title: 'Documents', path: '/pm/documents', icon: <AllotmentIcon /> },
+            { title: 'Logout', path: '/pm/Logout', icon: <AllotmentIcon /> }
         ]
     }
 

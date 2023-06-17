@@ -25,40 +25,36 @@ export default function AddAllotment(props) {
         <DialogTitle>RECORD ALLOTMENT</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
-            margin="dense"
+            size='small'
             id="name"
             label="TITLE"
-            type="email"
             fullWidth
             value={props.title}
-            variant="standard"
+            variant="outlined"
             onChange={(e) => props.onTitleChange(e.target.value)}
+            className='mb-7'
           />
           <TextField
-            autoFocus
-            margin="dense"
+            size='small'
             id="name"
             label="Description"
             type="email"
             fullWidth
             value={props.description}
-            variant="standard"
+            variant="outlined"
             onChange={(e) => props.onDescriptionChange(e.target.value)}
+            className='mb-7'
           />
-          <div className='flex gap-4 mt-5 justify-between'>
+          <div className='flex gap-2 flex-wrap items-center'>
             <div>
               <TextField
-                autoFocus
-                margin="dense"
                 id="name"
-                
                 label="Employee"
-                type="email"
-                fullWidth
                 value={props.employeename}
-                variant="standard"
+                variant="outlined"
+                size='small'
                 onChange={(e) => props.onNameChange(e.target.value)}
+                className='mb-7'
               />
             </div>
             <div>
@@ -79,7 +75,7 @@ export default function AddAllotment(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => props.onClose()}>Cancel</Button>
-          <Button onClick={() => props.save()}>SAVE</Button>
+          <Button variant='contained' onClick={() => props.save()}>SAVE</Button>
         </DialogActions>
       </Dialog>
     </div>

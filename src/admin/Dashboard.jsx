@@ -6,6 +6,7 @@ import { assets, Dot, people, performance, process, todo } from '../components/I
 import AddIcon from '@mui/icons-material/Add';
 
 const Dashboard = () => {
+    
 
 	const [dates, setDates] = useState({
 		from: new Date(new Date().setDate(-30)),
@@ -15,7 +16,7 @@ const Dashboard = () => {
 	const paths = [
 		{ path: '/admin/dashboard/', title: 'Dashboard' }
 	]
-
+   
 
 	const top = [{
 		"profile": "https://robohash.org/facilisvoluptatemdolorem.png?size=75x75&set=set1",
@@ -62,6 +63,7 @@ const Dashboard = () => {
 	}]
 
 	const TopEmployee = (emp) => (
+		
 		<div className='full-w shadow'>
 			{emp?.data?.map((e, index) => (
 				<div key={index} className='flex mb-4 items-center'>
@@ -90,6 +92,7 @@ const Dashboard = () => {
 		</div>
 	)
 
+ 
 
 	return (
 		<div className='w-full h-full flex flex-col'>
@@ -184,6 +187,7 @@ const Dashboard = () => {
 							desc={28}
 							icon={process}
 							color={`#25CBD6`}
+							path="/admin/processes"
 						/>
 					</div>
 				</div>

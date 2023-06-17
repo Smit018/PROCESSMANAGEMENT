@@ -3,12 +3,14 @@ import * as React from 'react'
 
 
 import moment from 'moment'
+import { useNavigate } from 'react-router-dom'
 
 const DashboardCard = (props) => {
     const [date, setDate] = React.useState(new Date(props.date))
+    const navigate=useNavigate();
 
     return (
-        <div className='bg-white flex w-60 md:w-72 lg:w-80 rounded-md shadow-none p-4 hover:bg-gray-100 cursor-pointer' onClick={() => props.click()}>
+        <div className='bg-white flex w-60 md:w-72 lg:w-80 rounded-md shadow-none p-4 hover:bg-gray-100 cursor-pointer' onClick={() => navigate(props.path)}>
             <div className='px-4 py-0 flex justify-center items-center'>
                 <div className='p-2 rounded relative' style={{backgroundColor: props.color}}>
                     {props.icon}
