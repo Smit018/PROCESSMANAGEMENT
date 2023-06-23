@@ -4,6 +4,7 @@ import DashboardCard from '../components/DashboardCard';
 import { AddToArtifactIcon, Avatar, PeopleIcon } from 'evergreen-ui';
 import { assets, Dot, people, performance, process, todo } from '../components/Icons';
 import AddIcon from '@mui/icons-material/Add';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     
@@ -114,13 +115,14 @@ const Dashboard = () => {
 					<div>
 						<div className='flex align-middle'>
 						<h3 className='text-base mb-4'>Employees</h3>
-                         <h4 className='text-blue-500 ml-2 underline text-sm font-normal'> Employee Report</h4>
+						<Link to="/admin/employees/employee-report" className='text-blue-500 ml-2 underline text-sm font-normal'>Employee Report</Link>
 						</div>
 						<DashboardCard
 							title={'Active Employees'}
 							desc={236}
 							icon={people}
 							color={`#7EBF7D`}
+							path="/admin/employees"
 						/>
 					</div>
 					<div>

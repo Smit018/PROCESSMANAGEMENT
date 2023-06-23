@@ -1,6 +1,5 @@
 import {React,useState,Fragment} from 'react'
 import StepLabel from '@mui/material/StepLabel';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -14,43 +13,12 @@ import Basics from '../tabs/AddEmployee/Basics'
 import Benefits from '../tabs/AddEmployee/Benefits'
 import PersonalInfo from '../tabs/AddEmployee/PersonalInfo'
 import SalaryTerms from '../tabs/AddEmployee/SalaryTerms'
-
+import { Breadcrumbs } from '../components/Breadcrumbs/Breadcrumbs';
 
 function handleClick(event) {
   event.preventDefault();
   console.info('You clicked a breadcrumb.');
 }
-
-const CustomSeparator=()=> {
-  const breadcrumbs = [
-    <Link underline="hover" key="1" color="inherit" href="/" onClick={handleClick} className='text-black text-lg'>
-      Employee
-    </Link>,
-    <Link
-      className='text-black text-lg'
-      underline="hover"
-      key="2"
-      color="inherit"
-      href="/material-ui/getting-started/installation/"
-      onClick={handleClick}
-    >
-      Add Employee
-    </Link>,
-  ];
-
-  return (
-    <Stack spacing={2}>
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        aria-label="breadcrumb"
-      >
-        {breadcrumbs}
-      </Breadcrumbs>
-    </Stack>
-  );
-}
-
-
 
 const steps = ['Basics', 'Personal Info', 'SALARY TERMS','BENEFITS'];
 
@@ -168,10 +136,14 @@ const Navigator=()=> {
 }
 
 const AddEmployee = () => {
+  const paths = [
+    { title: 'Employees', path: '/admin/employees' },
+    { title: 'Cameron Wilson', path: '/admin/employees' },
+  ];
   return (
     <div>
      <div className='mb-5'>
-      <CustomSeparator/>
+      <Breadcrumbs paths={paths}/>
      </div>
      <div className=' mt-16'>
       <Navigator/>

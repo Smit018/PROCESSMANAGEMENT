@@ -8,58 +8,9 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import YearMonthDropDown from "../../components/YearMonthDropDown";
 
 
-const years=[];
-const months=['January',
-'February',
-'March',
-'April',
-'May',
-'June',
-'July',
-'August',
-'September',
-'October',
-'November',
-'December',]
-
-const staticData = {
-  years: years,
-  months: months
-}
-
-const currentYear=new Date().getFullYear();
-
-for(let year=1900;year<=currentYear;year++){
-  years.push(year);
-}
-
-const DropdownButton=(props)=> {
-  const [age, setAge] = useState(''); 
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
-  // const options = Array.isArray(props.name) ? props.name : [];
-  return (
-    <Box sx={{ minWidth: 120, bgcolor:"white" }}>
-      <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{props.name}</InputLabel>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={age}
-          label={props.name}
-          onChange={handleChange}
-        >
-          {staticData[props.name]?.map((year)=>(
-            <MenuItem value={year} key={year}>{year} </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
-  );
-}
 
 
 const AddAttendanceButton = ({ onClick,setAttendanceTable }) => {
@@ -117,7 +68,7 @@ const Attendance = () => {
 
       <div className="flex justify-between">
         <p className='text-lg mt-5 ml-5'>Daily Attendance Report </p>
-        <div className="flex"> <DropdownButton name="years" /><DropdownButton name="months" />{attendanceTable===true?(<div><button class=" bg-slate-200 hover:bg-gray-100 h-full   text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">
+        <div className="flex"> <YearMonthDropDown name="years" /><YearMonthDropDown name="months" />{attendanceTable===true?(<div><button class=" bg-slate-200 hover:bg-gray-100 h-full   text-gray-800 py-2 px-4 border border-gray-200 rounded shadow text-right">
           Download CSV</button><FileDownloadOutlinedIcon className="bg-white h-full w-15 " /></div>):(null)} </div>
       </div>
       

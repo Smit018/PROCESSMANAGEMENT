@@ -11,26 +11,27 @@ import { CrossIcon } from '@mui/icons-material';
 export default function MoveToPip(props) {
 
   return (
-    <div>
+    <div className='w-56'>
      
-      <Dialog open={props.open} onClose={()=>props.onClose()}>
-        <DialogTitle>MOVE TO PIP</DialogTitle>
+      <Dialog open={props.open} onClose={()=>props.onClose()} 
+       PaperProps={{
+        sx:{maxwidth:"520px!important",  width:"100%",minHeight:"250px"},
+    }} >
+        <DialogTitle className='bg-slate-100 mb-2'>MOVE TO PIP</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-           No. Of Days
-          </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
             id="name"
             type="email"
             fullWidth
-            variant="standard"
+            variant="outlined"
+            label="No. Of Days"
           />
         </DialogContent>
-         <div className='flex align-middle bg-gray-200 h-300'>
-            <div>Continued</div>
-            <div className='justify-end mr-5 '>November 18,2022</div>
+         <div className='flex bg-slate-200 h-fit justify-between'>
+            <div className='pl-24'>Continued</div>
+            <div className='pr-10 text-xs text-gray-400 pt-3'>November 18,2022</div>
          </div>
         <DialogActions>
           <Button onClick={() => props.onClose()}>SAVE</Button>

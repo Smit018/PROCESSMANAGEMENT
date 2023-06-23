@@ -8,12 +8,9 @@ import Link from '@mui/material/Link';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import DownloadIcon from '@mui/icons-material/Download';
 
-
-
-
 import { Button, AddIcon, SearchInput, SearchIcon, TextInput } from "evergreen-ui";
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs';
-
+import YearMonthDropDown from '../YearMonthDropDown';
 
 
 
@@ -66,6 +63,15 @@ const TopBar = (props) => {
 		)
 	}
 
+	const YearMonthDropDown1=()=>{
+		return (
+			<div className='flex'>
+			<YearMonthDropDown name="months" />
+			<YearMonthDropDown name="years" />
+			</div>
+		)
+	}
+
 	const addButton = () => {
 		return (
 			<Button appearance="primary" iconBefore={AddIcon} onClick={() => add()}>{props.addTitle}</Button>
@@ -83,8 +89,10 @@ const TopBar = (props) => {
 			<div className='flex flex-wrap items-center' role="presentation">
 				{props.search != undefined ? searchBar() : null}
 				{props.filter ? filterButton() : null}
+				{props.dropdown ?  YearMonthDropDown1():null}
 				{props.csv ? downloadButton() : null}
 				{props.add ? addButton() : null}
+				
 			</div>
 		</div>
 	);

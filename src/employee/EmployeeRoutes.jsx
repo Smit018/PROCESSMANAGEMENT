@@ -4,10 +4,11 @@ import SideBar from '../components/SideBar/SideBar';
 import Dashboard from './Dashboard';
 import Login from './Login';
 import Process from './Process';
-import AssignedBy from './AssignedBy'
+import AssignedBy from './AssignedTodo'
 import ProcessDetails from './ProcessDetails';
 import PerformanceMeter from './PerformaceMeter';
 import Allotments from './Allotments';
+import Whatsappgroup from '../screens/WhatsappGroup/WhatsappGroup'
 
 const EmployeeRoutes = () => (
     <Routes>
@@ -18,9 +19,10 @@ const EmployeeRoutes = () => (
             <Route path='dashboard' element={<Dashboard/>}/>
             <Route path='processes' element={<Process/>}/>
             <Route path='allotments' element={<Allotments/>}/>
-            <Route path='assigned' element={<AssignedBy/>}/>
-            <Route path='process-details' element={<ProcessDetails/>}/>
+            <Route path='assigned/:type/:mode' element={<AssignedBy/>}/>
+            <Route path='processes/process-details' element={<ProcessDetails/>}/>
             <Route path='performance-meter' element={<PerformanceMeter/>}/>
+            <Route path='whatsapp-groups' element={<Whatsappgroup/>}/>
 
         </Route>
     </Routes>

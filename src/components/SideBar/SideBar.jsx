@@ -20,12 +20,9 @@ import { Avatar, ChevronRightIcon, ControlIcon, DashboardIcon } from 'evergreen-
 
 import { BrowserRouter as Router, Routes, Route, Link, Outlet, useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-
 // ICONS
 import { userAuthState } from '../../services/recoil.service';
 import { logout, updateLocalStorage } from '../../services/https.service';
-
-
 import { TextInput, TextInputField, Button, Menu, DocumentIcon, PeopleIcon, MugshotIcon, EditIcon, RandomIcon, ChatIcon, toaster } from "evergreen-ui";
 import PromptDialog from '../../dialogs/PromptDialog/PromptDialog';
 import { ListSubheader } from '@mui/material';
@@ -33,14 +30,11 @@ import { Dashboard } from '@mui/icons-material';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
 import TreeView from '@mui/lab/TreeView';
 import TreeItem from '@mui/lab/TreeItem';
 import { AllotmentIcon, HomeIcon, ProcessIcon, TodoIcon } from '../ProcessIcons';
 
 const drawerWidth = 240;
-
-
 
 function SideBar(props) {
 
@@ -48,7 +42,7 @@ function SideBar(props) {
 
     const { window } = props;
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [menu, setMenu] = React.useState([])
+    const [menu, setMenu] = React.useState([]);
 
     const [showLogout, setShowLogout] = React.useState(false)
     const _storage = useRecoilValue(userAuthState);
@@ -78,13 +72,14 @@ function SideBar(props) {
             { title: 'PIP', path: 'pip', icon: <Dashboard fontSize='32px' /> },
             { title: 'Loans & Advances', path: 'department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Attendance', path: 'department', icon: <FiberManualRecordIcon fontSize='32px' /> },
-            { title: 'Performance', path: 'department', icon: <FiberManualRecordIcon fontSize='32px' /> },
+            { title: 'Performance', path: 'performance-point', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Payroll', path: 'department', icon: <FiberManualRecordIcon fontSize='32px' /> },
             { title: 'Vendors', path: 'vendors', icon: <Dashboard fontSize='32px' /> },
             { title: 'Whatsapp Groups', path: 'whatsapp-groups', icon: <Dashboard fontSize='32px' /> },
             { title: 'Documents', path: 'documents', icon: <Dashboard fontSize='32px' /> },
             { title: 'Process Matrix', path: 'process-matrix', icon: <Dashboard fontSize='32px' /> },
-            { title: 'Allotments', path: 'pm/allotments', icon: <Dashboard fontSize='32px' /> }
+            { title: 'Allotments', path: 'pm/allotments', icon: <Dashboard fontSize='32px' /> },
+            
             
         ],
         rh: [

@@ -38,7 +38,7 @@ const Dashboard = () => {
                             desc={236}
                             icon={todo}
                             color={`#8F95B2`}
-                            click={() => navigate('/hr/assigned/to/overdue')}
+                            path='/hr/assigned/to/overdue'
                             dot={<Dot color='#F46767' />}
                         />
                     </div>
@@ -49,7 +49,7 @@ const Dashboard = () => {
                             desc={`21`}
                             icon={todo}
                             color={`#8F95B2`}
-                            click={() => navigate('/hr/assigned/to/pending')}
+                            path='/hr/assigned/to/pending'
                             dot={<Dot color='#EF9000' />}
                         />
                     </div>
@@ -60,7 +60,7 @@ const Dashboard = () => {
                             desc={`10`}
                             icon={todo}
                             color={`#8F95B2`}
-                            click={() => navigate('/hr/assigned/by/overdue')}
+                            path='/hr/assigned/by/overdue'
                             dot={<Dot color='#F46767' />}
                         />
                     </div>
@@ -71,7 +71,7 @@ const Dashboard = () => {
                             desc={`10`}
                             icon={todo}
                             color={`#8F95B2`}
-                            click={() => navigate('/hr/assigned/by/pending')}
+                            path='/hr/assigned/by/pending'
                             dot={<Dot color='#EF9000' />}
                         />
                     </div>

@@ -15,11 +15,89 @@ import { showEmpty, showSpinner } from '../../components/GlobalComponent';
 import Paginator from '../../components/Paginator/Paginator';
 import { CSV } from '../../services/csv.service';
 import { constSelector } from 'recoil';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+ function BasicTabs() {
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="ACTIVE" {...a11yProps(0)} />
+          <Tab label="PIP" {...a11yProps(1)} />
+          <Tab label="EEP	" {...a11yProps(2)} />
+        </Tabs>
+      </Box>
+      {/* <TabPanel value={value} index={0}>
+        Item One
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        Item Two
+      </TabPanel>
+      <TabPanel value={value} index={2}>
+        Item Three
+      </TabPanel> */}
+    </Box>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 let allData = []
 
-const Employee = () => {
+const Employee = (props) => {
 	const [showForm, setShowForm] = useState(false)
 	const [employee, setEmployee] = useState({});
 	const [imgPresent, setImgPresent] = useState(false);
@@ -170,7 +248,6 @@ const Employee = () => {
 		setSaveImage(e.target.files[0]);
 		setImage(URL.createObjectURL(e.target.files[0]))
 		setImgPresent(true);
-
 	}
 
 	const _uploadFile = async (file) => {
@@ -302,8 +379,6 @@ const Employee = () => {
 				description: err.message
 			})
 		}
-
-
 	}
 
 
@@ -474,17 +549,20 @@ const Employee = () => {
 
 
 			/>
+
+           <BasicTabs/>
+
 			<br></br>
 			<Table aria-label="simple table">
 				<Table.Head>
 					<Table.TextHeaderCell className="tableH-Color">Profile</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Name</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Designation</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Employee Code</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Date Joining</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Date Exit</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Designation</Table.TextHeaderCell>
 					<Table.TextHeaderCell className="tableH-Color">Contact Number</Table.TextHeaderCell>
-					<Table.TextHeaderCell className="tableH-Color">Bank Details</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Date Of Joining</Table.TextHeaderCell>
+					<Table.TextHeaderCell className="tableH-Color">Location</Table.TextHeaderCell>
+				{props.dateofexit &&	<Table.TextHeaderCell className="tableH-Color">Date Of Exit</Table.TextHeaderCell>}
 				</Table.Head>
 				<Table.Body height={employeeData?.length > 10 ? (height - 300) : 'auto'}>
 					{!employeeData ? showSpinner() : employeeData?.length === 0 ? showEmpty() : employeeData.map((item, index) => {

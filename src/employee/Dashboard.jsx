@@ -11,7 +11,7 @@ const Dashboard = () => {
 		from: new Date(new Date().setDate(-30)),
 		to: new Date()
 	})
-  const navigate=useNavigate();
+ 
     return (
         <div className='w-full h-full flex flex-col'>
 			<div className='flex justify-between items-center mb-10'>
@@ -36,7 +36,7 @@ const Dashboard = () => {
 							desc={236}
 							icon={todo}
 							color={`#8F95B2`}
-							path='/pm/assigned'
+							path='/pm/assigned/to/overdue'
                             dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -47,7 +47,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={todo}
 							color={`#8F95B2`}
-							path='/pm/assigned'
+							path='/pm/assigned/to/pending'
                             dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -58,7 +58,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
-							path='/pm/assigned'
+							path='/pm/assigned/by/overdue'
 							dot={<Dot color='#F46767' />}
 						/>
 					</div>
@@ -69,7 +69,7 @@ const Dashboard = () => {
 							desc={`10`}
 							icon={todo}
 							color={`#8F95B2`}
-							path='/pm/assigned'
+							path='/pm/assigned/by/pending'
 							dot={<Dot color='#EF9000' />}
 						/>
 					</div>
@@ -80,7 +80,7 @@ const Dashboard = () => {
 							desc={`21`}
 							icon={process}
 							color={`#25CBD6`}
-							path='/pm/process-details'
+							path='/pm/processes'
 						/>
 					</div>
 					<div>
@@ -90,7 +90,7 @@ const Dashboard = () => {
 							desc={26}
 							icon={process}
 							color={`#25CBD6`}
-							path='/pm/process-details'
+							path='/pm/processes'
 						/>
 					</div>
 					<div>
@@ -110,7 +110,7 @@ const Dashboard = () => {
 							desc={5}
 							icon={assets}
 							color={`#6E62B6`}
-							path='/pm/performance-meter'
+							path='/pm/allotments'
 						/>
 					</div>
 				</div>

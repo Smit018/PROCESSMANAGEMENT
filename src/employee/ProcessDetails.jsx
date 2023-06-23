@@ -9,6 +9,9 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SearchInput } from 'evergreen-ui'
 import IOsources from '../components/IOsources';
+import { Breadcrumbs } from '../components/Breadcrumbs/Breadcrumbs';
+import { ChevronRight } from '@mui/icons-material';
+
 
 const ProcessList = (list) => (
     <div className='w-full rounded flex justify-between items-center bg-blue-50 px-4 py-5 cursor-pointer shadow-md'>
@@ -21,12 +24,18 @@ const ProcessList = (list) => (
 )
 
 const ProcessDetails = () => {
+    const paths = [
+        { title: 'Dashboard', path: '/pm' },
+        { title: 'Processes', path: '/pm/processes' },
+        { title: 'ProcessDetails', path: '/pm/processes/process-details' },
+      
+      ];
 
     return (
         <div>
             <div className='w-full h-full flex flex-col'>
                 <div className='flex justify-between items-center mb-10'>
-                    <h2 className='text-lg'>Dashboard &gt; Processes &gt; Process Details</h2>
+                     <Breadcrumbs paths={paths} />
                 </div>
             </div>
             <div>

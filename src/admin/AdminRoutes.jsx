@@ -12,7 +12,11 @@ import AssignedToDo from "./AssignedToDo";
 import Dashboard from "./Dashboard";
 import EmployeeDetails from "./EmployeeDetails";
 import Allotments from "./Allotments";
-import AddEmployee from "./AddEmployee"
+import AddEmployee from "./AddEmployee";
+import EmployeeReport from "../screens/Employee/EmployeeReport";
+import PerformancePoint from "../components/PerformancePoint";
+import EmployeeActive from "../screens/Employee/EmployeeActive";
+import PerformanceImprovementProgram from "./PerformanceImprovementProgram";
 
 const AdminRoutes = () => (
     <Routes>
@@ -30,6 +34,9 @@ const AdminRoutes = () => (
             <Route path="allotments" element={<Allotments/>} />
             <Route path="employees/employee-details"  element={<EmployeeDetails/>}></Route>
             <Route path="employees/add-employee"  element={<AddEmployee/>}></Route>
+            <Route path="employees/employee-report"  element={<EmployeeReport/>}></Route>
+            <Route path="performance-point"  element={<PerformancePoint/>}></Route>
+            <Route path="pip"  element={<PerformanceImprovementProgram/>}></Route>
         </Route>
     </Routes>
 )
